@@ -24,7 +24,14 @@ CREATE TYPE role AS ENUM (
    'Administração', 'Médico', 'Doente'
 )
 
-
+CREATE OR REPLACE FUNCTION check_real_id(
+	hashed_id VARCHAR,
+) AS id_user
+BEGIN
+	IF hashed_id IS NOT NULL THEN
+		SELECT id_user FROM users WHERE hashed_id = hashed_id;
+	END IF;
+END
 
 CREATE OR REPLACE PROCEDURE insert_user(
 	user_name VARCHAR,
@@ -38,5 +45,32 @@ BEGIN
         INSERT INTO users (user_name, email, password, role, avatar_path)
         VALUES (user_name, email, password, role, avatar_path);
     END IF;
+END;
+$$ LANGUAGE PLPGSQL
+
+
+CREATE OR REPLACE A PROCEDURE update_user(
+	id_user BIGINT,
+	user_name VARCHAR,
+	email VARCHAR,
+	password VARCHAR,
+	role role,
+	status INT,
+	avatar_path VARCHAR,
+) AS $$
+	IF id_user IS NOT NULL AND user_name IS NOT NULL AND email IS NOT NULL AND password IS NOT NULL AND role IS NOT NULL AND status IS NOT NULL THEN
+		UPDATE users SET user_name = user_name, email = email, password = password, role = role, status = status, avatar_path = avatar_path WHERE id_user = id_user;
+	END IF;
+END;
+$$ LANGUAGE PLPGSQL
+
+
+CREATE OR REPLACE PROCEDURE delete_user(
+	id_user BIGINT, 
+) AS $$
+BEGIN 
+	IF id_user IS NOT NULL THEN
+		DELETE FROM users WHERE id_user = id_user
+	END IF;
 END;
 $$ LANGUAGE PLPGSQL
