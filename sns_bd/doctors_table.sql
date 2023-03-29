@@ -48,7 +48,6 @@ CREATE OR REPLACE PROCEDURE insert_doctor(
 		IF id_user IS NOT NULL AND first_name IS NOT NULL AND last_name IS NOT NULL  
 		AND doctor_nif IS NOT NULL AND phone_number IS NOT NULL AND doctor_id IS NOT NULL
 		AND doctor_number IS NOT NULL THEN
-		INSERT INTO Doctors(id_user, first_name, last_name, birth_date, d_gender, doctor_nif, phone_number, doctor_id, doctor_number)
 		INSERT INTO Doctors(id_user, first_name, last_name, birth_date, gender, doctor_nif, phone_number, doctor_id, doctor_number)
 		VALUES (id_user, first_name, last_name, birth_date, gender, doctor_nif, phone_number, doctor_id, doctor_number);
 		END IF;
