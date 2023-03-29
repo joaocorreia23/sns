@@ -74,3 +74,18 @@ BEGIN
 	END IF;
 END;
 $$ LANGUAGE PLPGSQL
+
+INSERT INTO users(user_name, email, password, role) VALUES ('joaocorreia23', 'j.correia2213@gmail.com', '12345', 'Administração')
+INSERT INTO users(user_name, email, password, role) VALUES ('brunoolivera04', 'brunooliveira04@gmail.com', '12345', 'Administração')
+
+SELECT * FROM users
+
+CREATE OR REPLACE FUNCTION get_users()
+RETURNS SETOF users AS $$
+BEGIN
+	RETURN QUERY SELECT * FROM users;
+END;
+$$ LANGUAGE PLPGSQL
+
+
+SELECT get_users()
