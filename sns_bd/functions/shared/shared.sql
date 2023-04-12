@@ -1,0 +1,10 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- CREATE HASHED ID
+CREATE OR REPLACE FUNCTION hash_id(
+	id BIGINT
+)
+RETURNS VARCHAR(255) AS $$
+BEGIN
+    RETURN encode(digest(id::text, 'sha256'), 'hex');
+END;
+$$ LANGUAGE plpgsql;
