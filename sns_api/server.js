@@ -1,4 +1,7 @@
 const express = require("express");
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
+
 
 const usersRoutes = require('./src/users/routes');
 const coutriesRoutes = require('./src/coutries/routes');
@@ -11,6 +14,8 @@ app.use(express.json());
 app.get("/", (req, res) => {
     res.send("Bem-Vindo(a) à API do SNS24!");
 })
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use('/api/users', usersRoutes);
 
