@@ -131,7 +131,7 @@ BEGIN
 
     IF user_id IS NULL AND id_user IS NOT NULL THEN
         RAISE EXCEPTION 'Não existe nenhum utilizador com o id_user passado';
-    ELSIF user_id IS NULL AND hashed_id IS NOT NULL THEN
+    ELSEIF user_id IS NULL AND hashed_id IS NOT NULL THEN
         RAISE EXCEPTION 'Não existe nenhum utilizador com o hashed_id passado';
     END IF;
 
@@ -180,16 +180,16 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     IF hashed_id_in IS NULL AND id_user_in IS NULL THEN
-        RETURN QUERY SELECT * FROM users; #GET ALL USERS
-    ELSIF hashed_id_in IS NULL THEN
-        RETURN QUERY SELECT * FROM users WHERE users.id_user = get_users.id_user_in; #GET USER BY ID
+        RETURN QUERY SELECT * FROM users; --GET ALL USERS
+    ELSEIF hashed_id_in IS NULL THEN
+        RETURN QUERY SELECT * FROM users WHERE users.id_user = get_users.id_user_in; --GET USER BY ID
         IF NOT FOUND THEN
-            RAISE EXCEPTION 'Utilizador com o id_user "%" não existe', id_user_in; #USER NOT FOUND
+            RAISE EXCEPTION 'Utilizador com o id_user "%" não existe', id_user_in; --USER NOT FOUND
         END IF;
-    ELSIF id_user_in IS NULL THEN
-        RETURN QUERY SELECT * FROM users WHERE users.hashed_id = get_users.hashed_id_in; #GET USER BY HASHED ID
+    ELSEIF id_user_in IS NULL THEN
+        RETURN QUERY SELECT * FROM users WHERE users.hashed_id = get_users.hashed_id_in; --GET USER BY HASHED ID
         IF NOT FOUND THEN
-            RAISE EXCEPTION 'Utilizador com o hased_id "%" não existe', hashed_id_in; #USER NOT FOUND
+            RAISE EXCEPTION 'Utilizador com o hased_id "%" não existe', hashed_id_in; --USER NOT FOUND
         END IF;
     END IF;
 END;
@@ -197,6 +197,39 @@ $$ LANGUAGE plpgsql;
 --SELECT * FROM get_users(); --ALL USERS
 --SELECT * FROM get_users(NULL,'3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278'); --USER FOUND 
 --SELECT * FROM get_users(NULL,'3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e279'); --USER NOT FOUND  
+--
+--
+--
+-- Delete User
+CREATE OR REPLACE FUNCTION delete_user(
+    IN id_user BIGINT DEFAULT NULL,
+    IN hashed_id VARCHAR(255) DEFAULT NULL
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+    user_id BIGINT;
+BEGIN
+    IF id_user IS NOT NULL AND hashed_id IS NOT NULL THEN
+        RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_user. Ambos foram passados.';
+    END IF;
+
+    IF hashed_id IS NOT NULL THEN
+        SELECT users.id_user INTO user_id FROM users WHERE hashed_id = hashed_id;
+    ELSE
+        user_id := id_user;
+    END IF;
+
+    IF user_id IS NULL THEN
+        RAISE EXCEPTION 'Não existe nenhum utilizador com o id_user passado';
+    END IF;
+
+    IF DELETE FROM users WHERE id_user = user_id THEN
+        RETURN TRUE;
+    ELSE
+        RETURN FALSE;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
 --
 --
 --

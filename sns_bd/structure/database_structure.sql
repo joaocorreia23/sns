@@ -230,7 +230,7 @@ CREATE TABLE patient_doctor (
 	id_health_unit_patient BIGINT NOT NULL,
 	start_date DATE NOT NULL,
 	end_date DATE NULL,
-	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+	created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 
