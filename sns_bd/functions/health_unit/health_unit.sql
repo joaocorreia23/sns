@@ -1,5 +1,5 @@
 --Create Health Unit
-CREATE OR REPLACE FUNCTION Create_Health_Unit(
+CREATE OR REPLACE FUNCTION create_health_unit(
     health_unit_name VARCHAR(50),
 )
 RETURNS INTEGER AS $$
