@@ -180,6 +180,21 @@ CREATE SEQUENCE health_unit_sequence
 INCREMENT 1
 START 1;
 
+-- Health Unit Doctor Sequence
+CREATE SEQUENCE health_unit_doctor_sequence
+INCREMENT 1
+START 1;
+
+-- Health Unit Patient Sequence
+CREATE SEQUENCE health_unit_patient_sequence
+INCREMENT 1
+START 1;
+
+-- Health Unit Patient Doctor Sequence
+CREATE SEQUENCE patient_doctor_sequence
+INCREMENT 1
+START 1;
+
 -- Health Unit Table
 CREATE TABLE health_unit (
 	id_health_unit BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('health_unit_sequence'::regclass),
@@ -190,6 +205,7 @@ CREATE TABLE health_unit (
 
 -- Health Unit Doctor Table
 CREATE TABLE health_unit_doctor (
+	id_health_unit_doctor BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('health_unit_doctor_sequence'::regclass),
 	id_health_unit BIGINT NOT NULL,
 	id_doctor BIGINT NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -199,12 +215,24 @@ CREATE TABLE health_unit_doctor (
 
 -- Health Unit Patient Table
 CREATE TABLE health_unit_patient (
+	id_health_unit_patient BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('health_unit_patient_sequence'::regclass),
 	id_health_unit BIGINT NOT NULL,
 	id_patient BIGINT NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	FOREIGN KEY (id_health_unit) REFERENCES health_unit(id_health_unit),
 	FOREIGN KEY (id_patient) REFERENCES users(id_user)
 );
+
+-- Health Unit Patient Doctor Table
+CREATE TABLE patient_doctor (
+	id_patient_doctor BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('patient_doctor_sequence'::regclass),
+	id_health_unit_doctor BIGINT NOT NULL,
+	id_health_unit_patient BIGINT NOT NULL,
+	start_date DATE NOT NULL,
+	end_date DATE NULL,
+	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+);
+
 
 -- =======================
 -- END: HEALTH UNIT
@@ -222,6 +250,7 @@ START 1;
 -- Appointment Table
 CREATE TABLE appointment (
 	id_appointment BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('appointment_sequence'::regclass),
+	hashed_id VARCHAR(255) NULL,
 	id_health_unit BIGINT NOT NULL,
 	id_user_doctor BIGINT NOT NULL,
 	id_user_patient BIGINT NOT NULL,
@@ -263,6 +292,7 @@ START 1;
 -- Medication Table
 CREATE TABLE medication (
 	id_medication BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('medication_sequence'::regclass),
+	hashed_id VARCHAR(255) NULL,
 	medication_name VARCHAR(255) UNIQUE NOT NULL,
 	status INT NOT NULL DEFAULT 0,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -271,6 +301,7 @@ CREATE TABLE medication (
 -- Prescription Table
 CREATE TABLE prescription (
 	id_prescription BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('prescription_sequence'::regclass),
+	hashed_id VARCHAR(255) NULL,
     id_doctor BIGINT NOT NULL,
     id_patient BIGINT NOT NULL,
     id_appointment BIGINT NOT NULL,
@@ -285,6 +316,7 @@ CREATE TABLE prescription (
 -- Medication Prescription Table
 CREATE TABLE medication_prescription (
     id_medication_prescription BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('medication_prescription_sequence'::regclass),
+	hashed_id VARCHAR(255) NULL,
     id_prescription BIGINT NOT NULL,
     id_medication BIGINT NOT NULL,
     access_pin INT NULL,
@@ -303,6 +335,7 @@ CREATE TABLE medication_prescription (
 -- Usual Medication Table
 CREATE TABLE usual_medication (
     id_usual_medication BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('usual_medication_sequence'::regclass),
+	hashed_id VARCHAR(255) NULL,
     id_patient BIGINT NOT NULL,
     id_medication BIGINT NOT NULL,
     id_medication_prescription BIGINT NULL,
@@ -335,6 +368,7 @@ START 1;
 -- Vaccine Table
 CREATE TABLE vaccine (
 	id_vaccine BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('vaccine_sequence'::regclass),
+	hashed_id VARCHAR(255) NULL,
 	vaccine_name VARCHAR(255) UNIQUE NOT NULL,
 	status INT NOT NULL DEFAULT 0,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -343,6 +377,7 @@ CREATE TABLE vaccine (
 -- Administered Vaccine Table
 CREATE TABLE administered_vaccine (
     id_administered_vaccine BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('administered_vaccine_sequence'::regclass),
+	hashed_id VARCHAR(255) NULL,
     id_vaccine BIGINT NOT NULL,
     id_doctor BIGINT NOT NULL,
     id_patient BIGINT NOT NULL,
@@ -378,6 +413,7 @@ START 1;
 -- Exam Table
 CREATE TABLE exam (
 	id_exam BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('exam_sequence'::regclass),
+	hashed_id VARCHAR(255) NULL,
 	exam_name VARCHAR(255) UNIQUE NOT NULL,
 	status INT NOT NULL DEFAULT 0,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -386,6 +422,7 @@ CREATE TABLE exam (
 -- Prescribed Exam Table
 CREATE TABLE prescribed_exam (
     id_prescribed_exam BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('prescribed_exam_sequence'::regclass),
+	hashed_id VARCHAR(255) NULL,
     requisition_date TIMESTAMP NOT NULL DEFAULT NOW(),
     expiration_date TIMESTAMP NOT NULL DEFAULT NOW()+INTERVAL '60 day',
     id_appointment BIGINT NOT NULL,
