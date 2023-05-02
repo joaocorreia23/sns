@@ -131,7 +131,7 @@ BEGIN
 
     IF user_id IS NULL AND id_user IS NOT NULL THEN
         RAISE EXCEPTION 'Não existe nenhum utilizador com o id_user passado';
-    ELSIF user_id IS NULL AND hashed_id IS NOT NULL THEN
+    ELSEIF user_id IS NULL AND hashed_id IS NOT NULL THEN
         RAISE EXCEPTION 'Não existe nenhum utilizador com o hashed_id passado';
     END IF;
 
@@ -180,16 +180,16 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
     IF hashed_id_in IS NULL AND id_user_in IS NULL THEN
-        RETURN QUERY SELECT * FROM users; #GET ALL USERS
-    ELSIF hashed_id_in IS NULL THEN
-        RETURN QUERY SELECT * FROM users WHERE users.id_user = get_users.id_user_in; #GET USER BY ID
+        RETURN QUERY SELECT * FROM users; GET ALL USERS
+    ELSEIF hashed_id_in IS NULL THEN
+        RETURN QUERY SELECT * FROM users WHERE users.id_user = get_users.id_user_in; --GET USER BY ID
         IF NOT FOUND THEN
-            RAISE EXCEPTION 'Utilizador com o id_user "%" não existe', id_user_in; #USER NOT FOUND
+            RAISE EXCEPTION 'Utilizador com o id_user "%" não existe', id_user_in; --USER NOT FOUND
         END IF;
-    ELSIF id_user_in IS NULL THEN
-        RETURN QUERY SELECT * FROM users WHERE users.hashed_id = get_users.hashed_id_in; #GET USER BY HASHED ID
+    ELSEIF id_user_in IS NULL THEN
+        RETURN QUERY SELECT * FROM users WHERE users.hashed_id = get_users.hashed_id_in; --GET USER BY HASHED ID
         IF NOT FOUND THEN
-            RAISE EXCEPTION 'Utilizador com o hased_id "%" não existe', hashed_id_in; #USER NOT FOUND
+            RAISE EXCEPTION 'Utilizador com o hased_id "%" não existe', hashed_id_in; --USER NOT FOUND
         END IF;
     END IF;
 END;
