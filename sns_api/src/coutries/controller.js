@@ -2,7 +2,10 @@ const pool = require("../../db");
 
 const Get_Coutries = (req, res) => {
   pool.query("SELECT * FROM get_countries()", (error, results) => {
-    if (error) throw error;
+    if (error) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
     res.status(200).json(results.rows);
   });
 };

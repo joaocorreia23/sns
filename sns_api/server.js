@@ -5,6 +5,7 @@ const swaggerDocument = require('./swagger.json');
 
 const usersRoutes = require('./src/users/routes');
 const coutriesRoutes = require('./src/coutries/routes');
+const authRoutes = require ('./src/auth/routes');
 
 const app = express();
 const port = 3000;
@@ -17,8 +18,11 @@ app.get("/", (req, res) => {
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+app.use('/api/auth', authRoutes);
+
 app.use('/api/users', usersRoutes);
 
 app.use('/api/countries', coutriesRoutes);
 
-app.listen(port, () => console.log(`Server running port: ${port}`));
+
+app.listen(port, () => console.log(`Servidor ativo na porta: ${port}`));
