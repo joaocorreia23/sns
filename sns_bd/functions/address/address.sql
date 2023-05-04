@@ -2,7 +2,7 @@
 CREATE OR REPLACE FUNCTION create_address(
     door_number VARCHAR(255) DEFAULT NULL,
     floor VARCHAR(255) DEFAULT NULL,
-    address VARCHAR(255) DEFAULT NULL,
+    address_name VARCHAR(255) DEFAULT NULL,
     zip_code VARCHAR(255) DEFAULT NULL,
     county VARCHAR(255) DEFAULT NULL,
     district VARCHAR(255) DEFAULT NULL,
@@ -45,29 +45,29 @@ BEGIN
     END IF;
 
     --Check if Zip Code exists
-    IF NOT EXISTS (SELECT id_zip_code FROM zip_code WHERE zip_code.zip_code = create_address.zip_code AND zip_code.id_county = out_id_county) THEN
+    IF NOT EXISTS (SELECT id_zip_code FROM zip_code WHERE zip_code.zip_code = create_address.zip_code AND zip_code.id_county = out_id_county AND zip_code.address=create_address.address_name) THEN
         --ZIP CODE NOT FOUND
         IF zip_code IS NULL THEN
             RAISE EXCEPTION 'O código postal não pode ser nulo';
-        ELSEIF address IS NULL THEN
+        ELSEIF address_name IS NULL THEN
             RAISE EXCEPTION 'O endereço não pode ser nulo';
         ELSE
-            INSERT INTO zip_code (zip_code, address, id_county) VALUES (create_address.zip_code, create_address.address, out_id_county) RETURNING id_zip_code INTO out_id_zip_code;
+            INSERT INTO zip_code (zip_code, address, id_county) VALUES (create_address.zip_code, create_address.address_name, out_id_county) RETURNING id_zip_code INTO out_id_zip_code;
         END IF;
     ELSE
         SELECT id_zip_code INTO out_id_zip_code FROM zip_code WHERE zip_code.zip_code = create_address.zip_code AND zip_code.id_county = out_id_county;
     END IF;
     
     --Check if address exists
-    IF NOT EXISTS (SELECT id_address FROM address WHERE address.door_number = create_address.door_number AND address.floor = create_address.floor AND address.address = create_address.address AND address.id_zip_code = out_id_zip_code) THEN
+    IF NOT EXISTS (SELECT id_address FROM address WHERE address.door_number = create_address.door_number AND address.floor = create_address.floor AND address.id_zip_code = out_id_zip_code) THEN
         --ADDRESS NOT FOUND
         IF door_number IS NULL THEN
             RAISE EXCEPTION 'O número da porta não pode ser nulo';
         ELSE
-            INSERT INTO address (door_number, floor, address, id_zip_code) VALUES (create_address.door_number, create_address.floor, create_address.address, out_id_zip_code) RETURNING id_address INTO out_id_address;
+            INSERT INTO address (door_number, floor, id_zip_code) VALUES (create_address.door_number, create_address.floor, out_id_zip_code) RETURNING id_address INTO out_id_address;
         END IF;
     ELSE
-        SELECT id_address INTO out_id_address FROM address WHERE address.door_number = create_address.door_number AND address.floor = create_address.floor AND address.address = create_address.address AND address.id_zip_code = out_id_zip_code;
+        SELECT id_address INTO out_id_address FROM address WHERE address.door_number = create_address.door_number AND address.floor = create_address.floor AND address.id_zip_code = out_id_zip_code;
     END IF;
 
     RETURN out_id_address;
