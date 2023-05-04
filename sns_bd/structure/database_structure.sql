@@ -110,7 +110,7 @@ CREATE TABLE users (
 	email VARCHAR(255) UNIQUE NOT NULL,
 	password VARCHAR(255) NOT NULL,
 	status INT NOT NULL DEFAULT 0,
-	avatar_path VARCHAR(255) NULL,
+	avatar_path VARCHAR(255) DEFAULT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
@@ -125,7 +125,7 @@ CREATE TABLE user_info (
 	phone_number VARCHAR(255) NULL,
 	contact_email VARCHAR(255) NULL,
 	nationality BIGINT NOT NULL,--Nationality
-	id_address BIGINT NULL,
+	id_address BIGINT DEFAULT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	FOREIGN KEY (id_user) REFERENCES users(id_user),
 	FOREIGN KEY (nationality) REFERENCES country(id_country),
@@ -199,15 +199,21 @@ START 1;
 CREATE TABLE health_unit (
 	id_health_unit BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('health_unit_sequence'::regclass),
 	hashed_id VARCHAR(255) NULL,
-	health_unit_name VARCHAR(255) UNIQUE NOT NULL,
-	created_at TIMESTAMP NOT NULL DEFAULT NOW()
+	name VARCHAR(255) UNIQUE NOT NULL,
+	id_address BIGINT NOT NULL,
+	phone_number VARCHAR(255) NULL,
+	email VARCHAR(255) NULL,
+	type INTEGER NOT NULL,
+	tax_number INT UNIQUE NOT NULL,
+	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+	FOREIGN KEY (id_address) REFERENCES address(id_address)
 );
 
 -- Health Unit Doctor Table
 CREATE TABLE health_unit_doctor (
 	id_health_unit_doctor BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('health_unit_doctor_sequence'::regclass),
 	id_health_unit BIGINT NOT NULL,
-	id_doctor BIGINT NOT NULL,
+	id_doctor BIGINT NOT NULL,--USER
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	FOREIGN KEY (id_health_unit) REFERENCES health_unit(id_health_unit),
 	FOREIGN KEY (id_doctor) REFERENCES users(id_user)
@@ -217,7 +223,7 @@ CREATE TABLE health_unit_doctor (
 CREATE TABLE health_unit_patient (
 	id_health_unit_patient BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('health_unit_patient_sequence'::regclass),
 	id_health_unit BIGINT NOT NULL,
-	id_patient BIGINT NOT NULL,
+	id_patient BIGINT NOT NULL,--USER
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	FOREIGN KEY (id_health_unit) REFERENCES health_unit(id_health_unit),
 	FOREIGN KEY (id_patient) REFERENCES users(id_user)
@@ -230,7 +236,8 @@ CREATE TABLE patient_doctor (
 	id_health_unit_patient BIGINT NOT NULL,
 	start_date DATE NOT NULL,
 	end_date DATE NULL,
-	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+	status INT NOT NULL DEFAULT 0,
+	created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 
@@ -284,11 +291,6 @@ CREATE SEQUENCE medication_prescription_sequence
 INCREMENT 1
 START 1;
 
--- Usual Medication Sequence
-CREATE SEQUENCE usual_medication_sequence
-INCREMENT 1
-START 1;
-
 -- Medication Table
 CREATE TABLE medication (
 	id_medication BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('medication_sequence'::regclass),
@@ -334,8 +336,6 @@ CREATE TABLE medication_prescription (
 
 -- Usual Medication Table
 CREATE TABLE usual_medication (
-    id_usual_medication BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('usual_medication_sequence'::regclass),
-	hashed_id VARCHAR(255) NULL,
     id_patient BIGINT NOT NULL,
     id_medication BIGINT NOT NULL,
     id_medication_prescription BIGINT NULL,

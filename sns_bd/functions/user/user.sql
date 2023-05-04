@@ -47,9 +47,28 @@ CREATE OR REPLACE FUNCTION verify_user_login(
 RETURNS BOOLEAN AS $$
     DECLARE
         hashed_password VARCHAR(255);
+        user_status INTEGER;
     BEGIN
-        SELECT password INTO hashed_password FROM users WHERE email = verify_user_login.email;
-        RETURN hashed_password = crypt(password, hashed_password);
+        IF email IS NULL THEN
+            RAISE EXCEPTION 'O Email não pode ser nulo';
+        ELSEIF password IS NULL THEN
+            RAISE EXCEPTION 'A Password não pode ser nula';
+        END IF;
+
+        SELECT u.password, u.status INTO hashed_password, user_status FROM users u WHERE u.email = verify_user_login.email;
+
+        IF hashed_password IS NULL THEN
+            RAISE EXCEPTION 'O Email inserido não se encontra registado';
+        ELSEIF user_status = 0 THEN
+            RAISE EXCEPTION 'O utilizador não tem permissões para aceder';
+        END IF;
+        
+
+        IF hashed_password = crypt(verify_user_login.password, hashed_password) THEN
+            RETURN TRUE;
+        ELSE
+            RETURN FALSE;
+        END IF;
     END;
 $$ LANGUAGE plpgsql;
 --
@@ -100,14 +119,17 @@ BEGIN
     RETURN new_user_id;
 END;
 $$ LANGUAGE plpgsql;
---SELECT create_user('ruizurc', 'ruizurc@gmail.com', '123ppppppppp!', NULL);
+SELECT create_user('ruizurc', 'ruizurc@gmail.com', '123ppppppppp!', NULL);
+SELECT create_user('joaocorreia', 'joao@gmail.com', '123ppppppppp!', NULL);
+
+SELECT create_user('thaysvieira', 'thays@gmail.com', '123ppppppppp!', NULL);
 --
 --
 --
 -- Update User
 CREATE OR REPLACE FUNCTION update_user(
-    IN id_user BIGINT,
-    IN hashed_id VARCHAR(255),
+    IN id_user_in BIGINT,
+    IN hashed_id_in VARCHAR(255),
     IN username VARCHAR(64),
     IN email VARCHAR(255),
     IN password VARCHAR(255),
@@ -117,21 +139,21 @@ DECLARE
     user_id BIGINT;
 BEGIN
 
-    IF id_user IS NOT NULL AND hashed_id IS NOT NULL THEN
+    IF id_user_in IS NOT NULL AND hashed_id_in IS NOT NULL THEN
         RAISE EXCEPTION 'Apenas pode ser passado o "hashed_id" ou o "id_user". Ambos foram passados.';
     END IF;
 
-    IF hashed_id IS NOT NULL THEN
-        SELECT users.id_user INTO user_id FROM users WHERE hashed_id = hashed_id;
-    ELSEIF id_user IS NOT NULL THEN
-        SELECT users.id_user INTO user_id FROM users WHERE id_user = id_user;
+    IF hashed_id_in IS NOT NULL THEN
+        SELECT users.id_user INTO user_id FROM users WHERE hashed_id = hashed_id_in;
+    ELSEIF id_user_in IS NOT NULL THEN
+        SELECT users.id_user INTO user_id FROM users WHERE id_user = id_user_in;
     ELSE
         RAISE EXCEPTION 'É necessário passar o "hashed_id" ou o "id_user".';
     END IF;
 
-    IF user_id IS NULL AND id_user IS NOT NULL THEN
+    IF user_id IS NULL AND id_user_in IS NOT NULL THEN
         RAISE EXCEPTION 'Não existe nenhum utilizador com o id_user passado';
-    ELSIF user_id IS NULL AND hashed_id IS NOT NULL THEN
+    ELSEIF user_id IS NULL AND hashed_id_in IS NOT NULL THEN
         RAISE EXCEPTION 'Não existe nenhum utilizador com o hashed_id passado';
     END IF;
 
@@ -173,23 +195,24 @@ RETURNS TABLE (
     hashed_id VARCHAR(255),
     username VARCHAR(64),
     email VARCHAR(255),
-    password VARCHAR(255),
     status INT,
     avatar_path VARCHAR(255),
-    created_at TIMESTAMP
+    created_at TIMESTAMP,
+    first_name VARCHAR(255),
+    last_name VARCHAR(255)
 ) AS $$
 BEGIN
     IF hashed_id_in IS NULL AND id_user_in IS NULL THEN
-        RETURN QUERY SELECT * FROM users; #GET ALL USERS
-    ELSIF hashed_id_in IS NULL THEN
-        RETURN QUERY SELECT * FROM users WHERE users.id_user = get_users.id_user_in; #GET USER BY ID
+        RETURN QUERY SELECT u.id_user, u.hashed_id, u.username, u.email, u.status, u.avatar_path, u.created_at, uf.first_name, uf.last_name FROM users u LEFT JOIN user_info uf ON u.id_user=uf.id_user; --GET ALL USERS
+    ELSEIF hashed_id_in IS NULL THEN
+        RETURN QUERY SELECT u.id_user, u.hashed_id, u.username, u.email, u.status, u.avatar_path, u.created_at, uf.first_name, uf.last_name FROM users u LEFT JOIN user_info uf ON u.id_user=uf.id_user WHERE u.id_user = get_users.id_user_in; --GET USER BY ID
         IF NOT FOUND THEN
-            RAISE EXCEPTION 'Utilizador com o id_user "%" não existe', id_user_in; #USER NOT FOUND
+            RAISE EXCEPTION 'Utilizador com o id_user "%" não existe', id_user_in; --USER NOT FOUND
         END IF;
-    ELSIF id_user_in IS NULL THEN
-        RETURN QUERY SELECT * FROM users WHERE users.hashed_id = get_users.hashed_id_in; #GET USER BY HASHED ID
+    ELSEIF id_user_in IS NULL THEN
+        RETURN QUERY SELECT u.id_user, u.hashed_id, u.username, u.email, u.status, u.avatar_path, u.created_at, uf.first_name, uf.last_name FROM users u LEFT JOIN user_info uf ON u.id_user=uf.id_user WHERE u.hashed_id = get_users.hashed_id_in; --GET USER BY HASHED ID
         IF NOT FOUND THEN
-            RAISE EXCEPTION 'Utilizador com o hased_id "%" não existe', hashed_id_in; #USER NOT FOUND
+            RAISE EXCEPTION 'Utilizador com o hased_id "%" não existe', hashed_id_in; --USER NOT FOUND
         END IF;
     END IF;
 END;
@@ -197,6 +220,40 @@ $$ LANGUAGE plpgsql;
 --SELECT * FROM get_users(); --ALL USERS
 --SELECT * FROM get_users(NULL,'3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278'); --USER FOUND 
 --SELECT * FROM get_users(NULL,'3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e279'); --USER NOT FOUND  
+--
+--
+--
+-- Delete User
+CREATE OR REPLACE FUNCTION delete_user(
+    IN id_user_in BIGINT DEFAULT NULL,
+    IN hashed_id_in VARCHAR(255) DEFAULT NULL
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+    user_id BIGINT;
+BEGIN
+    IF id_user_in IS NOT NULL AND hashed_id_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_user. Ambos foram passados.';
+    END IF;
+
+    IF hashed_id_in IS NOT NULL THEN
+        SELECT users.id_user INTO user_id FROM users WHERE hashed_id = hashed_id_in;
+    ELSE
+        user_id := id_user_in;
+    END IF;
+
+    IF user_id IS NULL THEN
+        RAISE EXCEPTION 'Não existe nenhum utilizador com o id_user passado';
+    END IF;
+
+    DELETE FROM users WHERE id_user = user_id;
+    IF EXISTS (SELECT 1 FROM users WHERE id_user = user_id) THEN
+        RETURN FALSE;
+    ELSE
+        RETURN TRUE;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
 --
 --
 --
@@ -388,8 +445,8 @@ $$ LANGUAGE plpgsql;
 --
 -- Update/Insert User Info
 CREATE OR REPLACE FUNCTION update_user_info(
-    id_user BIGINT DEFAULT NULL,
-    hashed_id VARCHAR(255) DEFAULT NULL,
+    id_user_in BIGINT DEFAULT NULL,
+    hashed_id_in VARCHAR(255) DEFAULT NULL,
     first_name VARCHAR(255) DEFAULT NULL,
     last_name VARCHAR(255) DEFAULT NULL,
     birth_date DATE DEFAULT NULL,   
@@ -411,58 +468,58 @@ DECLARE
     out_id_user BIGINT;
     out_id_address BIGINT;
 BEGIN
-    IF id_user IS NOT NULL AND hashed_id IS NOT NULL THEN
+    IF id_user_in IS NOT NULL AND hashed_id_in IS NOT NULL THEN
         RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_user. Ambos foram passados.';
-    ELSEIF id_user IS NULL AND hashed_id IS NULL THEN
+    ELSEIF id_user_in IS NULL AND hashed_id_in IS NULL THEN
         RAISE EXCEPTION 'Tem de ser passado o hashed_id ou o id_user.';
     END IF;
 
-    IF hashed_id IS NOT NULL THEN
-        SELECT id_user INTO out_id_user FROM users WHERE hashed_id = hashed_id;
+    IF hashed_id_in IS NOT NULL THEN
+        SELECT id_user INTO out_id_user FROM users WHERE hashed_id = hashed_id_in;
     ELSE
-        out_id_user := id_user;
+        out_id_user := id_user_in;
     END IF;
 
     --Check if user exists
     IF NOT EXISTS (SELECT get_users(out_id_user)) THEN
-        IF id_user IS NOT NULL THEN
-            RAISE EXCEPTION 'Utilizador com o id_user "%" não existe', id_user; --USER NOT FOUND
+        IF id_user_in IS NOT NULL THEN
+            RAISE EXCEPTION 'Utilizador com o id_user "%" não existe', id_user_in; --USER NOT FOUND
         ELSE
-            RAISE EXCEPTION 'Utilizador com o hashed_id "%" não existe', hashed_id; --USER NOT FOUND
+            RAISE EXCEPTION 'Utilizador com o hashed_id "%" não existe', hashed_id_in; --USER NOT FOUND
         END IF;
     END IF;
 
     --Check if user has info
-    IF EXISTS (SELECT * FROM user_info WHERE user_info.id_user = update_user_info.id_user) THEN 
-        --RAISE EXCEPTION 'Utilizador com o id_user "%" já tem informação', update_user_info.id_user; --USER ALREADY HAS INFO
+    IF EXISTS (SELECT * FROM user_info WHERE user_info.id_user = update_user_info.id_user_in) THEN 
+        --RAISE EXCEPTION 'Utilizador com o id_user "%" já tem informação', update_user_info.id_user_in; --USER ALREADY HAS INFO
         --Check NULL fields
         IF first_name IS NOT NULL THEN
-            UPDATE user_info SET first_name = first_name WHERE id_user = update_user_info.id_user;
+            UPDATE user_info SET first_name = first_name WHERE id_user = update_user_info.id_user_in;
         END IF;
         IF last_name IS NOT NULL THEN
-            UPDATE user_info SET last_name = last_name WHERE id_user = update_user_info.id_user;
+            UPDATE user_info SET last_name = last_name WHERE id_user = update_user_info.id_user_in;
         END IF;
         IF birth_date IS NOT NULL THEN
-            UPDATE user_info SET birth_date = birth_date WHERE id_user = update_user_info.id_user;
+            UPDATE user_info SET birth_date = birth_date WHERE id_user = update_user_info.id_user_in;
         END IF;
         IF gender IS NOT NULL THEN
-            UPDATE user_info SET gender = gender WHERE id_user = update_user_info.id_user;
+            UPDATE user_info SET gender = gender WHERE id_user = update_user_info.id_user_in;
         END IF;
         IF tax_number IS NOT NULL THEN
-            UPDATE user_info SET tax_number = tax_number WHERE id_user = update_user_info.id_user;
+            UPDATE user_info SET tax_number = tax_number WHERE id_user = update_user_info.id_user_in;
         END IF;
         IF phone_number IS NOT NULL THEN
-            UPDATE user_info SET phone_number = phone_number WHERE id_user = update_user_info.id_user;
+            UPDATE user_info SET phone_number = phone_number WHERE id_user = update_user_info.id_user_in;
         END IF;
         IF contact_email IS NOT NULL THEN
-            UPDATE user_info SET contact_email = contact_email WHERE id_user = update_user_info.id_user;
+            UPDATE user_info SET contact_email = contact_email WHERE id_user = update_user_info.id_user_in;
         END IF;
         IF nationality IS NOT NULL THEN
-            UPDATE user_info SET nationality = nationality WHERE id_user = update_user_info.id_user;
+            UPDATE user_info SET nationality = nationality WHERE id_user = update_user_info.id_user_in;
         END IF;
-
+        RETURN out_id_user;
     ELSE 
-        --RAISE EXCEPTION 'Utilizador com o id_user "%" não tem informação', update_user_info.id_user; --USER DOESN'T HAVE INFO
+        --RAISE EXCEPTION 'Utilizador com o id_user "%" não tem informação', update_user_info.id_user_in; --USER DOESN'T HAVE INFO
         --Check NULL fields
         IF first_name IS NULL THEN
             RAISE EXCEPTION 'O primeiro nome não pode ser nulo';
@@ -490,12 +547,15 @@ BEGIN
             RAISE EXCEPTION 'O id da morada não pode ser nulo';
         END IF;
 
-        INSERT INTO user_info (first_name, last_name, birth_date, gender, tax_number, phone_number, contact_email, nationality, id_address, id_user) VALUES (update_user_info.first_name, update_user_info.last_name, update_user_info.birth_date, update_user_info.gender, update_user_info.tax_number, update_user_info.contact_email, update_user_info.nationality, out_id_address, out_id_user); 
-
+        INSERT INTO user_info (first_name, last_name, birth_date, gender, tax_number, phone_number, contact_email, nationality, id_address, id_user) VALUES (update_user_info.first_name, update_user_info.last_name, update_user_info.birth_date, update_user_info.gender, update_user_info.tax_number, update_user_info.phone_number, update_user_info.contact_email, update_user_info.nationality, out_id_address, out_id_user); 
+        RETURN out_id_user;
     END IF;
+
+    
 
 END;
 $$ LANGUAGE plpgsql;
+
 --
 --
 --
