@@ -1,20 +1,117 @@
+-- Check Health Unit Tax Number
+CREATE OR REPLACE FUNCTION check_health_unit_tax_number(
+    tax_number INT
+)
+RETURNS BOOLEAN AS $$
+BEGIN
+    IF tax_number IS NULL THEN
+        RAISE EXCEPTION 'O número de contribuinte da unidade de saúde não pode ser nulo';
+    END IF;
+
+    IF EXISTS(SELECT * FROM health_unit hu WHERE hu.tax_number = check_health_unit_tax_number.tax_number) THEN
+        RETURN TRUE;
+    ELSE
+        RETURN FALSE;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+--
+--
+--
+-- Check Health Unit Name
+CREATE OR REPLACE FUNCTION check_health_unit_name(
+    name VARCHAR(255)
+)
+RETURNS BOOLEAN AS $$
+BEGIN
+    IF name IS NULL THEN
+        RAISE EXCEPTION 'O nome da unidade de saúde não pode ser nulo';
+    ELSIF name = '' THEN
+        RAISE EXCEPTION 'O nome da unidade de saúde não pode ser vazio';
+    END IF;
+
+    IF EXISTS (SELECT * FROM health_unit hu WHERE hu.name = check_health_unit_name.name) THEN
+        RETURN TRUE;
+    ELSE
+        RETURN FALSE;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+--
+--
+--
 --Create Health Unit
 CREATE OR REPLACE FUNCTION create_health_unit(
-    health_unit_name VARCHAR(50),
+    name VARCHAR(255),
+    phone_number VARCHAR(255) DEFAULT NULL,
+    email VARCHAR(255) DEFAULT NULL,
+    type INTEGER DEFAULT NULL,
+    tax_number INT DEFAULT NULL,
+    door_number VARCHAR(255) DEFAULT NULL,
+    floor VARCHAR(255) DEFAULT NULL,
+    address VARCHAR(255) DEFAULT NULL,
+    zip_code VARCHAR(255) DEFAULT NULL,
+    county VARCHAR(255) DEFAULT NULL,
+    district VARCHAR(255) DEFAULT NULL,
+    id_country BIGINT DEFAULT NULL
 )
 RETURNS INTEGER AS $$
 DECLARE
-    id_health_unit_out INTEGER;
+    id_health_unit_out BIGINT;
+    out_id_address BIGINT;
 BEGIN
-    IF health_unit_name IS NULL THEN
+    IF name IS NULL THEN
         RAISE EXCEPTION 'O nome da unidade de saúde não pode ser nulo';
+    ELSIF name = '' THEN
+        RAISE EXCEPTION 'O nome da unidade de saúde não pode ser vazio';
     END IF;
 
-    IF EXISTS(SELECT * FROM health_unit WHERE health_unit_name = health_unit_name) THEN
-        RAISE EXCEPTION 'A unidade de saúde já existe';
+    IF type IS NULL THEN
+        RAISE EXCEPTION 'O tipo da unidade de saúde não pode ser nulo';
     END IF;
 
-    INSERT INTO health_unit (health_unit_name) VALUES (health_unit_name) RETURNING health_unit.id_health_unit INTO id_health_unit_out;
+    IF tax_number IS NULL THEN
+        RAISE EXCEPTION 'O número de contribuinte da unidade de saúde não pode ser nulo';
+    ELSIF check_health_unit_tax_number(tax_number) THEN
+        RAISE EXCEPTION 'O número de contribuinte da unidade de saúde já existe';
+    END IF;
+
+    IF address IS NULL THEN
+        RAISE EXCEPTION 'A morada da unidade de saúde não pode ser nula';
+    ELSIF address = '' THEN
+        RAISE EXCEPTION 'A morada da unidade de saúde não pode ser vazia';
+    END IF;
+
+    IF zip_code IS NULL THEN
+        RAISE EXCEPTION 'O código postal da unidade de saúde não pode ser nulo';
+    ELSIF zip_code = '' THEN
+        RAISE EXCEPTION 'O código postal da unidade de saúde não pode ser vazio';
+    END IF;
+
+    IF county IS NULL THEN
+        RAISE EXCEPTION 'O concelho da unidade de saúde não pode ser nulo';
+    ELSIF county = '' THEN
+        RAISE EXCEPTION 'O concelho da unidade de saúde não pode ser vazio';
+    END IF;
+
+    IF district IS NULL THEN
+        RAISE EXCEPTION 'O distrito da unidade de saúde não pode ser nulo';
+    ELSIF district = '' THEN
+        RAISE EXCEPTION 'O distrito da unidade de saúde não pode ser vazio';
+    END IF;
+
+    IF id_country IS NULL THEN
+        RAISE EXCEPTION 'O país da unidade de saúde não pode ser nulo';
+    END IF;
+
+    IF check_health_unit_name(name) THEN
+        RAISE EXCEPTION 'O nome da unidade de saúde já está em uso';
+    END IF;
+
+    -- Add your logic here for creating the health unit and assigning id_health_unit_out
+    SELECT create_address(door_number, floor, address, zip_code, county, district, id_country) INTO out_id_address;
+    INSERT INTO health_unit(name, phone_number, email, type, tax_number, id_address) VALUES (name, phone_number, email, type, tax_number, out_id_address) RETURNING id_health_unit INTO id_health_unit_out;
+    
     RETURN id_health_unit_out;
 END;
 $$ LANGUAGE plpgsql;
@@ -22,18 +119,104 @@ $$ LANGUAGE plpgsql;
 --
 --
 -- Set Hashed ID on New Rows
-CREATE OR REPLACE FUNCTION set_hashed_id()
+CREATE OR REPLACE FUNCTION set_health_unit_hashed_id()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.hashed_id = hash_id(NEW.id_health_unit);
+    UPDATE health_unit SET hashed_id = hash_id(NEW.id_health_unit) WHERE id_health_unit = NEW.id_health_unit;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 --
-CREATE TRIGGER set_hashed_id
+--
+--
+-- Trigger to Set Hashed ID on New Rows
+CREATE OR REPLACE TRIGGER set_hashed_id
 AFTER INSERT ON health_unit
 FOR EACH ROW
-EXECUTE PROCEDURE set_hashed_id();
+EXECUTE PROCEDURE set_health_unit_hashed_id();
+--
+--
+--
+-- Get Health Unit
+CREATE OR REPLACE FUNCTION get_health_unit(
+    IN id_health_unit_in BIGINT DEFAULT NULL,
+    IN hashed_id_in VARCHAR(255) DEFAULT NULL
+)
+RETURNS TABLE (
+    hashed_id VARCHAR(255),
+    name VARCHAR(255),
+    phone_number VARCHAR(255),
+    email VARCHAR(255),
+    type INTEGER,
+    tax_number INT,
+    id_address BIGINT,
+    door_number VARCHAR(255),
+    floor VARCHAR(255),
+    address VARCHAR(255),
+    zip_code VARCHAR(255),
+    county_name VARCHAR(255),
+    district_name VARCHAR(255),
+    id_country BIGINT,
+    country_name VARCHAR(255),
+    created_at TIMESTAMP
+) AS $$
+BEGIN
+    IF hashed_id_in IS NULL AND id_health_unit_in IS NULL THEN
+        RETURN QUERY SELECT 
+            hu.hashed_id, hu.name, hu.phone_number, hu.email, hu.type, hu.tax_number, hu.id_address,
+            ad.door_number, ad.floor,
+            zc.address, zc.zip_code,
+            c.county_name,
+            d.district_name,
+            cty.id_country, cty.country_name,
+            hu.created_at
+        FROM health_unit hu
+        LEFT JOIN address ad ON hu.id_address=ad.id_address
+        LEFT JOIN zip_code zc ON ad.id_zip_code=zc.id_zip_code
+        LEFT JOIN county c ON zc.id_county=c.id_county
+        LEFT JOIN district d ON c.id_district=d.id_district
+        LEFT JOIN country cty ON d.id_country=cty.id_country;
+    ELSEIF hashed_id_in IS NULL THEN
+        RETURN QUERY SELECT 
+            hu.hashed_id, hu.name, hu.phone_number, hu.email, hu.type, hu.tax_number, hu.id_address,
+            ad.door_number, ad.floor,
+            zc.address, zc.zip_code,
+            c.county_name,
+            d.district_name,
+            cty.id_country, cty.country_name,
+            hu.created_at
+        FROM health_unit hu
+        LEFT JOIN address ad ON hu.id_address=ad.id_address
+        LEFT JOIN zip_code zc ON ad.id_zip_code=zc.id_zip_code
+        LEFT JOIN county c ON zc.id_county=c.id_county
+        LEFT JOIN district d ON c.id_district=d.id_district
+        LEFT JOIN country cty ON d.id_country=cty.id_country
+        WHERE hu.id_health_unit = id_health_unit_in;
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Unidade de Saúde com o id "%" não existe', id_health_unit_in; --USER NOT FOUND
+        END IF;
+    ELSEIF id_health_unit_in IS NULL THEN
+       RETURN QUERY SELECT 
+            hu.hashed_id, hu.name, hu.phone_number, hu.email, hu.type, hu.tax_number, hu.id_address,
+            ad.door_number, ad.floor,
+            zc.address, zc.zip_code,
+            c.county_name,
+            d.district_name,
+            cty.id_country, cty.country_name,
+            hu.created_at
+        FROM health_unit hu
+        LEFT JOIN address ad ON hu.id_address=ad.id_address
+        LEFT JOIN zip_code zc ON ad.id_zip_code=zc.id_zip_code
+        LEFT JOIN county c ON zc.id_county=c.id_county
+        LEFT JOIN district d ON c.id_district=d.id_district
+        LEFT JOIN country cty ON d.id_country=cty.id_country
+        WHERE hu.hashed_id = hashed_id_in;
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Unidade de Saúde com o hashed_id "%" não existe', hashed_id_in; --USER NOT FOUND
+        END IF;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
 --
 --
 --

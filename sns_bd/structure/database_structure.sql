@@ -110,7 +110,6 @@ CREATE TABLE users (
 	email VARCHAR(255) UNIQUE NOT NULL,
 	password VARCHAR(255) NOT NULL,
 	status INT NOT NULL DEFAULT 0,
-	avatar_path VARCHAR(255) DEFAULT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
@@ -126,6 +125,7 @@ CREATE TABLE user_info (
 	contact_email VARCHAR(255) NULL,
 	nationality BIGINT NOT NULL,--Nationality
 	id_address BIGINT DEFAULT NULL,
+	avatar_path VARCHAR(255) DEFAULT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	FOREIGN KEY (id_user) REFERENCES users(id_user),
 	FOREIGN KEY (nationality) REFERENCES country(id_country),
