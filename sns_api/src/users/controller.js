@@ -17,13 +17,13 @@ const Get_UserByHashedId = (req, res) => {
       res.status(400).json({ error: error.message });
       return;
     }
-    res.status(200).json(results.rows);
+    res.status(200).json(results.rows[0]);
   });
 };
 
 const Add_User = (req, res) => {
-  const { username, email, password, avatar_path } = req.body;
-  pool.query("SELECT * FROM create_user($1, $2, $3, $4)", [username, email, password, avatar_path], (error, results) => {
+  const { username, email, password, role } = req.body;
+  pool.query("SELECT * FROM create_user($1, $2, $3, $4)", [username, email, password, role], (error, results) => {
     if (error) {
       res.status(400).json({ error: error.message });
       return;
@@ -33,8 +33,8 @@ const Add_User = (req, res) => {
 };
 
 const Update_User = (req, res) => {
-  const { hashed_id, username, email, password, avatar_path } = req.body;
-  pool.query("SELECT * FROM update_user(NULL, $1, $2, $3, $4, $5)", [hashed_id, username, email, password, avatar_path], (error, results) => {
+  const { hashed_id, username, email, password } = req.body;
+  pool.query("SELECT * FROM update_user(NULL, $1, $2, $3, $4)", [hashed_id, username, email, password], (error, results) => {
     if (error) {
       res.status(400).json({ error: error.message });
       return;
@@ -44,10 +44,10 @@ const Update_User = (req, res) => {
 };
 
 const Update_User_Info = (req, res) => {
-  const { hashed_id, first_name, last_name, birth_date, gender, tax_number, phone_number, contact_email, nationality, door_number, floor, address, zip_code, county, district, id_country } = req.body;
+  const { hashed_id, first_name, last_name, birth_date, gender, tax_number, phone_number, contact_email, nationality, door_number, floor, address, zip_code, county, district, id_country, avatar_path } = req.body;
   pool.query(
-    "SELECT * FROM update_user_info(NULL, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13,$14,$15,$16)",
-    [hashed_id, first_name, last_name, birth_date, gender, tax_number, phone_number, contact_email, nationality, door_number, floor, address, zip_code, county, district, id_country],
+    "SELECT * FROM update_user_info(NULL, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17)",
+    [hashed_id, first_name, last_name, birth_date, gender, tax_number, phone_number, contact_email, nationality, door_number, floor, address, zip_code, county, district, id_country, avatar_path],
     (error, results) => {
       if (error) {
         res.status(400).json({ error: error.message });

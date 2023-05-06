@@ -1,0 +1,65 @@
+:root {
+  --bs-primary: #019147;
+  --bs-text-primary: #019147;
+  --bs-link-color: #019147;
+  --bs-link-color-rgb: 1 145 71;
+  --bs-primary-active: #085f35;
+  --bs-link-hover-color: #085f35;
+  --bs-link-hover-color-rgb: 6, 80, 45;
+  --bs-primary-light: #d6ffea;
+
+  --bs-component-active-bg: #019147;
+  --bs-component-hover-color: #019147;
+  --bs-component-checked-bg: #019147;
+
+  --bs-menu-link-color-hover: #019147;
+  --bs-menu-link-color-show: #019147;
+  --bs-menu-link-color-here: #019147;
+  --bs-menu-link-color-active: #019147;
+
+  --bs-nav-pills-link-active-bg: #019147;
+  --bs-nav-pills-link-active-color: #fff;
+
+  --bs-app-toolbar-bg: url(/assets/media/uploads/background.svg);
+}
+
+.nav-pills {
+  --bs-nav-pills-link-active-bg: #019147;
+}
+.form-check-input:checked {
+  background-color: #019147;
+}
+
+.link-primary {
+  color: #019147 !important;
+}
+
+.link-primary:focus,
+.link-primary:hover {
+  color: var(--bs-primary-active) !important;
+}
+
+.bg-blur {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(15px) !important;
+}
+
+.bg-role {
+  background-color: rgba(0, 0, 0, 0.5);
+  background: linear-gradient(90deg, rgba(1, 145, 71, 1) 0%, rgba(234, 189, 0, 1) 43%, rgba(206, 21, 0, 1) 100%);
+}
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #f5f5f5;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background-color: #f5f5f5;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+	background-color: #777;}

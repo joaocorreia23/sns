@@ -18,6 +18,10 @@
     {
       "name": "Utilizadores",
       "description": "Serviço de Utilizadores"
+    },
+    {
+      "name": "Países",
+      "description": "Serviço de Países"
     }
   ],
   "paths": {
@@ -47,6 +51,274 @@
         "responses": {
           "200": {
             "description": "true"
+          }
+        }
+      }
+    },
+    "/auth/email": {
+      "post": {
+        "tags": ["Autenticação"],
+        "summary": "Verificar Email",
+        "description": "Necessário em Email Válido",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "true"
+          }
+        }
+      }
+    },
+    "/users/": {
+      "get": {
+        "tags": ["Utilizadores"],
+        "summary": "Listar Utilizadores",
+        "description": "Sem Dados Necessários",
+        "responses": {
+          "200": {
+            "description": "Listar todos os Utilizadores em JSON"
+          }
+        }
+      }
+    },
+    "/users/{hashed_id}": {
+      "get": {
+        "tags": ["Utilizadores"],
+        "summary": "Listar o Utilizador",
+        "description": "Necessário Hashed_ID do Utilizador",
+        "parameters": [
+          {
+            "name": "hashed_id",
+            "in": "path",
+            "description": "Hashed_ID do Utilizador",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listar o Utilizador em JSON"
+          }
+        }
+      }
+    },
+    "/users/insert": {
+      "post": {
+        "tags": ["Utilizadores"],
+        "summary": "Adicionar Utilizador",
+        "description": "Necessário Dados do Utilizador",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string"
+                  }
+                },
+                "required": ["username, email, password, role"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Utilizador Adicionado com Sucesso!"
+          }
+        }
+      }
+    },
+    "/users/update": {
+      "put": {
+        "tags": ["Utilizadores"],
+        "summary": "Atualizar Utilizador",
+        "description": "Necessário Dados do Utilizador",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "hashed_id": {
+                    "type": "string"
+                  },
+                  "username": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": ["hashed_id, username, email, password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Utilizador editado com Sucesso!!"
+          }
+        }
+      }
+    },
+    "/users/update/info": {
+      "put": {
+        "tags": ["Utilizadores"],
+        "summary": "Atualizar Informação do Utilizador",
+        "description": "Necessário Dados do Utilizador",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "hashed_id": {
+                    "type": "string"
+                  },
+                  "first_name": {
+                    "type": "string"
+                  },
+                  "last_name": {
+                    "type": "string"
+                  },
+                  "birth_date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "gender": {
+                    "type": "string"
+                  },
+                  "tax_number": {
+                    "type": "integer"
+                  },
+                  "phone_number": {
+                    "type": "string"
+                  },
+                  "contact_email": {
+                    "type": "string"
+                  },
+                  "nationality": {
+                    "type": "integer"
+                  },
+                  "door_number": {
+                    "type": "string"
+                  },
+                  "floor": {
+                    "type": "string"
+                  },
+                  "address": {
+                    "type": "string"
+                  },
+                  "zip_code": {
+                    "type": "string"
+                  },
+                  "county": {
+                    "type": "string"
+                  },
+                  "district": {
+                    "type": "string"
+                  },
+                  "id_country": {
+                    "type": "integer"
+                  },
+                  "avatar_path": {
+                    "type": "string"
+                  }
+                },
+                "required": ["hashed_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Utilizador editado com Sucesso!"
+          }
+        }
+      }
+    },
+    "/users/remove/{:hashed_id}": {
+      "delete": {
+        "tags": ["Utilizadores"],
+        "summary": "Remover Utilizador",
+        "description": "Necessário Hashed_ID do Utilizador",
+        "parameters": [
+          {
+            "name": "hashed_id",
+            "in": "path",
+            "description": "Hashed_ID do Utilizador",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Utilizador removido com Sucesso!"
+          }
+        }
+      }
+    },
+    "/countries/": {
+      "get": {
+        "tags": ["Países"],
+        "summary": "Listar Países",
+        "description": "Sem Dados Necessários",
+        "responses": {
+          "200": {
+            "description": "Listar todos os Países em JSON"
+          }
+        }
+      }
+    },
+    "/countries/{id_country}": {
+      "get": {
+        "tags": ["Países"],
+        "summary": "Listar o País",
+        "description": "Necessário ID do País",
+        "parameters": [
+          {
+            "name": "id_country",
+            "in": "path",
+            "description": "ID do País",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listar o País em JSON"
           }
         }
       }
