@@ -185,6 +185,38 @@ END;
 $$ LANGUAGE plpgsql;
 
 SELECT create_user_role(1, NULL, 'Admin');
+--
+--
+--
+-- Get User Roles
+CREATE OR REPLACE FUNCTION get_user_roles(
+    IN id_user_in BIGINT,
+    IN hashed_id_in VARCHAR(255)
+) RETURNS TABLE (role role) AS $$
+DECLARE
+    user_id BIGINT;
+BEGIN
+    IF id_user_in IS NOT NULL AND hashed_id_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Apenas pode ser passado o "hashed_id" ou o "id_user". Ambos foram passados.';
+    END IF;
+
+    IF hashed_id_in IS NOT NULL THEN
+        SELECT users.id_user INTO user_id FROM users WHERE hashed_id = hashed_id_in;
+    ELSEIF id_user_in IS NOT NULL THEN
+        SELECT users.id_user INTO user_id FROM users WHERE id_user = id_user_in;
+    ELSE
+        RAISE EXCEPTION 'É necessário passar o "hashed_id" ou o "id_user".';
+    END IF;
+
+    IF user_id IS NULL AND id_user_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Não existe nenhum utilizador com o id_user passado';
+    ELSEIF user_id IS NULL AND hashed_id_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Não existe nenhum utilizador com o hashed_id passado';
+    END IF;
+
+    RETURN QUERY SELECT user_role.role FROM user_role WHERE user_role.id_user = user_id;
+END;
+$$ LANGUAGE plpgsql;
 
 --
 --
@@ -260,6 +292,51 @@ BEGIN
 
     RETURN new_user_id;
 END;
+$$ LANGUAGE plpgsql;
+--
+--
+--
+-- Check if user is already in role
+CREATE OR REPLACE FUNCTION check_user_role(
+    IN id_user_in BIGINT,
+    IN hashed_id_in VARCHAR(255),
+    IN role VARCHAR(255)
+) RETURNS BOOLEAN AS $$
+DECLARE
+    user_id BIGINT;
+BEGIN
+    
+        IF id_user_in IS NOT NULL AND hashed_id_in IS NOT NULL THEN
+            RAISE EXCEPTION 'Apenas pode ser passado o "hashed_id" ou o "id_user". Ambos foram passados.';
+        END IF;
+    
+        IF hashed_id_in IS NOT NULL THEN
+            SELECT users.id_user INTO user_id FROM users WHERE hashed_id = hashed_id_in;
+        ELSEIF id_user_in IS NOT NULL THEN
+            SELECT users.id_user INTO user_id FROM users WHERE id_user = id_user_in;
+        ELSE
+            RAISE EXCEPTION 'É necessário passar o "hashed_id" ou o "id_user".';
+        END IF;
+    
+        IF user_id IS NULL AND id_user_in IS NOT NULL THEN
+            RAISE EXCEPTION 'Não existe nenhum utilizador com o id_user passado';
+        ELSEIF user_id IS NULL AND hashed_id_in IS NOT NULL THEN
+            RAISE EXCEPTION 'Não existe nenhum utilizador com o hashed_id passado';
+        END IF;
+    
+        IF role IS NULL THEN
+            RAISE EXCEPTION 'É necessário passar o role';
+        --CONVERT ROLE TO VARCHAR
+        ELSEIF check_valid_role(role) = FALSE THEN
+            RAISE EXCEPTION 'O role passado não é válido';
+        END IF;
+    
+        IF EXISTS (SELECT 1 FROM user_role WHERE user_role.id_user = user_id AND user_role.role = check_user_role.role::role) THEN
+            RETURN TRUE;
+        ELSE
+            RETURN FALSE;
+        END IF;
+    END;
 $$ LANGUAGE plpgsql;
 --
 --
@@ -346,7 +423,8 @@ RETURNS TABLE (
     zipcode VARCHAR(255),
     county_name VARCHAR(255),
     district_name VARCHAR(255),
-    country_name VARCHAR(255)
+    country_name VARCHAR(255),
+    id_country BIGINT
 ) AS $$
 BEGIN
     IF hashed_id_in IS NULL AND id_user_in IS NULL THEN
@@ -357,7 +435,7 @@ BEGIN
             zc.address, zc.zip_code,
             c.county_name,
             d.district_name,
-            cty.country_name
+            cty.country_name, cty.id_country
         FROM users u 
         LEFT JOIN user_info uf ON u.id_user=uf.id_user
         LEFT JOIN address ad ON uf.id_address=ad.id_address
@@ -374,7 +452,7 @@ BEGIN
             zc.address, zc.zip_code,
             c.county_name,
             d.district_name,
-            cty.country_name
+            cty.country_name, cty.id_country
         FROM users u 
         LEFT JOIN user_info uf ON u.id_user=uf.id_user
         LEFT JOIN address ad ON uf.id_address=ad.id_address
@@ -395,7 +473,7 @@ BEGIN
             zc.address, zc.zip_code,
             c.county_name,
             d.district_name,
-            cty.country_name
+            cty.country_name, cty.id_country
         FROM users u 
         LEFT JOIN user_info uf ON u.id_user=uf.id_user
         LEFT JOIN address ad ON uf.id_address=ad.id_address
