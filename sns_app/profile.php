@@ -110,7 +110,7 @@ $user_info_data = $user_info["response"];
                                         <!--end::Card title-->
 
                                         <!--begin::Action-->
-                                        <a href="" class="btn btn-sm btn-primary align-self-center">Editar Perfil</a>
+                                        <a href="edit-profile" class="btn btn-sm btn-primary align-self-center">Editar Perfil</a>
                                         <!--end::Action-->
                                     </div>
                                     <!--begin::Card header-->

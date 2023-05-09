@@ -33,7 +33,7 @@
                 <div class="page-title d-flex align-items-center me-3">
                     <img alt="Logo" src="<?php echo $link_home?>assets/media/svg/misc/layer.svg" class="h-60px me-5" />
                     <!--begin::Title-->
-                    <h1 class="page-heading d-flex text-white fw-bolder fs-2 flex-column justify-content-center my-0">SNS 24
+                    <h1 class="page-heading d-flex text-white fw-bolder fs-2 flex-column justify-content-center my-0"><?php echo isset($page_name) ? $page_name : "SNS 24" ?>
                         <!--begin::Description-->
                         <span class="page-desc text-white opacity-50 fs-6 fw-bold pt-4">Serviços Digitais SNS 24</span>
                         <!--end::Description-->
