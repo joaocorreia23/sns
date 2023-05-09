@@ -398,7 +398,8 @@ $$ LANGUAGE plpgsql;
 -- Get Users OR User
 CREATE OR REPLACE FUNCTION get_users(
     IN id_user_in BIGINT DEFAULT NULL,
-    IN hashed_id_in VARCHAR(255) DEFAULT NULL
+    IN hashed_id_in VARCHAR(255) DEFAULT NULL,
+    role_in VARCHAR(255) DEFAULT NULL
 )
 RETURNS TABLE (
     hashed_id VARCHAR(255),
@@ -406,7 +407,7 @@ RETURNS TABLE (
     email VARCHAR(255),
     status INT,
     created_at TIMESTAMP,
-    first_name VARCHAR(255),
+    first_name VARCHAR(255) DEFAULT 'Sem nome',
     last_name VARCHAR(255),
 	bith_date DATE,
     gender gender,
@@ -427,7 +428,11 @@ RETURNS TABLE (
     id_country BIGINT
 ) AS $$
 BEGIN
-    IF hashed_id_in IS NULL AND id_user_in IS NULL THEN
+    IF hashed_id_in IS NOT NULL AND id_user_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Não é possível procurar por hashed_id e id_user ao mesmo tempo';
+    END IF;
+
+    IF hashed_id_in IS NULL AND id_user_in IS NULL AND role_in IS NULL THEN
         RETURN QUERY SELECT 
             u.hashed_id, u.username, u.email, u.status, u.created_at, 
             uf.first_name, uf.last_name, uf.birth_date, uf.gender, uf.tax_number, uf.phone_number, uf.contact_email, uf.nationality ,cty_n.country_name as nationality_country_name, uf.id_address, uf.avatar_path,
@@ -444,6 +449,32 @@ BEGIN
         LEFT JOIN district d ON c.id_district=d.id_district
         LEFT JOIN country cty ON d.id_country=cty.id_country
         LEFT JOIN country cty_n ON uf.nationality=cty_n.id_country;
+
+    ELSEIF hashed_id_in IS NULL AND id_user_in IS NULL AND role_in IS NOT NULL THEN
+
+        --Check Valid Role
+        IF check_valid_role(role_in) = FALSE THEN
+            RAISE EXCEPTION 'O Role "%" não é válido', role_in;
+        END IF;
+
+        RETURN QUERY SELECT 
+            u.hashed_id, u.username, u.email, u.status, u.created_at, 
+            uf.first_name, uf.last_name, uf.birth_date, uf.gender, uf.tax_number, uf.phone_number, uf.contact_email, uf.nationality ,cty_n.country_name as nationality_country_name, uf.id_address, uf.avatar_path,
+            ad.door_number, ad.floor,
+            zc.address, zc.zip_code,
+            c.county_name,
+            d.district_name,
+            cty.country_name, cty.id_country
+        FROM users u 
+        LEFT JOIN user_info uf ON u.id_user=uf.id_user
+        LEFT JOIN address ad ON uf.id_address=ad.id_address
+        LEFT JOIN zip_code zc ON ad.id_zip_code=zc.id_zip_code
+        LEFT JOIN county c ON zc.id_county=c.id_county
+        LEFT JOIN district d ON c.id_district=d.id_district
+        LEFT JOIN country cty ON d.id_country=cty.id_country
+        LEFT JOIN country cty_n ON uf.nationality=cty_n.id_country
+        JOIN user_role ur ON u.id_user=ur.id_user AND ur.role=role_in::role;
+
     ELSEIF hashed_id_in IS NULL THEN
         RETURN QUERY SELECT 
             u.hashed_id, u.username, u.email, u.status, u.created_at, 
@@ -751,7 +782,13 @@ BEGIN
 
     IF hashed_id_in IS NOT NULL THEN
         SELECT id_user INTO out_id_user FROM users WHERE hashed_id = hashed_id_in;
+        IF out_id_user IS NULL THEN
+            RAISE EXCEPTION 'Utilizador com o hashed_id "%" não existe', hashed_id_in; --USER NOT FOUND
+        END IF;
     ELSE
+        IF id_user_in IS NULL THEN
+            RAISE EXCEPTION 'Tem de ser passado o hashed_id ou o id_user.';
+        END IF;
         out_id_user := id_user_in;
     END IF;
 
@@ -800,6 +837,16 @@ BEGIN
         IF update_user_info.avatar_path IS NOT NULL THEN
             UPDATE user_info SET avatar_path = update_user_info.avatar_path WHERE id_user = out_id_user;
         END IF;
+		
+		--Check if address exists
+        SELECT create_address(door_number, floor, address, zip_code, county, district, id_country) INTO out_id_address;
+
+        IF out_id_address IS NULL THEN
+            RAISE EXCEPTION 'Não foi possível criar o endereço';
+        ELSE 
+            UPDATE user_info SET id_address = out_id_address WHERE id_user = out_id_user;
+        END IF;
+    
         RETURN out_id_user;
     ELSE 
         --RAISE EXCEPTION 'Utilizador com o id_user "%" não tem informação', update_user_info.id_user_in; --USER DOESN'T HAVE INFO
@@ -830,7 +877,7 @@ BEGIN
         SELECT create_address(door_number, floor, address, zip_code, county, district, id_country) INTO out_id_address;
 
         IF out_id_address IS NULL THEN
-            RAISE EXCEPTION 'O id da morada não pode ser nulo';
+            RAISE EXCEPTION 'Não foi possível criar o endereço';
         END IF;
 
         INSERT INTO user_info (first_name, last_name, avatar_path, birth_date, gender, tax_number, phone_number, contact_email, nationality, id_address, id_user) VALUES (update_user_info.first_name, update_user_info.last_name, update_user_info.avatar_path, update_user_info.birth_date, update_user_info.gender, update_user_info.tax_number, update_user_info.phone_number, update_user_info.contact_email, update_user_info.nationality, out_id_address, out_id_user); 
@@ -839,7 +886,9 @@ BEGIN
     END IF;
 END;
 $$ LANGUAGE plpgsql;
-
+--
+--
+--
 --
 --
 --

@@ -8,6 +8,8 @@ const usersRoutes = require('./src/users/routes');
 const coutriesRoutes = require('./src/coutries/routes');
 const authRoutes = require ('./src/auth/routes');
 const healthUnitsRoutes = require('./src/health_unit/routes');
+const examRoutes = require('./src/exam/routes');
+const vaccineRoutes = require('./src/vaccine/routes');
 
 const app = express();
 app.use(cors());
@@ -30,6 +32,9 @@ app.use('/api/countries', coutriesRoutes);
 
 app.use('/api/health_unit', healthUnitsRoutes);
 
+app.use('/api/exams', examRoutes);
+
+app.use('/api/vaccines', vaccineRoutes);
 
 
 

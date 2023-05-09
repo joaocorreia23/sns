@@ -1,14 +1,7 @@
-CREATE TABLE vaccine (
-	id_vaccine BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('vaccine_sequence'::regclass),
-	hashed_id VARCHAR(255) NULL,
-	vaccine_name VARCHAR(255) UNIQUE NOT NULL,
-	status INT NOT NULL DEFAULT 0,
-	created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
+--Create Vaccine 
 CREATE OR REPLACE FUNCTION insert_vaccine(
     IN vaccine_name VARCHAR(50),
-    IN status INTEGER DEFAULT NULL
+    IN status INTEGER DEFAULT 1
 )
 RETURNS INTEGER AS $$
 DECLARE
@@ -16,31 +9,20 @@ DECLARE
 BEGIN
 	
 	IF EXISTS (SELECT * FROM vaccine WHERE vaccine.vaccine_name = insert_vaccine.vaccine_name) THEN
-    	RAISE EXCEPTION 'O nome desta vacina já está registado.';
+    	RAISE EXCEPTION 'O nome da vacina já está registado.';
 	END IF;
 
-	IF insert_vaccine.vaccine_name = '' THEN
-        RAISE EXCEPTION 'O nome da vacina não pode ser vazio.';
-    END IF;
-	
-    IF insert_vaccine.vaccine_name IS NULL THEN
-        RAISE EXCEPTION 'O nome da vacina não pode ser nulo.';   
-    END IF;
-
-    IF insert_vaccine.status IS NULL THEN
-        insert_vaccine.status := 1;
-    END IF;
-
-    IF EXISTS(SELECT * FROM vaccine WHERE vaccine.vaccine_name = insert_vaccine.vaccine_name) THEN
-        RAISE EXCEPTION 'Já existe uma vacina com esse nome.';
+	IF insert_vaccine.vaccine_name = '' OR insert_vaccine.vaccine_name IS NULL THEN
+        RAISE EXCEPTION 'O nome da vacina não pode ser nulo.';
     END IF;
 
     INSERT INTO vaccine (vaccine_name, status) VALUES (insert_vaccine.vaccine_name, insert_vaccine.status) RETURNING id_vaccine INTO id_vaccine_out;
-    UPDATE vaccine SET hashed_id = hash_id(id_vaccine_out) WHERE id_vaccine = id_vaccine_out;
     RETURN id_vaccine_out;
 END;
 $$ LANGUAGE plpgsql;
-
+--
+--
+--
 -- Set Hashed ID on New Rows
 CREATE OR REPLACE FUNCTION set_vaccine_hashed_id()
 RETURNS TRIGGER AS $$
@@ -49,12 +31,11 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
 --
 --
 --
 -- Trigger to Set Hashed ID on New Rows
-CREATE OR REPLACE TRIGGER set_hashed_id
+CREATE OR REPLACE TRIGGER set_hashed_vaccine_id_trigger
 AFTER INSERT ON vaccine
 FOR EACH ROW
 EXECUTE PROCEDURE set_vaccine_hashed_id();
@@ -94,54 +75,55 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION update_vaccine(
-    id_vaccine BIGINT,
-    hashed_id VARCHAR(50),
-    vaccine_name VARCHAR(50),
+    id_vaccine BIGINT DEFAULT NULL,
+    hashed_id VARCHAR(50) DEFAULT NULL,
+    vaccine_name VARCHAR(50) DEFAULT NULL,
     status INT DEFAULT NULL
 ) RETURNS BOOLEAN AS $$ 
+DECLARE
+    id_vaccine_out INTEGER;
     BEGIN 
 	
-		IF update_vaccine.vaccine_name IS NULL THEN
+		IF update_vaccine.vaccine_name IS NULL OR update_vaccine.vaccine_name = '' THEN
             RAISE EXCEPTION 'O nome da vacina não pode ser nulo.';
 		END IF;
-		
-		IF EXISTS (SELECT * FROM vaccine WHERE vaccine.vaccine_name = update_vaccine.vaccine_name) THEN
-    		RAISE EXCEPTION 'O nome desta vacina já está registado.';
-		END IF;
-
-		IF update_vaccine.vaccine_name = '' THEN
-        	RAISE EXCEPTION 'O nome da vacina não pode ser vazio.';
-    	END IF;
-        
+		        
         IF update_vaccine.id_vaccine IS NOT NULL AND hashed_id IS NOT NULL THEN
             RAISE EXCEPTION 'Não é possível atualizar o id e o hashed_id ao mesmo tempo.';
         END IF;
 
         IF update_vaccine.hashed_id IS NOT NULL THEN
-            SELECT vaccine.id_vaccine INTO id_vaccine FROM vaccine WHERE vaccine.hashed_id = update_vaccine.hashed_id;
-			IF update_vaccine.status IS NULL THEN
-			SELECT vaccine.status INTO status FROM vaccine WHERE vaccine.hashed_id = update_vaccine.hashed_id;
-			END IF;
+            SELECT vaccine.id_vaccine INTO id_vaccine_out FROM vaccine WHERE vaccine.hashed_id = update_vaccine.hashed_id;
+            IF NOT FOUND THEN
+                RAISE EXCEPTION 'Vacina com o hashed_id "%" não existe.', hashed_id;
+            END IF;
         ELSEIF update_vaccine.id_vaccine IS NOT NULL THEN
-            SELECT vaccine.id_vaccine INTO id_vaccine FROM vaccine WHERE vaccine.id_vaccine = update_vaccine.id_vaccine;
-			IF update_vaccine.status IS NULL THEN
-			SELECT vaccine.status INTO status FROM vaccine WHERE vaccine.id_vaccine = update_vaccine.id_vaccine;
-			END IF;
+            SELECT vaccine.id_vaccine INTO id_vaccine_out FROM vaccine WHERE vaccine.id_vaccine = update_vaccine.id_vaccine;
+            IF NOT FOUND THEN
+                RAISE EXCEPTION 'Vacina com o id_vaccine "%" não existe.', id_vaccine;
+            END IF;
         ELSE
             RAISE EXCEPTION 'É necessário passar o "hashed_id" ou o "id_vaccine".';
-        END IF;  
-		IF id_vaccine IS NOT NULL THEN
-			UPDATE vaccine SET vaccine_name = update_vaccine.vaccine_name, status = update_vaccine.status;
-			RETURN TRUE;
-		ELSE
-			RAISE EXCEPTION 'Vacina não encontrada.';
-		END IF;
+        END IF; 
+
+        IF status IS NULL THEN
+            SELECT vaccine.status INTO status FROM vaccine WHERE vaccine.id_vaccine = id_vaccine_out;
+        END IF; 
+
+        IF NOT EXISTS (SELECT * FROM vaccine WHERE vaccine.vaccine_name=update_vaccine.vaccine_name AND vaccine.id_vaccine != id_vaccine_out) THEN
+            UPDATE vaccine SET vaccine_name = update_vaccine.vaccine_name, status = update_vaccine.status WHERE vaccine.id_vaccine = id_vaccine_out;
+        ELSE
+            RAISE EXCEPTION 'O nome da vacina já está registado.';
+        END IF;
+
+        RETURN TRUE;
     END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION get_vaccine(
     id_vaccine_in BIGINT DEFAULT NULL,
-    hashed_id_in VARCHAR(50) DEFAULT NULL
+    hashed_id_in VARCHAR(50) DEFAULT NULL,
+    status_in INT DEFAULT 1
 ) RETURNS TABLE (
     id_vaccine BIGINT,
     hashed_id VARCHAR(50),
@@ -151,11 +133,11 @@ CREATE OR REPLACE FUNCTION get_vaccine(
 ) AS $$ 
     BEGIN
 		IF id_vaccine_in IS NOT NULL AND hashed_id_in IS NOT NULL THEN
-            RAISE EXCEPTION 'Não é possível procurar pelo id e o hashed_id ao mesmo tempo.';
+            RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_vaccine. Ambos foram passados.';
         END IF;
 		
         IF id_vaccine_in IS NULL AND hashed_id_in IS NULL THEN
-        	RETURN QUERY SELECT * FROM vaccine;
+        	RETURN QUERY SELECT * FROM vaccine WHERE vaccine.status = get_vaccine.status_in;
     	ELSEIF hashed_id_in IS NULL THEN
        		RETURN QUERY SELECT * FROM vaccine WHERE vaccine.id_vaccine = get_vaccine.id_vaccine_in;
         	IF NOT FOUND THEN
@@ -170,19 +152,51 @@ CREATE OR REPLACE FUNCTION get_vaccine(
    		END IF;
 END;
 $$ LANGUAGE plpgsql;
+--
+--
+--
+-- Change vaccine status
+CREATE OR REPLACE FUNCTION change_vaccine_status(
+    IN id_vaccine_in BIGINT DEFAULT NULL,
+    IN hashed_id_in VARCHAR(255) DEFAULT NULL,
+    IN status_in INT DEFAULT 1
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+    vaccine_id BIGINT;
+BEGIN
 
+    IF status_in <> 0 AND status_in <> 1 THEN
+        RAISE EXCEPTION 'O status deve ser 0 ou 1';
+    END IF;
 
---testes
-ALTER TABLE vaccine ADD COLUMN hashed_id VARCHAR(255) NULL
-SELECT insert_vaccine('COVID-18');
-SELECT insert_vaccine('Poliomielite');
-SELECT insert_vaccine('BCG');
-SELECT insert_vaccine('Tétano');
-SELECT * FROM vaccine
-SELECT * FROM get_vaccine();
-SELECT delete_vaccine(14, NULL);
-SELECT update_vaccine(NULL,'2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3','COVID-19');
-SELECT * FROM get_vaccine(12, '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918');
+    IF id_vaccine_in IS NOT NULL AND hashed_id_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_vaccine. Ambos foram passados.';
+    END IF;
 
+    IF hashed_id_in IS NOT NULL THEN
+        SELECT vaccine.id_vaccine INTO vaccine_id FROM vaccine WHERE hashed_id = hashed_id_in;
+    ELSE
+        vaccine_id := id_vaccine_in;
+    END IF;
 
--- verificação do nome das vacinas (tem que ser unicos)
+    IF vaccine_id IS NULL AND id_vaccine_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Não existe nenhuma Vacina com o id passado';
+    ELSEIF vaccine_id IS NULL AND hashed_id_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Não existe nenhuma Vacina com o hashed_id passado';
+    END IF;
+
+    IF NOT EXISTS (SELECT vaccine.id_vaccine FROM vaccine WHERE vaccine.id_vaccine = vaccine_id AND vaccine.status = status_in) THEN
+        UPDATE vaccine SET status = status_in WHERE id_vaccine = vaccine_id;
+        RETURN TRUE;
+    ELSE
+        IF status_in = 0 THEN
+            RAISE EXCEPTION 'A vacina já está desativada';
+        ELSE
+            RAISE EXCEPTION 'A vacina já está ativada';
+        END IF;
+    END IF;
+
+    RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql;
