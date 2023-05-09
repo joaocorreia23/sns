@@ -23,7 +23,7 @@ BEGIN
     --Check if district exists
     IF NOT EXISTS (SELECT id_district FROM district WHERE district.district_name = create_address.district AND district.id_country = create_address.id_country) THEN
         --DISTRICT NOT FOUND
-        IF district IS NULL THEN
+        IF district IS NULL OR district = '' THEN
             RAISE EXCEPTION 'O distrito não pode ser nulo';
         ELSE
             INSERT INTO district (district_name, id_country) VALUES (create_address.district, create_address.id_country) RETURNING id_district INTO out_id_district;
@@ -35,7 +35,7 @@ BEGIN
     --Check if county exists
     IF NOT EXISTS (SELECT id_county FROM county WHERE county.county_name = create_address.county AND county.id_district = out_id_district) THEN
        --COUNTY NOT FOUND
-       IF county IS NULL THEN
+       IF county IS NULL OR county = '' THEN
             RAISE EXCEPTION 'O concelho não pode ser nulo';
         ELSE
             INSERT INTO county (county_name, id_district) VALUES (create_address.county, out_id_district) RETURNING id_county INTO out_id_county;
@@ -47,9 +47,9 @@ BEGIN
     --Check if Zip Code exists
     IF NOT EXISTS (SELECT id_zip_code FROM zip_code WHERE zip_code.zip_code = create_address.zip_code AND zip_code.id_county = out_id_county AND zip_code.address=create_address.address_name) THEN
         --ZIP CODE NOT FOUND
-        IF zip_code IS NULL THEN
+        IF zip_code IS NULL OR zip_code = '' THEN
             RAISE EXCEPTION 'O código postal não pode ser nulo';
-        ELSEIF address_name IS NULL THEN
+        ELSEIF address_name IS NULL OR address_name = '' THEN
             RAISE EXCEPTION 'O endereço não pode ser nulo';
         ELSE
             INSERT INTO zip_code (zip_code, address, id_county) VALUES (create_address.zip_code, create_address.address_name, out_id_county) RETURNING id_zip_code INTO out_id_zip_code;

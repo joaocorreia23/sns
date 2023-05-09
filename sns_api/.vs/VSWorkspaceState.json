@@ -4,8 +4,9 @@
     "\\src",
     "\\src\\auth",
     "\\src\\coutries",
+    "\\src\\health_unit",
     "\\src\\users"
   ],
-  "SelectedNode": "\\src\\users\\controller.js",
+  "SelectedNode": "\\src\\health_unit\\routes.js",
   "PreviewInSolutionExplorer": false
 }

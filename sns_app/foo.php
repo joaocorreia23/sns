@@ -16,6 +16,15 @@
 <script src="https://cdn.amcharts.com/lib/5/geodata/worldTimeZoneAreasLow.js"></script>
 <script src="<?php echo $link_home; ?>assets/plugins/custom/datatables/datatables.bundle.js"></script>
 
+<script src="<?php echo $link_home; ?>assets/plugins/custom/datatables/datatables.bundle.js"></script>
+
+
+<!-- Imports CDN -->
+<script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.6/jquery.inputmask.min.js"></script>
+
+
+
 <script src="<?php echo $link_home; ?>assets/js/widgets.bundle.js"></script>
 <script src="<?php echo $link_home; ?>assets/js/custom/widgets.js"></script>
 <script src="<?php echo $link_home; ?>assets/js/custom/apps/chat/chat.js"></script>

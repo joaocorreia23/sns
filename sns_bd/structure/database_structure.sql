@@ -201,13 +201,23 @@ CREATE TABLE health_unit (
 	hashed_id VARCHAR(255) NULL,
 	name VARCHAR(255) UNIQUE NOT NULL,
 	id_address BIGINT NOT NULL,
-	phone_number VARCHAR(255) NULL,
-	email VARCHAR(255) NULL,
+	phone_number VARCHAR(255) NOT NULL,
+	email VARCHAR(255) NOT NULL,
 	type INTEGER NOT NULL,
 	tax_number INT UNIQUE NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	FOREIGN KEY (id_address) REFERENCES address(id_address)
 );
+CREATE TYPE health_unit_type AS ENUM ('Hospital Publico', 'Hospital Privado', 'Clinica Publica', 'Clinica Privada', 'Centro de Saúde');
+ALTER TABLE health_unit DROP COLUMN type;
+ALTER TABLE health_unit ADD COLUMN type health_unit_type;
+
+ALTER TABLE health_unit ADD COLUMN status INT NOT NULL DEFAULT 1;
+
+--NOT NULL
+ALTER TABLE health_unit ALTER COLUMN phone_number SET NOT NULL;
+ALTER TABLE health_unit ALTER COLUMN email SET NOT NULL;
+--UPDATE health_unit SET type = 'Hospital Publico';
 
 -- Health Unit Doctor Table
 CREATE TABLE health_unit_doctor (
