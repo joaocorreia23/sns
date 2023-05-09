@@ -242,7 +242,7 @@
                         showCancelButton: true,
                         buttonsStyling: false,
                         cancelButtonText: "Não, cancelar",
-                        confirmButtonText: "Sim, eliminar!",
+                        confirmButtonText: "Sim, desativar!",
                         reverseButtons: true,
                         allowOutsideClick: false,
                         customClass: {
