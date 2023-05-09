@@ -5,6 +5,8 @@ const router = Router();
 
 router.get('/', controller.Get_Users);
 
+router.get('/role/:role', controller.Get_UsersByRole);
+
 router.get('/:hashed_id', controller.Get_UserByHashedId);
 
 router.post('/insert', controller.Add_User);

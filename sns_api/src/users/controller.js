@@ -10,6 +10,17 @@ const Get_Users = (req, res) => {
     });
 };
 
+const Get_UsersByRole = (req, res) => {
+    const role = req.params.role;
+    pool.query("SELECT * FROM get_users(NULL, NULL, $1)", [role], (error, results) => {
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        res.status(200).json({ "status": true, "data": results.rows});
+    });
+};
+
 const Get_UserByHashedId = (req, res) => {
     const hashed_id = req.params.hashed_id;
     pool.query("SELECT * FROM get_users(NULL, $1)", [hashed_id], (error, results) => {
@@ -70,39 +81,40 @@ const Delete_User = (req, res) => {
 };
 
 const Create_User_Role = (req, res) => {
-  const { hashed_id, role } = req.body;
-  pool.query("SELECT * FROM create_user_role(NULL, $1, $2)", [hashed_id, role], (error, results) => {
-    if (error) {
-      res.status(400).json({ error: error.message });
-      return;
-    }
-    res.status(201).send(`Role adicionada com Sucesso!`);
-  });
+    const { hashed_id, role } = req.body;
+    pool.query("SELECT * FROM create_user_role(NULL, $1, $2)", [hashed_id, role], (error, results) => {
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        res.status(201).send(`Role adicionada com Sucesso!`);
+    });
 };
 
 const Get_User_Roles = (req, res) => {
-  const hashed_id = req.params.hashed_id;
-  pool.query("SELECT * FROM get_user_roles(NULL, $1)", [hashed_id], (error, results) => {
-    if (error) {
-      res.status(400).json({ error: error.message });
-      return;
-    }
-    /*     
-    if (results.rows.length === 0) {
-      res.status(404).send(`Utilizador não encontrado!`);
-      return;
-    } */
-    res.status(200).json(results.rows);
-  });
+    const hashed_id = req.params.hashed_id;
+    pool.query("SELECT * FROM get_user_roles(NULL, $1)", [hashed_id], (error, results) => {
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        /*     
+        if (results.rows.length === 0) {
+          res.status(404).send(`Utilizador não encontrado!`);
+          return;
+        } */
+        res.status(200).json(results.rows);
+    });
 };
 
 module.exports = {
-  Get_Users,
-  Get_UserByHashedId,
-  Add_User,
-  Update_User,
-  Update_User_Info,
-  Delete_User,
-  Create_User_Role,
-  Get_User_Roles
+    Get_Users,
+    Get_UsersByRole,
+    Get_UserByHashedId,
+    Add_User,
+    Update_User,
+    Update_User_Info,
+    Delete_User,
+    Create_User_Role,
+    Get_User_Roles
 };
