@@ -12,8 +12,8 @@
         <!--begin::Logo-->
         <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0 me-lg-15">
             <a href="<?php $_SERVER["DOCUMENT_ROOT"] . "/index.php" ?>">
-                <img alt="Logo" src="<?php echo $link_home?>assets/media/uploads/logo.svg" class="h-10px d-lg-none" />
-                <img alt="Logo" src="<?php echo $link_home?>assets/media/uploads/logo.svg" class="h-30px d-none d-lg-inline app-sidebar-logo-default theme-light-show" />
+                <img alt="Logo" src="<?php echo $link_home ?>assets/media/uploads/logo.svg" class="h-10px d-lg-none" />
+                <img alt="Logo" src="<?php echo $link_home ?>assets/media/uploads/logo.svg" class="h-30px d-none d-lg-inline app-sidebar-logo-default theme-light-show" />
             </a>
         </div>
         <!--end::Logo-->
@@ -21,13 +21,14 @@
         <div class="d-flex align-items-stretch justify-content-between flex-lg-grow-1" id="kt_app_header_wrapper">
             <!--begin::Menu wrapper-->
             <div class="app-header-menu app-header-mobile-drawer align-items-stretch" data-kt-drawer="true" data-kt-drawer-name="app-header-menu" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="250px" data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_app_header_menu_toggle" data-kt-swapper="true" data-kt-swapper-mode="{default: 'append', lg: 'prepend'}" data-kt-swapper-parent="{default: '#kt_app_body', lg: '#kt_app_header_wrapper'}">
-                <!--begin::Menu-->
+
+                <!-- Unidades de Saúde -->
                 <div class="menu menu-rounded menu-active-bg menu-state-primary menu-column menu-lg-row menu-title-gray-700 menu-icon-gray-500 menu-arrow-gray-500 menu-bullet-gray-500 my-5 my-lg-0 align-items-stretch fw-semibold px-2 px-lg-0" id="kt_app_header_menu" data-kt-menu="true">
                     <!--begin:Menu item-->
                     <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="-50,0" class="menu-item here show menu-here-bg menu-lg-down-accordion me-0 me-lg-2">
                         <!--begin:Menu link-->
                         <span class="menu-link">
-                            <span class="menu-title">Dashboards</span>
+                            <span class="menu-title">Unidades Saúde</span>
                             <span class="menu-arrow d-lg-none"></span>
                         </span>
                         <!--end:Menu link-->
@@ -39,160 +40,72 @@
                                 <div class="row">
                                     <!--begin:Col-->
                                     <div class="col-lg-12 mb-3 mb-lg-0 py-3 px-3 py-lg-6 px-lg-6">
-                                        <!--begin:Row-->
                                         <div class="row">
-                                            <!--begin:Col-->
                                             <div class="col-lg-6 mb-3">
-                                                <!--begin:Menu item-->
                                                 <div class="menu-item p-0 m-0">
-                                                    <!--begin:Menu link-->
-                                                    <a href="../../demo30/dist/index.html" class="menu-link active">
+                                                    <a href="<?php echo $link_home; ?>pages/admin/health-units/list.php" class="menu-link">
                                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-element-11 text-primary fs-1"></i>
+                                                            <i class="ki-outline ki-bank text-primary fs-1"></i>
                                                         </span>
                                                         <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Default</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Reports & statistics</span>
+                                                            <span class="fs-6 fw-bold text-gray-800">Unidades de Saúde</span>
+                                                            <span class="fs-7 fw-semibold text-muted">Listar Unidades de Saúde</span>
                                                         </span>
                                                     </a>
-                                                    <!--end:Menu link-->
                                                 </div>
-                                                <!--end:Menu item-->
                                             </div>
-                                            <!--end:Col-->
-                                            <!--begin:Col-->
                                             <div class="col-lg-6 mb-3">
-                                                <!--begin:Menu item-->
                                                 <div class="menu-item p-0 m-0">
-                                                    <!--begin:Menu link-->
-                                                    <a href="../../demo30/dist/dashboards/ecommerce.html" class="menu-link">
+                                                    <a href="<?php echo $link_home; ?>pages/admin/health-units/disabled-list.php" class="menu-link">
                                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-basket text-danger fs-1"></i>
+                                                            <i class="ki-outline ki-bank text-danger fs-1"></i>
                                                         </span>
                                                         <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">eCommerce</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Sales reports</span>
+                                                            <span class="fs-6 fw-bold text-gray-800">Unidades de Saúde Desativadas</span>
+                                                            <span class="fs-7 fw-semibold text-muted">Listar Unidades de Saúde Desativadas</span>
                                                         </span>
                                                     </a>
-                                                    <!--end:Menu link-->
                                                 </div>
-                                                <!--end:Menu item-->
                                             </div>
-                                            <!--end:Col-->
-                                            <!--begin:Col-->
                                             <div class="col-lg-6 mb-3">
-                                                <!--begin:Menu item-->
                                                 <div class="menu-item p-0 m-0">
-                                                    <!--begin:Menu link-->
-                                                    <a href="../../demo30/dist/dashboards/projects.html" class="menu-link">
+                                                    <a href="<?php echo $link_home; ?>pages/admin/health-units/add.php" class="menu-link">
                                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-abstract-44 text-info fs-1"></i>
+                                                            <i class="ki-outline ki-plus-square text-danger fs-1"></i>
                                                         </span>
                                                         <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Projects</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Tasts, graphs & charts</span>
+                                                            <span class="fs-6 fw-bold text-gray-800">Adicionar - Unidades de Saúde</span>
+                                                            <span class="fs-7 fw-semibold text-muted">Adicionar Unidades de Saúde</span>
                                                         </span>
                                                     </a>
-                                                    <!--end:Menu link-->
                                                 </div>
-                                                <!--end:Menu item-->
                                             </div>
-                                            <!--end:Col-->
-                                            <!--begin:Col-->
                                             <div class="col-lg-6 mb-3">
-                                                <!--begin:Menu item-->
                                                 <div class="menu-item p-0 m-0">
-                                                    <!--begin:Menu link-->
-                                                    <a href="../../demo30/dist/dashboards/online-courses.html" class="menu-link">
+                                                    <a href="" class="menu-link">
                                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-color-swatch text-success fs-1"></i>
+                                                            <i class="ki-outline ki-bandage text-info fs-1"></i>
                                                         </span>
                                                         <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Online Courses</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Student progress</span>
+                                                            <span class="fs-6 fw-bold text-gray-800">Médicos - Unidades de Saúde</span>
+                                                            <span class="fs-7 fw-semibold text-muted">Associar e Desassociar Médicos</span>
                                                         </span>
                                                     </a>
-                                                    <!--end:Menu link-->
                                                 </div>
-                                                <!--end:Menu item-->
                                             </div>
-                                            <!--end:Col-->
-                                            <!--begin:Col-->
                                             <div class="col-lg-6 mb-3">
-                                                <!--begin:Menu item-->
                                                 <div class="menu-item p-0 m-0">
-                                                    <!--begin:Menu link-->
-                                                    <a href="../../demo30/dist/dashboards/marketing.html" class="menu-link">
+                                                    <a href="" class="menu-link">
                                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-chart-simple text-dark fs-1"></i>
+                                                            <i class="ki-outline ki-profile-user text-dark fs-1"></i>
                                                         </span>
                                                         <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Marketing</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Campaings & conversions</span>
+                                                            <span class="fs-6 fw-bold text-gray-800">Utentes - Unidades de Saúde</span>
+                                                            <span class="fs-7 fw-semibold text-muted">Associar e Desassociar Utentes</span>
                                                         </span>
                                                     </a>
-                                                    <!--end:Menu link-->
                                                 </div>
-                                                <!--end:Menu item-->
                                             </div>
-                                            <!--end:Col-->
-                                            <!--begin:Col-->
-                                            <div class="col-lg-6 mb-3">
-                                                <!--begin:Menu item-->
-                                                <div class="menu-item p-0 m-0">
-                                                    <!--begin:Menu link-->
-                                                    <a href="../../demo30/dist/dashboards/bidding.html" class="menu-link">
-                                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-switch text-warning fs-1"></i>
-                                                        </span>
-                                                        <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Bidding</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Campaings & conversions</span>
-                                                        </span>
-                                                    </a>
-                                                    <!--end:Menu link-->
-                                                </div>
-                                                <!--end:Menu item-->
-                                            </div>
-                                            <!--end:Col-->
-                                            <!--begin:Col-->
-                                            <div class="col-lg-6 mb-3">
-                                                <!--begin:Menu item-->
-                                                <div class="menu-item p-0 m-0">
-                                                    <!--begin:Menu link-->
-                                                    <a href="../../demo30/dist/dashboards/pos.html" class="menu-link">
-                                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-abstract-42 text-danger fs-1"></i>
-                                                        </span>
-                                                        <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">POS System</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Campaings & conversions</span>
-                                                        </span>
-                                                    </a>
-                                                    <!--end:Menu link-->
-                                                </div>
-                                                <!--end:Menu item-->
-                                            </div>
-                                            <!--end:Col-->
-                                            <!--begin:Col-->
-                                            <div class="col-lg-6 mb-3">
-                                                <!--begin:Menu item-->
-                                                <div class="menu-item p-0 m-0">
-                                                    <!--begin:Menu link-->
-                                                    <a href="../../demo30/dist/dashboards/call-center.html" class="menu-link">
-                                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-call text-primary fs-1"></i>
-                                                        </span>
-                                                        <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Call Center</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Campaings & conversions</span>
-                                                        </span>
-                                                    </a>
-                                                    <!--end:Menu link-->
-                                                </div>
-                                                <!--end:Menu item-->
-                                            </div>
-                                            <!--end:Col-->
                                         </div>
                                     </div>
                                     <!--end:Col-->
@@ -207,7 +120,7 @@
                     <!--end:Menu item-->
 
                 </div>
-                <!--end::Menu-->
+
             </div>
             <!--end::Menu wrapper-->
             <!--begin::Navbar-->
@@ -231,7 +144,7 @@
                 <div class="app-navbar-item ms-3 ms-lg-5" id="kt_header_user_menu_toggle">
                     <!--begin::Menu wrapper-->
                     <div class="cursor-pointer symbol symbol-35px symbol-md-45px" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
-                        <img class="symbol symbol-circle symbol-35px symbol-md-45px" src="<?php echo $_SESSION["avatar_path"]?>" alt="user" />
+                        <img class="symbol symbol-circle symbol-35px symbol-md-45px" src="<?php echo $_SESSION["avatar_path"] ?>" alt="user" />
                     </div>
                     <!--begin::User account menu-->
                     <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg menu-state-color fw-semibold py-4 fs-6 w-300px" data-kt-menu="true">
@@ -240,7 +153,7 @@
                             <div class="menu-content d-flex align-items-center px-3">
                                 <!--begin::Avatar-->
                                 <div class="symbol symbol-50px me-5">
-                                    <img alt="Logo" src="<?php echo $_SESSION["avatar_path"]?>" />
+                                    <img alt="Logo" src="<?php echo $_SESSION["avatar_path"] ?>" />
                                 </div>
                                 <!--end::Avatar-->
                                 <!--begin::Username-->
@@ -260,7 +173,7 @@
                         <!--end::Menu separator-->
                         <!--begin::Menu item-->
                         <div class="menu-item px-5">
-                            <a href="<?php echo $link_home?>profile" class="menu-link px-5">Meu Perfil</a>
+                            <a href="<?php echo $link_home ?>profile" class="menu-link px-5">Meu Perfil</a>
                         </div>
                         <!--end::Menu item-->
 

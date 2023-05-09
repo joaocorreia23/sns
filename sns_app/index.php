@@ -3,7 +3,6 @@
 <body id="kt_app_body" data-kt-app-header-fixed-mobile="true" data-kt-app-toolbar-enabled="true" class="app-default">
 
     <div class="modal fade show bg-role" id="kt_modal_two_factor_authentication" tabindex="-1" style="display: block;" aria-modal="true" role="dialog">
-        <pre><?php print_r($_SESSION) ?></pre>
         <!--begin::Modal header-->
         <div class="modal-dialog modal-dialog-centered mw-650px">
             <!--begin::Modal content-->
