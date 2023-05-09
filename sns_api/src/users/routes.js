@@ -5,6 +5,10 @@ const router = Router();
 
 router.get('/', controller.Get_Users);
 
+router.get('/table', controller.Get_Users_DataTable);
+
+router.get('/table/disabled', controller.Get_Users_DataTable_Disabled);
+
 router.get('/role/:role', controller.Get_UsersByRole);
 
 router.get('/:hashed_id', controller.Get_UserByHashedId);
