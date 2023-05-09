@@ -1,5 +1,18 @@
 <?php require_once($_SERVER["DOCUMENT_ROOT"] . "/head.php") ?>
-<?php $page_name = "Adicionar Prescrição de Exames" ?>
+<?php require_once($_SERVER["DOCUMENT_ROOT"] . "/api/api.php") ?>
+
+<?php
+$id = isset($_GET["id"]) && !empty($_GET["id"]) ? $_GET["id"] : null;
+$api = new Api();
+$exam_info = $api->fetch("exams/", null, $id);
+if ($exam_info['status']) {
+    $exam_info = $exam_info['response']['data'];
+} else {
+    header("Location: list");
+    exit();
+}
+?>
+<?php $page_name = "Editar Prescrição - Exame (" . $exam_info['exam_name'] . ")" ?>
 
 <body id="kt_app_body" data-kt-app-header-fixed-mobile="true" data-kt-app-toolbar-enabled="true" class="app-default">
     <div class="d-flex flex-column flex-root app-root" id="kt_app_root">
@@ -19,7 +32,7 @@
                                     <div class="card-header border-0 cursor-pointer" role="button" data-bs-toggle="collapse" data-bs-target="#kt_account_profile_details" aria-expanded="true" aria-controls="kt_account_profile_details">
                                         <!--begin::Card title-->
                                         <div class="card-title m-0">
-                                            <h3 class="fw-bold m-0">Adicionar Nova Prescrição de Exames</h3>
+                                            <h3 class="fw-bold m-0">Editar Prescrição - <?php echo $exam_info['exam_name'] ?></h3>
                                         </div>
                                         <!--end::Card title-->
                                     </div>
@@ -27,15 +40,14 @@
                                     <!--begin::Content-->
                                     <div id="kt_account_settings_profile_details" class="collapse show">
                                         <!--begin::Form-->
-                                        <form id="form-add-exam" class="form fv-plugins-bootstrap5 fv-plugins-framework" novalidate="novalidate">
+                                        <form id="form-edit-exam" class="form fv-plugins-bootstrap5 fv-plugins-framework" novalidate="novalidate">
                                             <!--begin::Card body-->
                                             <div class="card-body border-top p-9">
-
                                                 <div class="row mb-6">
                                                     <div class="col-12">
                                                         <label class="col-lg-12 col-form-label required fw-semibold fs-6">Nome da Prescrição - Exame</label>
                                                         <div class="col-lg-12 fv-row fv-plugins-icon-container">
-                                                            <input type="text" name="exam_name" class="form-control form-control-lg form-control-solid" placeholder="Nome da Prescrição - Exame" value="">
+                                                            <input type="text" name="exam_name" class="form-control form-control-lg form-control-solid" placeholder="Nome da Vacina" value="<?php echo $exam_info['exam_name'] ?>">
                                                             <div class="fv-plugins-message-container invalid-feedback"></div>
                                                         </div>
                                                     </div>
@@ -70,24 +82,25 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const form = document.getElementById("form-add-exam");
-            form.addEventListener("submit", insertExam);
+            const form = document.getElementById("form-edit-exam");
+            form.addEventListener("submit", insertHealthUnit);
 
             const api_url = "http://localhost:3000/api/";
             const path = "exams/";
 
-            function insertExam() {
+            function insertHealthUnit() {
                 event.preventDefault();
 
-                var form = document.getElementById("form-add-exam");
+                var form = document.getElementById("form-edit-exam");
 
                 const formData = {
-                    exam_name: form.exam_name.value,
+                    hashed_id: '<?php echo $id ?>',
+                    exam_name: form.exam_name.value
                 };
 
 
-                fetch(api_url + path + "insert", {
-                        method: "POST",
+                fetch(api_url + path + "update", {
+                        method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
                         },
@@ -120,7 +133,7 @@
                                     icon: "error",
                                     title: "Ocorreu um Erro!",
                                     text: data.error,
-                                    confirmButtonText: "Voltar a Edição",
+                                    confirmButtonText: "Voltar",
                                     buttonsStyling: false,
                                     customClass: {
                                         confirmButton: "btn btn-danger",
