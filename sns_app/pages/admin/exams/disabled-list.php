@@ -137,8 +137,7 @@
 								var day = date.getDate();
 								var month = date.getMonth() + 1;
 								var year = date.getFullYear();
-								var formattedDate = (day < 10 ? "0" + day : day) + "/" + (month < 10 ? "0" + month : month) + "/" + year;
-								return `
+								var formattedDate = (day < 10 ? "0" + day : day) + "/" + (month < 10 ? "0" + month : month) + "/" + year + " " + (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":" + (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes());								return `
 									<div class="d-inline-flex align-items-center">                                
 										<div class="d-flex justify-content-center flex-column">
 											<span class="text-dark fw-bold text-hover-primary mb-1 fs-6 lh-sm">${formattedDate}</span>
