@@ -278,6 +278,10 @@ CREATE TABLE appointment (
 	FOREIGN KEY (id_user_patient) REFERENCES users(id_user)
 );
 
+ALTER TABLE appointment ADD COLUMN start_date DATE NOT NULL;
+ALTER TABLE appointment ADD COLUMN start_time TIME NOT NULL;
+ALTER TABLE appointment ADD COLUMN end_time TIME NOT NULL;
+
 -- =======================
 -- END: APPOINTMENT
 -- =======================

@@ -10,6 +10,26 @@ const Get_Users = (req, res) => {
     });
 };
 
+const Get_Users_DataTable = (req, res) => {
+    pool.query("SELECT * FROM get_users()", (error, results) => {
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        res.status(200).json({ 'recordsFiltered': results.rows.length, 'recordsTotal': results.rows.length, 'data': results.rows });
+    });
+};
+
+const Get_Users_DataTable_Disabled = (req, res) => {
+    pool.query("SELECT * FROM get_users(null, null , 0)", (error, results) => {
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        res.status(200).json({ 'recordsFiltered': results.rows.length, 'recordsTotal': results.rows.length, 'data': results.rows });
+    });
+};
+
 const Get_UsersByRole = (req, res) => {
     const role = req.params.role;
     pool.query("SELECT * FROM get_users(NULL, NULL, $1)", [role], (error, results) => {
@@ -17,7 +37,7 @@ const Get_UsersByRole = (req, res) => {
             res.status(400).json({ error: error.message });
             return;
         }
-        res.status(200).json({ "status": true, "data": results.rows});
+        res.status(200).json({ "status": true, "data": results.rows });
     });
 };
 
@@ -39,7 +59,7 @@ const Add_User = (req, res) => {
             res.status(400).json({ error: error.message });
             return;
         }
-        res.status(201).send(`Utilizador adicionado com Sucesso!`);
+        res.status(201).json({ "status": true, "message": "Utilizador adicionado com Sucesso!" });
     });
 };
 
@@ -109,6 +129,8 @@ const Get_User_Roles = (req, res) => {
 
 module.exports = {
     Get_Users,
+    Get_Users_DataTable,
+    Get_Users_DataTable_Disabled,
     Get_UsersByRole,
     Get_UserByHashedId,
     Add_User,

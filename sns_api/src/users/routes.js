@@ -5,9 +5,11 @@ const router = Router();
 
 router.get('/', controller.Get_Users);
 
-router.get('/role/:role', controller.Get_UsersByRole);
+router.get('/table', controller.Get_Users_DataTable);
 
-router.get('/:hashed_id', controller.Get_UserByHashedId);
+router.get('/table/disabled', controller.Get_Users_DataTable_Disabled);
+
+router.get('/role/:role', controller.Get_UsersByRole);
 
 router.post('/insert', controller.Add_User);
 
@@ -20,6 +22,8 @@ router.delete('/remove/:hashed_id', controller.Delete_User);
 router.post('/create_role', controller.Create_User_Role);
 
 router.get('/roles/:hashed_id', controller.Get_User_Roles);
+
+router.get('/:hashed_id', controller.Get_UserByHashedId);
 
 
 module.exports = router;

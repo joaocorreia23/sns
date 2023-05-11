@@ -30,12 +30,11 @@ function handleLogin(event) {
   fetch("../../api/auth.php", requestOptions)
     .then((response) => response.json())
     .then((data) => {
-      console.log(data);
       if (data.error) {
         toastr.error(data.error, "Erro!");
       } else if (data.status === true) {
         toastr.success("Credencias Corretas!", "Sucesso!");
-        if (data.user_role.length > 0) {
+        if (data.user_role.length > 1) {
           setTimeout(() => {
             window.location.href = "../../index";
           }, 650);

@@ -200,3 +200,104 @@ BEGIN
     RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql;
+--
+--
+--
+CREATE OR REPLACE FUNCTION create_appointment(
+    id_health_unit_in BIGINT DEFAULT NULL,
+    hashed_id_health_unit_in VARCHAR(255) DEFAULT NULL,
+    id_doctor_in BIGINT DEFAULT NULL,
+    hashed_id_doctor_in VARCHAR(255) DEFAULT NULL,
+    id_patient_in BIGINT DEFAULT NULL,
+    hashed_id_patient_in VARCHAR(255) DEFAULT NULL,
+    start_date_in DATE DEFAULT NULL,
+    start_time_in TIME DEFAULT NULL,
+    end_time_in TIME DEFAULT NULL,
+    status INT DEFAULT 0
+) RETURNS BOOLEAN AS $$
+DECLARE
+    health_unit_id BIGINT;
+    doctor_id BIGINT;
+    patient_id BIGINT;
+BEGIN
+    IF id_health_unit_in IS NOT NULL AND hashed_id_health_unit_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_health_unit. Ambos foram passados.';
+    ELSEIF (id_health_unit_in IS NULL) AND (hashed_id_health_unit_in IS NULL OR hashed_id_health_unit_in = '') THEN
+        RAISE EXCEPTION 'É necessário passar o id ou o hashed_id da unidade de saúde.';
+    END IF;
+
+    IF id_doctor_in IS NOT NULL AND hashed_id_doctor_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_doctor. Ambos foram passados.';
+    ELSEIF (id_doctor_in IS NULL) AND (hashed_id_doctor_in IS NULL OR hashed_id_doctor_in = '') THEN
+        RAISE EXCEPTION 'É necessário passar o id ou o hashed_id do médico.';
+    END IF;
+
+    IF id_patient_in IS NOT NULL AND hashed_id_patient_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_patient. Ambos foram passados.';
+    ELSEIF (id_patient_in IS NULL) AND (hashed_id_patient_in IS NULL OR hashed_id_patient_in = '') THEN
+        RAISE EXCEPTION 'É necessário passar o id ou o hashed_id do paciente.';
+    END IF;
+
+    IF hashed_id_health_unit_in IS NOT NULL THEN
+        SELECT health_unit.id_health_unit INTO health_unit_id FROM health_unit WHERE hashed_id = hashed_id_health_unit_in;
+    ELSE
+        health_unit_id := id_health_unit_in;
+    END IF;
+
+    IF hashed_id_doctor_in IS NOT NULL THEN
+        SELECT users.id_user INTO doctor_id FROM users WHERE hashed_id = hashed_id_doctor_in;
+    ELSE
+        doctor_id := id_doctor_in;
+    END IF;
+
+    IF hashed_id_patient_in IS NOT NULL THEN
+        SELECT users.id_user INTO patient_id FROM users WHERE hashed_id = hashed_id_patient_in;
+    ELSE
+        patient_id := id_patient_in;
+    END IF;
+
+    IF NOT EXISTS (SELECT * FROM health_unit WHERE id_health_unit = health_unit_id) THEN 
+        RAISE EXCEPTION 'Unidade de Saúde não encontrada.';
+    END IF;
+
+    IF NOT EXISTS (SELECT * FROM users WHERE id_user = doctor_id) THEN 
+        RAISE EXCEPTION 'Médico não encontrado.';
+    ELSEIF (SELECT * FROM check_user_role(doctor_id, NULL, 'Doctor')) = FALSE THEN
+        RAISE EXCEPTION 'O utilizador não é um médico.';
+    END IF;
+
+    IF NOT EXISTS (SELECT * FROM users WHERE id_user = patient_id) THEN 
+        RAISE EXCEPTION 'Utente não encontrado.';
+    ELSEIF (SELECT * FROM check_user_role(patient_id, NULL, 'Patient')) = FALSE THEN
+        RAISE EXCEPTION 'O utilizador não é um utente.';
+    END IF;
+
+    IF doctor_id = patient_id THEN
+        RAISE EXCEPTION 'O médico não pode ser o mesmo que o utente.';
+    END IF;
+
+    IF start_date_in IS NULL THEN
+        RAISE EXCEPTION 'É necessário passar a data da consulta.';
+    END IF;
+
+    IF start_time_in IS NULL THEN
+        RAISE EXCEPTION 'É necessário passar a hora da consulta.';
+    END IF;
+
+    IF end_date_in IS NULL THEN
+        RAISE EXCEPTION 'É necessário passar a data de fim da consulta.';
+    END IF;
+
+    IF start_time_in >= end_time_in THEN
+        RAISE EXCEPTION 'A hora de início da consulta tem de ser menor que a hora de fim da consulta.';
+    END IF;
+
+    IF start_date_in < CURRENT_DATE AND status_in == 0 THEN
+        RAISE EXCEPTION 'Não é possível criar uma consulta pendente com uma data anterior à data atual.';
+    END IF;
+    
+    INSERT INTO appointment (id_health_unit, id_user_doctor, id_user_patient, status, start_date, start_time, end_time) VALUES (health_unit_id, doctor_id, patient_id, status, start_date_in, start_time_in, end_time_in);
+	RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql;
+SELECT * FROM create_appointment(NULL, 'd4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35', NULL, '4ec9599fc203d176a301536c2e091a19bc852759b255bd6818810a42c5fed14a', NULL, '4523540f1504cd17100c4835e85b7eefd49911580f8efff0599a8f283be6b9e3', '2023-06-01', '10:00:00', '11:00:00');
