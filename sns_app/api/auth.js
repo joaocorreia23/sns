@@ -34,8 +34,6 @@ function handleLogin(event) {
         toastr.error(data.error, "Erro!");
       } else if (data.status === true) {
         toastr.success("Credencias Corretas!", "Sucesso!");
-        console.log(data);
-        console.log(data.user_role[0]);
         if (data.user_role.length > 1) {
           setTimeout(() => {
             window.location.href = "../../index";
