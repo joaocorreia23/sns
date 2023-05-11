@@ -19,7 +19,9 @@
         <!--end::Logo-->
         <!--begin::Header wrapper-->
         <div class="d-flex align-items-stretch justify-content-between flex-lg-grow-1" id="kt_app_header_wrapper">
-            <!--begin::Menu wrapper-->
+
+            <?php if($_SESSION["active_role"] === "Admin"){?>
+            <!--Admin NavBar-->
             <div class="app-header-menu app-header-mobile-drawer align-items-stretch" data-kt-drawer="true" data-kt-drawer-name="app-header-menu" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="250px" data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_app_header_menu_toggle" data-kt-swapper="true" data-kt-swapper-mode="{default: 'append', lg: 'prepend'}" data-kt-swapper-parent="{default: '#kt_app_body', lg: '#kt_app_header_wrapper'}">
 
 
@@ -77,6 +79,19 @@
                                                         <span class="d-flex flex-column">
                                                             <span class="fs-6 fw-bold text-gray-800">Adicionar - Utilizadores</span>
                                                             <span class="fs-7 fw-semibold text-muted">Administradores, Médico e Utentes</span>
+                                                        </span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6 mb-3">
+                                                <div class="menu-item p-0 m-0">
+                                                    <a href="<?php echo $link_home; ?>pages/admin/users/add" class="menu-link">
+                                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                            <i class="ki-outline ki-lock text-info fs-1"></i>
+                                                        </span>
+                                                        <span class="d-flex flex-column">
+                                                            <span class="fs-6 fw-bold text-gray-800">Gerir Permissões</span>
+                                                            <span class="fs-7 fw-semibold text-muted">Gerir as Permissões dos Utilizadores</span>
                                                         </span>
                                                     </a>
                                                 </div>
@@ -300,7 +315,9 @@
                 </div>
 
             </div>
-            <!--end::Menu wrapper-->
+            <!--Admin NavBar-->
+            <?php } ?>
+
             <!--begin::Navbar-->
             <div class="app-navbar flex-shrink-0">
                 <!--begin::Search-->
@@ -337,7 +354,14 @@
                                 <!--begin::Username-->
                                 <div class="d-flex flex-column">
                                     <div class="d-flex align-items-center">
-                                        <span class="badge badge-light-success fw-bold fs-8 px-2 py-1 mb-1">Administrador</span>
+                                        <?php if ($_SESSION["active_role"] == "Admin") {
+                                            echo '<span class="badge badge-light-success fw-bold fs-8 px-2 py-1 mb-1">Administrador</span>';
+                                        } else if ($_SESSION["active_role"] == "Doctor") {
+                                            echo '<span class="badge badge-light-warning fw-bold fs-8 px-2 py-1 mb-1">Médico</span>';
+                                        } else if ($_SESSION["active_role"] == "Patient") {
+                                            echo '<span class="badge badge-light-info fw-bold fs-8 px-2 py-1 mb-1">Utente</span>';
+                                        }
+                                        ?>
                                     </div>
                                     <div class="fw-bold d-flex align-items-center fs-5"><?php echo $_SESSION["name"]; ?></div>
                                     <a href="#" class="fw-semibold text-muted text-hover-primary fs-7"><?php echo $_SESSION["email"]; ?></a>

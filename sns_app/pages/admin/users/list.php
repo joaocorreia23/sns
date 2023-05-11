@@ -170,7 +170,8 @@
 								return `
 									<div>
 										<a href="edit?id=${row.hashed_id}" class="btn btn-icon btn-bg-light btn-color-primary btn-active-light-primary rounded w-35px h-35px me-1"><i class="ki-outline ki-notepad-edit fs-2"></i></a>
-										<button type="button" data-id="${row.hashed_id}" data-name="${row.first_name}" data-datatable-action="delete-row" class="btn btn-icon btn-bg-light btn-color-danger btn-active-light-danger rounded w-35px h-35px"><i class="ki-outline ki-trash fs-2"></i></button>
+										<a href="permissions?id=${row.hashed_id}" class="btn btn-icon btn-bg-light btn-color-info btn-active-light-info rounded w-35px h-35px me-1"><i class="ki-outline ki-lock fs-2"></i></a>
+										<button type="button" data-id="${row.hashed_id}" data-name="${row.email}" data-datatable-action="delete-row" class="btn btn-icon btn-bg-light btn-color-danger btn-active-light-danger rounded w-35px h-35px"><i class="ki-outline ki-trash fs-2"></i></button>
 									</div>
 								`;
 							},
@@ -212,8 +213,8 @@
 
 					Swal.fire({
 						icon: "warning",
-						title: "Desativar Vacina",
-						text: "Tem a certeza que deseja desativar a Vacina (" + name + ") ?",
+						title: "Desativar Utilizador",
+						text: "Tem a certeza que deseja desativar o Utilizador (" + name + ") ?",
 						showCancelButton: true,
 						buttonsStyling: false,
 						cancelButtonText: "Não, cancelar",
@@ -244,7 +245,7 @@
 								},
 							}
 
-							fetch("http://localhost:3000/api/vaccines/deactivate", options)
+							fetch("http://localhost:3000/api/users/remove", options)
 								.then((response) => {
 									response.text().then((json) => {
 										json = JSON.parse(json)

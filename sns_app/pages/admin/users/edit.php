@@ -6,7 +6,7 @@ $api = new Api();
 $user_info = $api->fetch("users/", null, $id);
 $user_info_data = $user_info["response"];
 ?>
-<?php $page_name = "Editar Utilizador" ?>
+<?php $page_name = "Editar Utilizador - " . $user_info_data["username"]?>
 
 <body id="kt_app_body" data-kt-app-header-fixed-mobile="true" data-kt-app-toolbar-enabled="true" class="app-default">
 	<div class="d-flex flex-column flex-root app-root" id="kt_app_root">
@@ -18,8 +18,6 @@ $user_info_data = $user_info["response"];
 					<div class="app-main flex-column flex-row-fluid" id="kt_app_main">
 						<div class="d-flex flex-column flex-column-fluid">
 							<div id="kt_app_content" class="app-content">
-
-                            <pre><?php print_r($user_info_data) ?></pre>
 
 								<!-- Content Here -->
 								<div class="card mb-5 mb-xl-10">
@@ -35,7 +33,7 @@ $user_info_data = $user_info["response"];
 									<!--begin::Content-->
 									<div id="kt_account_settings_profile_details" class="collapse show">
 										<!--begin::Form-->
-										<form id="form-add-user" class="form fv-plugins-bootstrap5 fv-plugins-framework" novalidate="novalidate">
+										<form id="form-edit-user" class="form fv-plugins-bootstrap5 fv-plugins-framework" novalidate="novalidate">
 											<!--begin::Card body-->
 											<div class="card-body border-top p-9">
 
@@ -54,41 +52,6 @@ $user_info_data = $user_info["response"];
 															<div class="fv-plugins-message-container invalid-feedback"></div>
 														</div>
 													</div>
-													<div class="col-12 col-lg-6">
-														<label for="modal-add-user-form-password" class="col-form-label form-label fw-semibold fs-6 required">Palavra-passe</label>
-														<div class="fv-row password-meter">
-															<div class="position-relative mb-3">
-																<?php
-																$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*_";
-																$generated_password = substr(str_shuffle($chars), 0, 8) . "!";
-																?>
-
-																<input type="password" name="password" id="modal-add-user-form-password" class="form-control form-control-lg form-control-solid" value="<?php echo $generated_password; ?>" placeholder="" autocomplete="off">
-																<span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2" data-kt-password-meter-control="visibility">
-																	<i class="ki-outline ki-eye fs-2"></i>
-																	<i class="ki-outline ki-eye-slash fs-2 d-none"></i>
-																</span>
-															</div>
-
-															<div class="d-flex align-items-center mb-3" data-kt-password-meter-control="highlight">
-																<div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px me-2"></div>
-																<div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px me-2"></div>
-																<div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px me-2"></div>
-																<div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px"></div>
-															</div>
-															<div class="text-muted">Use 8 ou mais caracteres com uma mistura de letras, números e símbolos.</div>
-														</div>
-													</div>
-													<div class="col-12 col-lg-6">
-                                                        <label class="col-lg-12 col-form-label required fw-semibold fs-6">Permissões</label>
-                                                        <select class="form-select form-select-solid" name="role" data-control="select2" data-placeholder="Selecione a Permissão do Utilizador">
-                                                            <option></option>
-                                                                <option value="Admin">Administrador</option>
-																<option value="Doctor">Médico</option>
-																<option value="Patient">Utente</option>
-                                                        </select>
-                                                    </div>
-
 												</div>
 
 											</div>
@@ -96,7 +59,7 @@ $user_info_data = $user_info["response"];
 											<!--begin::Actions-->
 											<div class="card-footer d-flex justify-content-end py-6 px-9">
 												<button type="reset" class="btn btn-light btn-active-light-primary me-2">Cancelar</button>
-												<button type="submit" class="btn btn-primary" id="kt_account_profile_details_submit">Criar</button>
+												<button type="submit" class="btn btn-primary" id="kt_account_profile_details_submit">Guardar</button>
 											</div>
 											<!--end::Actions-->
 											<input type="hidden">
@@ -119,41 +82,27 @@ $user_info_data = $user_info["response"];
 	<?php require_once($_SERVER["DOCUMENT_ROOT"] . "/foo.php") ?>
 
 	<script>
-		const options = {
-			minLength: 8,
-			checkUppercase: true,
-			checkLowercase: true,
-			checkDigit: true,
-			checkChar: true,
-			scoreHighlightClass: "active"
-		};
-		var passwordMeterElement = document.querySelector(`#form-add-user .password-meter`);
-		var passwordMeter = new KTPasswordMeter(passwordMeterElement, options);
-		passwordMeter.check();
-
-
 		document.addEventListener("DOMContentLoaded", function() {
-			const form = document.getElementById("form-add-user");
-			form.addEventListener("submit", insertUser);
+			const form = document.getElementById("form-edit-user");
+			form.addEventListener("submit", editUser);
 
 			const api_url = "http://localhost:3000/api/";
 			const path = "users/";
 
-			function insertUser() {
+			function editUser() {
 				event.preventDefault();
 
-				var form = document.getElementById("form-add-user");
+				var form = document.getElementById("form-edit-user");
 
 				const formData = {
+                    hashed_id: "<?php echo $id ?>",
 					username: form.username.value,
 					email: form.email.value,
-					password: form.password.value,
-					role: form.role.value,
 				};
 
 
-				fetch(api_url + path + "insert", {
-						method: "POST",
+				fetch(api_url + path + "update", {
+						method: "PUT",
 						headers: {
 							"Content-Type": "application/json",
 						},
