@@ -123,6 +123,17 @@ const Create_User_Role = (req, res) => {
     });
 };
 
+const Manage_User_Roles = (req, res) => {
+    const { hashed_id, roles } = req.body;
+    pool.query("SELECT * FROM manage_user_roles(NULL, $1, $2)", [hashed_id, roles], (error, results) => {
+        if (error) {
+            res.status(400).json({'status': false, 'message': error.message });
+            return;
+        }
+        res.status(201).json({ "status": true, "message": "Roles atualizadas com Sucesso!" });
+    });
+};
+
 const Get_User_Roles = (req, res) => {
     const hashed_id = req.params.hashed_id;
     pool.query("SELECT * FROM get_user_roles(NULL, $1)", [hashed_id], (error, results) => {
@@ -151,5 +162,6 @@ module.exports = {
     Delete_User,
     Activate_User,
     Create_User_Role,
+    Manage_User_Roles,
     Get_User_Roles
 };
