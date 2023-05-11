@@ -11,7 +11,7 @@
         <!--end::Header mobile toggle-->
         <!--begin::Logo-->
         <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0 me-lg-15">
-            <a href="<?php $_SERVER["DOCUMENT_ROOT"] . "/index.php" ?>">
+            <a href="<?php $_SERVER["DOCUMENT_ROOT"] . "/index" ?>">
                 <img alt="Logo" src="<?php echo $link_home ?>assets/media/uploads/logo.svg" class="h-10px d-lg-none" />
                 <img alt="Logo" src="<?php echo $link_home ?>assets/media/uploads/logo.svg" class="h-30px d-none d-lg-inline app-sidebar-logo-default theme-light-show" />
             </a>
@@ -44,7 +44,7 @@
                                         <div class="row">
                                             <div class="col-lg-6 mb-3">
                                                 <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/users/list.php" class="menu-link">
+                                                    <a href="<?php echo $link_home; ?>pages/admin/users/list" class="menu-link">
                                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
                                                             <i class="ki-outline ki-profile-user text-primary fs-1"></i>
                                                         </span>
@@ -57,7 +57,7 @@
                                             </div>
                                             <div class="col-lg-6 mb-3">
                                                 <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/users/disabled-list.php" class="menu-link">
+                                                    <a href="<?php echo $link_home; ?>pages/admin/users/disabled-list" class="menu-link">
                                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
                                                             <i class="ki-outline ki-profile-user text-danger fs-1"></i>
                                                         </span>
@@ -70,7 +70,7 @@
                                             </div>
                                             <div class="col-lg-6 mb-3">
                                                 <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/users/add.php" class="menu-link">
+                                                    <a href="<?php echo $link_home; ?>pages/admin/users/add" class="menu-link">
                                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
                                                             <i class="ki-outline ki-plus-square text-danger fs-1"></i>
                                                         </span>
@@ -112,7 +112,7 @@
                                         <div class="row">
                                             <div class="col-lg-6 mb-3">
                                                 <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/health-units/list.php" class="menu-link">
+                                                    <a href="<?php echo $link_home; ?>pages/admin/health-units/list" class="menu-link">
                                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
                                                             <i class="ki-outline ki-bank text-primary fs-1"></i>
                                                         </span>
@@ -125,7 +125,7 @@
                                             </div>
                                             <div class="col-lg-6 mb-3">
                                                 <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/health-units/disabled-list.php" class="menu-link">
+                                                    <a href="<?php echo $link_home; ?>pages/admin/health-units/disabled-list" class="menu-link">
                                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
                                                             <i class="ki-outline ki-bank text-danger fs-1"></i>
                                                         </span>
@@ -138,7 +138,7 @@
                                             </div>
                                             <div class="col-lg-6 mb-3">
                                                 <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/health-units/add.php" class="menu-link">
+                                                    <a href="<?php echo $link_home; ?>pages/admin/health-units/add" class="menu-link">
                                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
                                                             <i class="ki-outline ki-plus-square text-danger fs-1"></i>
                                                         </span>
@@ -180,7 +180,7 @@
                                         <div class="row">
                                             <div class="col-lg-6 mb-3">
                                                 <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/exams/list.php" class="menu-link">
+                                                    <a href="<?php echo $link_home; ?>pages/admin/exams/list" class="menu-link">
                                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
                                                             <i class="ki-outline ki-document text-primary fs-1"></i>
                                                         </span>
@@ -193,7 +193,7 @@
                                             </div>
                                             <div class="col-lg-6 mb-3">
                                                 <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/exams/disabled-list.php" class="menu-link">
+                                                    <a href="<?php echo $link_home; ?>pages/admin/exams/disabled-list" class="menu-link">
                                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
                                                             <i class="ki-outline ki-document text-danger fs-1"></i>
                                                         </span>
@@ -206,7 +206,7 @@
                                             </div>
                                             <div class="col-lg-6 mb-3">
                                                 <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/exams/add.php" class="menu-link">
+                                                    <a href="<?php echo $link_home; ?>pages/admin/exams/add" class="menu-link">
                                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
                                                             <i class="ki-outline ki-plus-square text-danger fs-1"></i>
                                                         </span>
@@ -248,7 +248,7 @@
                                         <div class="row">
                                             <div class="col-lg-6 mb-3">
                                                 <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/vaccines/list.php" class="menu-link">
+                                                    <a href="<?php echo $link_home; ?>pages/admin/vaccines/list" class="menu-link">
                                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
                                                             <i class="ki-outline ki-syringe text-primary fs-1"></i>
                                                         </span>
@@ -261,7 +261,7 @@
                                             </div>
                                             <div class="col-lg-6 mb-3">
                                                 <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/vaccines/disabled-list.php" class="menu-link">
+                                                    <a href="<?php echo $link_home; ?>pages/admin/vaccines/disabled-list" class="menu-link">
                                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
                                                             <i class="ki-outline ki-syringe text-danger fs-1"></i>
                                                         </span>
@@ -274,7 +274,7 @@
                                             </div>
                                             <div class="col-lg-6 mb-3">
                                                 <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/vaccines/add.php" class="menu-link">
+                                                    <a href="<?php echo $link_home; ?>pages/admin/vaccines/add" class="menu-link">
                                                         <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
                                                             <i class="ki-outline ki-plus-square text-danger fs-1"></i>
                                                         </span>

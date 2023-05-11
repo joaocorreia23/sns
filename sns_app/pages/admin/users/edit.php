@@ -1,5 +1,12 @@
 <?php require_once($_SERVER["DOCUMENT_ROOT"] . "/head.php") ?>
-<?php $page_name = "Adicionar Novo Utilizador" ?>
+<?php require_once($_SERVER["DOCUMENT_ROOT"] . "/api/api.php") ?>
+<?php
+$id = isset($_GET["id"]) && !empty($_GET["id"]) ? $_GET["id"] : null;
+$api = new Api();
+$user_info = $api->fetch("users/", null, $id);
+$user_info_data = $user_info["response"];
+?>
+<?php $page_name = "Editar Utilizador" ?>
 
 <body id="kt_app_body" data-kt-app-header-fixed-mobile="true" data-kt-app-toolbar-enabled="true" class="app-default">
 	<div class="d-flex flex-column flex-root app-root" id="kt_app_root">
@@ -12,6 +19,7 @@
 						<div class="d-flex flex-column flex-column-fluid">
 							<div id="kt_app_content" class="app-content">
 
+                            <pre><?php print_r($user_info_data) ?></pre>
 
 								<!-- Content Here -->
 								<div class="card mb-5 mb-xl-10">
@@ -19,7 +27,7 @@
 									<div class="card-header border-0 cursor-pointer" role="button" data-bs-toggle="collapse" data-bs-target="#kt_account_profile_details" aria-expanded="true" aria-controls="kt_account_profile_details">
 										<!--begin::Card title-->
 										<div class="card-title m-0">
-											<h3 class="fw-bold m-0">Adicionar Novo Utilizador</h3>
+											<h3 class="fw-bold m-0">Editar Utilizador</h3>
 										</div>
 										<!--end::Card title-->
 									</div>
@@ -35,14 +43,14 @@
 													<div class="col-12 col-lg-6">
 														<label class="col-lg-12 col-form-label required fw-semibold fs-6">Username</label>
 														<div class="col-lg-12 fv-row fv-plugins-icon-container">
-															<input type="text" name="username" class="form-control form-control-lg form-control-solid" placeholder="Nome do Utilizador" value="">
+															<input type="text" name="username" class="form-control form-control-lg form-control-solid" placeholder="Nome do Utilizador" value="<?php echo $user_info_data["username"] ?>">
 															<div class="fv-plugins-message-container invalid-feedback"></div>
 														</div>
 													</div>
 													<div class="col-12 col-lg-6">
 														<label class="col-lg-12 col-form-label required fw-semibold fs-6">Email</label>
 														<div class="col-lg-12 fv-row fv-plugins-icon-container">
-															<input type="text" name="email" class="form-control form-control-lg form-control-solid" placeholder="Email do Utilizador" value="">
+															<input type="text" name="email" class="form-control form-control-lg form-control-solid" placeholder="Email do Utilizador" value="<?php echo $user_info_data["email"] ?>">
 															<div class="fv-plugins-message-container invalid-feedback"></div>
 														</div>
 													</div>

@@ -37,7 +37,7 @@ const Get_UsersByRole = (req, res) => {
             res.status(400).json({ error: error.message });
             return;
         }
-        res.status(200).json({ "status": true, "data": results.rows});
+        res.status(200).json({ "status": true, "data": results.rows });
     });
 };
 
@@ -59,7 +59,7 @@ const Add_User = (req, res) => {
             res.status(400).json({ error: error.message });
             return;
         }
-        res.status(201).send(`Utilizador adicionado com Sucesso!`);
+        res.status(201).json({ "status": true, "message": "Utilizador adicionado com Sucesso!" });
     });
 };
 

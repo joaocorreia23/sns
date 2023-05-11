@@ -11,8 +11,6 @@ router.get('/table/disabled', controller.Get_Users_DataTable_Disabled);
 
 router.get('/role/:role', controller.Get_UsersByRole);
 
-router.get('/:hashed_id', controller.Get_UserByHashedId);
-
 router.post('/insert', controller.Add_User);
 
 router.put('/update', controller.Update_User);
@@ -25,5 +23,6 @@ router.post('/create_role', controller.Create_User_Role);
 
 router.get('/roles/:hashed_id', controller.Get_User_Roles);
 
+router.get('/:hashed_id', controller.Get_UserByHashedId);
 
 module.exports = router;

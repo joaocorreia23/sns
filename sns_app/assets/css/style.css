@@ -45,8 +45,11 @@
 }
 
 .bg-role {
-  background-color: rgba(0, 0, 0, 0.5);
-  background: linear-gradient(90deg, rgba(1, 145, 71, 1) 0%, rgba(234, 189, 0, 1) 43%, rgba(206, 21, 0, 1) 100%);
+  /* background-color: rgba(0, 0, 0, 0.5); */
+  /* background: linear-gradient(90deg, rgba(1, 145, 71, 1) 0%, rgba(234, 189, 0, 1) 43%, rgba(206, 21, 0, 1) 100%); */
+  background-image: url(/assets/media/uploads/fundo_sessao.png);
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 ::-webkit-scrollbar-track {
