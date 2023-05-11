@@ -172,11 +172,11 @@ BEGIN
         RAISE EXCEPTION 'O role passado não é válido';
     END IF;
 
-    IF EXISTS (SELECT 1 FROM user_roles WHERE user_roles.id_user = user_id AND user_roles.role = create_user_role.role) THEN
+    IF EXISTS (SELECT 1 FROM user_role WHERE user_role.id_user = user_id AND user_role.role = create_user_role.role) THEN
         RAISE EXCEPTION 'O utilizador já tem o role passado';
     END IF;
 
-    INSERT INTO user_roles (id_user, role) VALUES (user_id, create_user_role.role);
+    INSERT INTO user_role (id_user, role) VALUES (user_id, create_user_role.role);
     
     RETURN TRUE;
 
@@ -217,7 +217,63 @@ BEGIN
     RETURN QUERY SELECT user_role.role FROM user_role WHERE user_role.id_user = user_id;
 END;
 $$ LANGUAGE plpgsql;
+--
+--
+--
+-- Manage User Roles
+CREATE OR REPLACE FUNCTION manage_user_roles(
+    IN id_user_in BIGINT,
+    IN hashed_id_in VARCHAR(255),
+    IN roles VARCHAR[]
+) RETURNS BOOLEAN AS $$
+DECLARE
+    user_id BIGINT;
+BEGIN
+    IF id_user_in IS NOT NULL AND hashed_id_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Apenas pode ser passado o "hashed_id" ou o "id_user". Ambos foram passados.';
+    END IF;
 
+    IF hashed_id_in IS NOT NULL AND hashed_id_in != '' THEN
+        SELECT users.id_user INTO user_id FROM users WHERE hashed_id = hashed_id_in;
+    ELSIF id_user_in IS NOT NULL THEN
+        SELECT users.id_user INTO user_id FROM users WHERE id_user = id_user_in;
+    ELSE
+        RAISE EXCEPTION 'É necessário passar o "hashed_id" ou o "id_user".';
+    END IF;
+
+    IF user_id IS NULL AND id_user_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Não existe nenhum utilizador com o id_user passado';
+    ELSIF user_id IS NULL AND hashed_id_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Não existe nenhum utilizador com o hashed_id passado';
+    END IF;
+
+    IF roles IS NULL THEN
+        RAISE EXCEPTION 'É necessário passar o role';
+    END IF;
+
+    --CONVERT ROLE TO VARCHAR
+    -- IF ARRAY NOT EMPTY
+    IF array_length(roles, 1) > 0 THEN
+        FOR i IN 1..array_length(roles, 1) LOOP
+            IF check_valid_role(roles[i]) = FALSE THEN
+                RAISE EXCEPTION 'O role passado não é válido';
+            ELSEIF EXISTS (SELECT 1 FROM user_role WHERE user_role.id_user = user_id AND user_role.role = roles[i]::role) THEN
+                --RAISE EXCEPTION 'O utilizador já tem o role passado';
+            ELSE 
+                INSERT INTO user_role (id_user, role) VALUES (user_id, roles[i]::role);
+            END IF;
+        END LOOP;
+    ELSE
+        RAISE EXCEPTION 'Erro! O Utilizador precisa de pelo menos uma Permissão de Acesso.';
+    END IF;
+
+    --DELETE FROM user_role WHERE user_role.id_user = user_id AND user_role.role::text = ANY(roles);
+	DELETE FROM user_role WHERE user_role.id_user = user_id AND user_role.role NOT IN (SELECT UNNEST(roles)::role);
+
+    RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql;
+--SELECT * FROM manage_user_roles(1, NULL, ARRAY['Admin', 'User']);
 --
 --
 --
@@ -399,7 +455,8 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION get_users(
     IN id_user_in BIGINT DEFAULT NULL,
     IN hashed_id_in VARCHAR(255) DEFAULT NULL,
-    role_in VARCHAR(255) DEFAULT NULL
+    role_in VARCHAR(255) DEFAULT NULL,
+    status_in INT DEFAULT 1
 )
 RETURNS TABLE (
     hashed_id VARCHAR(255),
@@ -407,7 +464,7 @@ RETURNS TABLE (
     email VARCHAR(255),
     status INT,
     created_at TIMESTAMP,
-    first_name VARCHAR(255) DEFAULT 'Sem nome',
+    first_name VARCHAR(255),
     last_name VARCHAR(255),
 	bith_date DATE,
     gender gender,
@@ -448,7 +505,8 @@ BEGIN
         LEFT JOIN county c ON zc.id_county=c.id_county
         LEFT JOIN district d ON c.id_district=d.id_district
         LEFT JOIN country cty ON d.id_country=cty.id_country
-        LEFT JOIN country cty_n ON uf.nationality=cty_n.id_country;
+        LEFT JOIN country cty_n ON uf.nationality=cty_n.id_country
+        WHERE u.status = status_in;
 
     ELSEIF hashed_id_in IS NULL AND id_user_in IS NULL AND role_in IS NOT NULL THEN
 
@@ -473,7 +531,8 @@ BEGIN
         LEFT JOIN district d ON c.id_district=d.id_district
         LEFT JOIN country cty ON d.id_country=cty.id_country
         LEFT JOIN country cty_n ON uf.nationality=cty_n.id_country
-        JOIN user_role ur ON u.id_user=ur.id_user AND ur.role=role_in::role;
+        JOIN user_role ur ON u.id_user=ur.id_user AND ur.role=role_in::role
+        WHERE u.status = status_in;
 
     ELSEIF hashed_id_in IS NULL THEN
         RETURN QUERY SELECT 
@@ -492,7 +551,7 @@ BEGIN
         LEFT JOIN district d ON c.id_district=d.id_district
         LEFT JOIN country cty ON d.id_country=cty.id_country
         LEFT JOIN country cty_n ON uf.nationality=cty_n.id_country
-        WHERE u.id_user = get_users.id_user_in; --GET USER BY ID
+        WHERE u.id_user = get_users.id_user_in AND u.status = status_in;
         IF NOT FOUND THEN
             RAISE EXCEPTION 'Utilizador com o id_user "%" não existe', id_user_in; --USER NOT FOUND
         END IF;
@@ -513,7 +572,7 @@ BEGIN
         LEFT JOIN district d ON c.id_district=d.id_district
         LEFT JOIN country cty ON d.id_country=cty.id_country
         LEFT JOIN country cty_n ON uf.nationality=cty_n.id_country
-        WHERE u.hashed_id = get_users.hashed_id_in; --GET USER BY HASHED ID
+        WHERE u.hashed_id = get_users.hashed_id_in AND u.status = status_in;
         IF NOT FOUND THEN
             RAISE EXCEPTION 'Utilizador com o hased_id "%" não existe', hashed_id_in; --USER NOT FOUND
         END IF;
@@ -556,6 +615,41 @@ BEGIN
     END IF;
 
     UPDATE users SET status = 0 WHERE id_user = user_id;--NOT DELETING USER, JUST DEACTIVATING
+    RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql;
+--
+--
+--
+CREATE OR REPLACE FUNCTION activate_user(
+    IN id_user_in BIGINT DEFAULT NULL,
+    IN hashed_id_in VARCHAR(255) DEFAULT NULL
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+    user_id BIGINT;
+BEGIN
+    IF id_user_in IS NOT NULL AND hashed_id_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_user. Ambos foram passados.';
+    END IF;
+
+    IF hashed_id_in IS NOT NULL THEN
+        SELECT users.id_user INTO user_id FROM users WHERE hashed_id = hashed_id_in;
+    ELSE
+        user_id := id_user_in;
+    END IF;
+
+    IF user_id IS NULL AND id_user_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Não existe nenhum utilizador com o id_user passado';
+    ELSEIF user_id IS NULL AND hashed_id_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Não existe nenhum utilizador com o hashed_id passado';
+    END IF;
+
+    IF (SELECT users.id_user FROM users WHERE users.id_user = user_id AND users.status = 1) IS NOT NULL THEN
+        RAISE EXCEPTION 'O utilizador já se encontra ativado';
+    END IF;
+
+    UPDATE users SET status = 1 WHERE id_user = user_id;--NOT DELETING USER, JUST DEACTIVATING
     RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql;

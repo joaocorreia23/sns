@@ -6,8 +6,9 @@
     "\\src\\coutries",
     "\\src\\exam",
     "\\src\\health_unit",
-    "\\src\\users"
+    "\\src\\users",
+    "\\src\\vaccine"
   ],
-  "SelectedNode": "\\src\\users\\controller.js",
+  "SelectedNode": "\\src\\users\\routes.js",
   "PreviewInSolutionExplorer": false
 }

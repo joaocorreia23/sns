@@ -17,9 +17,13 @@ router.put('/update', controller.Update_User);
 
 router.put('/update/info', controller.Update_User_Info)
 
-router.delete('/remove/:hashed_id', controller.Delete_User);
+router.post('/remove', controller.Delete_User);
+
+router.post('/activate', controller.Activate_User);
 
 router.post('/create_role', controller.Create_User_Role);
+
+router.post('/manage_roles', controller.Manage_User_Roles);
 
 router.get('/roles/:hashed_id', controller.Get_User_Roles);
 

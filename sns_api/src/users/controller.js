@@ -21,7 +21,7 @@ const Get_Users_DataTable = (req, res) => {
 };
 
 const Get_Users_DataTable_Disabled = (req, res) => {
-    pool.query("SELECT * FROM get_users(null, null , 0)", (error, results) => {
+    pool.query("SELECT * FROM get_users(null, null , null,  0)", (error, results) => {
         if (error) {
             res.status(400).json({ error: error.message });
             return;
@@ -90,13 +90,25 @@ const Update_User_Info = (req, res) => {
 };
 
 const Delete_User = (req, res) => {
-    const hashed_id = req.params.hashed_id;
+    const { hashed_id } = req.body;
     pool.query("SELECT delete_user(NULL, $1)", [hashed_id], (error, results) => {
         if (error) {
             res.status(400).json({ error: error.message });
             return;
         }
-        res.status(200).send(`Utilizador eliminado com Sucesso!`);
+        res.status(201).json({ "status": true, "data": results.rows[0], "message": "Utilizador desativado com Sucesso!" });
+
+    });
+};
+
+const Activate_User = (req, res) => {
+    const { hashed_id } = req.body;
+    pool.query("SELECT activate_user(NULL, $1)", [hashed_id], (error, results) => {
+        if (error) {
+            res.status(400).json({ error: error.message });
+            return;
+        }
+        res.status(201).json({ "status": true, "data": results.rows[0], "message": "Utilizador ativado com Sucesso!" });
     });
 };
 
@@ -108,6 +120,17 @@ const Create_User_Role = (req, res) => {
             return;
         }
         res.status(201).send(`Role adicionada com Sucesso!`);
+    });
+};
+
+const Manage_User_Roles = (req, res) => {
+    const { hashed_id, roles } = req.body;
+    pool.query("SELECT * FROM manage_user_roles(NULL, $1, $2)", [hashed_id, roles], (error, results) => {
+        if (error) {
+            res.status(400).json({'status': false, 'message': error.message });
+            return;
+        }
+        res.status(201).json({ "status": true, "message": "Roles atualizadas com Sucesso!" });
     });
 };
 
@@ -137,6 +160,8 @@ module.exports = {
     Update_User,
     Update_User_Info,
     Delete_User,
+    Activate_User,
     Create_User_Role,
+    Manage_User_Roles,
     Get_User_Roles
 };
