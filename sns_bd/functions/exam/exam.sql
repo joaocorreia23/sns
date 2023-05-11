@@ -122,7 +122,7 @@ BEGIN
         RETURN QUERY SELECT 
             e.hashed_id, e.exam_name, e.status, e.created_at
         FROM exam e
-        WHERE e.id_exam = id_exam_in AND e.status = status_in;
+        WHERE e.id_exam = id_exam_in;
         IF NOT FOUND THEN
             RAISE EXCEPTION 'Exame com o id "%" não existe', id_exam_in; --USER NOT FOUND
         END IF;
@@ -130,7 +130,7 @@ BEGIN
         RETURN QUERY SELECT 
             e.hashed_id, e.exam_name, e.status, e.created_at
         FROM exam e
-        WHERE e.hashed_id = hashed_id_in AND e.status = status_in;
+        WHERE e.hashed_id = hashed_id_in;
         IF NOT FOUND THEN
             RAISE EXCEPTION 'Exame com o hashed_id "%" não existe', hashed_id_in; --USER NOT FOUND
         END IF;
