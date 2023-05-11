@@ -60,9 +60,9 @@ $permissions_data = $permissions["response"];
                                                         <label class="col-lg-12 col-form-label required fw-semibold fs-6">Permissões</label>
                                                         <select class="form-select form-select-solid" multiple name="role" data-control="select2" data-placeholder="Selecione as Permissões">
                                                             <option></option>
-                                                            <option value="Admin">Administrador</option>
-                                                            <option value="Doctor">Médico</option>
-                                                            <option value="Patient">Utente</option>
+                                                            <option value="Admin"<?php foreach ($permissions_data as $key => $value) {if ($value["role"] == "Admin") {echo 'selected';}} ?>>Administrador</option>
+                                                            <option value="Doctor"<?php foreach ($permissions_data as $key => $value) {if ($value["role"] == "Doctor") {echo 'selected';}} ?>>Médico</option>
+                                                            <option value="Patient"<?php foreach ($permissions_data as $key => $value) {if ($value["role"] == "Patient") {echo 'selected';}} ?>>Utente</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -72,7 +72,7 @@ $permissions_data = $permissions["response"];
                                             <!--begin::Actions-->
                                             <div class="card-footer d-flex justify-content-end py-6 px-9">
                                                 <button type="reset" class="btn btn-light btn-active-light-primary me-2">Cancelar</button>
-                                                <button type="submit" class="btn btn-primary" id="kt_account_profile_details_submit">Guardar</button>
+                                                <button type="submit" class="btn btn-primary" id="permissions-submit">Guardar</button>
                                             </div>
                                             <!--end::Actions-->
                                             <input type="hidden">
@@ -95,6 +95,7 @@ $permissions_data = $permissions["response"];
     <?php require_once($_SERVER["DOCUMENT_ROOT"] . "/foo.php") ?>
 
     <script>
+
         document.addEventListener("DOMContentLoaded", function() {
             const form = document.getElementById("form-edit-user");
             form.addEventListener("submit", editUser);
@@ -105,17 +106,18 @@ $permissions_data = $permissions["response"];
             function editUser() {
                 event.preventDefault();
 
+                const button = document.getElementById("permissions-submit");
+                button.disabled = true;
+
                 var form = document.getElementById("form-edit-user");
 
                 const formData = {
                     hashed_id: "<?php echo $id ?>",
-                    username: form.username.value,
-                    email: form.email.value,
+                    roles: [...form.role.selectedOptions].map(option => option.value),
                 };
 
-
-                fetch(api_url + path + "update", {
-                        method: "PUT",
+                fetch(api_url + path + "manage_roles", {
+                        method: "POST",
                         headers: {
                             "Content-Type": "application/json",
                         },
@@ -139,7 +141,8 @@ $permissions_data = $permissions["response"];
                                 },
                             }).then((result) => {
                                 if (result.isConfirmed) {
-                                    window.location.href = "list";
+                                    window.location.reload();
+                                    //window.location.href = "list";
                                 }
                             });
                         } else {
@@ -154,9 +157,11 @@ $permissions_data = $permissions["response"];
                                         confirmButton: "btn btn-danger",
                                     },
                                 });
+                            button.disabled = false;
                         }
                     })
                     .catch((error) => {
+                        button.disabled = false;
                         console.error("Error:", error);
                     });
             }

@@ -23,6 +23,8 @@ router.post('/activate', controller.Activate_User);
 
 router.post('/create_role', controller.Create_User_Role);
 
+router.post('/manage_roles', controller.Manage_User_Roles);
+
 router.get('/roles/:hashed_id', controller.Get_User_Roles);
 
 router.get('/:hashed_id', controller.Get_UserByHashedId);
