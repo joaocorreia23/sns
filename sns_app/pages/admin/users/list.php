@@ -38,12 +38,11 @@
 											<table id="datatable" class="table align-middle gs-0 gy-4">
 												<thead>
 													<tr class="fw-bold text-muted bg-light">
-														<th class="ps-4 fs-6 min-w-300px rounded-start" data-priority="1">Nome</th>
-														<th class="ps-4 fs-6 min-w-100px rounded-start" data-priority="4">Email</th>
-														<th class="ps-4 fs-6 min-w-100px rounded-start" data-priority="4">Telefone</th>
-														<th class="ps-4 fs-6 min-w-100px rounded-start" data-priority="4">NIF</th>
-														<th class="ps-4 fs-6 min-w-100px rounded-start" data-priority="4">Data de Criação</th>
-														<th class="pe-4 fs-6 min-w-200px text-sm-end rounded-end" data-priority="5">Ações</th>
+														<th class="ps-4 fs-6 min-w-200px rounded-start" data-priority="1">Nome</th>
+														<th class="ps-4 fs-6 min-w-150px rounded-start" data-priority="4">Email</th>
+														<th class="ps-4 fs-6 min-w-120px rounded-start" data-priority="4">Telefone</th>
+														<th class="ps-4 fs-6 min-w-80px rounded-start" data-priority="4">Data de Criação</th>
+														<th class="pe-4 fs-6 min-w-80px text-sm-end rounded-end" data-priority="5">Ações</th>
 													</tr>
 												</thead>
 												<tbody></tbody>
@@ -95,9 +94,6 @@
 							data: "phone_number"
 						},
 						{
-							data: "tax_number"
-						},
-						{
 							data: "created_at"
 						},
 						{
@@ -141,21 +137,6 @@
 								return `
 									<div class="d-inline-flex align-items-center">                                
 										<div class="d-flex justify-content-center flex-column">
-										<span class="mb-1 fs-6 lh-sm">${row.phone_number != null ? row.phone_number : 'N/A'}</span>
-										</div>
-									</div>
-								`;
-
-							},
-						},
-						{
-							targets: 3,
-							orderable: true,
-							render: (data, type, row) => {
-
-								return `
-									<div class="d-inline-flex align-items-center">                                
-										<div class="d-flex justify-content-center flex-column">
 										<span class="mb-1 fs-6 lh-sm">${row.tax_number != null ? row.tax_number : 'N/A'}</span>
 										</div>
 									</div>
@@ -164,7 +145,7 @@
 							},
 						},
 						{
-							targets: 4,
+							targets: 3,
 							orderable: true,
 							render: (data, type, row) => {
 								var date = new Date(row.created_at);
