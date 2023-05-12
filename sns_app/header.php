@@ -20,302 +20,396 @@
         <!--begin::Header wrapper-->
         <div class="d-flex align-items-stretch justify-content-between flex-lg-grow-1" id="kt_app_header_wrapper">
 
-            <?php if($_SESSION["active_role"] === "Admin"){?>
-            <!--Admin NavBar-->
-            <div class="app-header-menu app-header-mobile-drawer align-items-stretch" data-kt-drawer="true" data-kt-drawer-name="app-header-menu" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="250px" data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_app_header_menu_toggle" data-kt-swapper="true" data-kt-swapper-mode="{default: 'append', lg: 'prepend'}" data-kt-swapper-parent="{default: '#kt_app_body', lg: '#kt_app_header_wrapper'}">
+            <?php if ($_SESSION["active_role"] === "Admin") { ?>
+                <!--Admin NavBar-->
+                <div class="app-header-menu app-header-mobile-drawer align-items-stretch" data-kt-drawer="true" data-kt-drawer-name="app-header-menu" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="250px" data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_app_header_menu_toggle" data-kt-swapper="true" data-kt-swapper-mode="{default: 'append', lg: 'prepend'}" data-kt-swapper-parent="{default: '#kt_app_body', lg: '#kt_app_header_wrapper'}">
 
 
-                <div class="menu menu-rounded menu-active-bg menu-state-primary menu-column menu-lg-row menu-title-gray-700 menu-icon-gray-500 menu-arrow-gray-500 menu-bullet-gray-500 my-5 my-lg-0 align-items-stretch fw-semibold px-2 px-lg-0" id="kt_app_header_menu" data-kt-menu="true">
+                    <div class="menu menu-rounded menu-active-bg menu-state-primary menu-column menu-lg-row menu-title-gray-700 menu-icon-gray-500 menu-arrow-gray-500 menu-bullet-gray-500 my-5 my-lg-0 align-items-stretch fw-semibold px-2 px-lg-0" id="kt_app_header_menu" data-kt-menu="true">
 
-                    <!-- Utilizadores -->
-                    <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="-50,0" class="menu-item here show menu-here-bg menu-lg-down-accordion me-0 me-lg-2">
-                        <!--begin:Menu link-->
-                        <span class="menu-link">
-                            <span class="menu-title">Utilizadores</span>
-                            <span class="menu-arrow d-lg-none"></span>
-                        </span>
-                        <!--end:Menu link-->
-                        <!--begin:Menu sub-->
-                        <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown p-0 w-100 w-lg-700px">
-                            <!--begin:Dashboards menu-->
-                            <div class="menu-state-bg menu-extended overflow-hidden overflow-lg-visible" data-kt-menu-dismiss="true">
-                                <!--begin:Row-->
-                                <div class="row">
-                                    <!--begin:Col-->
-                                    <div class="col-lg-12 mb-3 mb-lg-0 py-3 px-3 py-lg-6 px-lg-6">
-                                        <div class="row">
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/users/list" class="menu-link">
-                                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-profile-user text-primary fs-1"></i>
-                                                        </span>
-                                                        <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Utlizadores</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Lista de Todos os Utlizadores</span>
-                                                        </span>
-                                                    </a>
+                        <!-- Utilizadores -->
+                        <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="-50,0" class="menu-item here show menu-here-bg menu-lg-down-accordion me-0 me-lg-2">
+                            <!--begin:Menu link-->
+                            <span class="menu-link">
+                                <span class="menu-title">Utilizadores</span>
+                                <span class="menu-arrow d-lg-none"></span>
+                            </span>
+                            <!--end:Menu link-->
+                            <!--begin:Menu sub-->
+                            <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown p-0 w-100 w-lg-700px">
+                                <!--begin:Dashboards menu-->
+                                <div class="menu-state-bg menu-extended overflow-hidden overflow-lg-visible" data-kt-menu-dismiss="true">
+                                    <!--begin:Row-->
+                                    <div class="row">
+                                        <!--begin:Col-->
+                                        <div class="col-lg-12 mb-3 mb-lg-0 py-3 px-3 py-lg-6 px-lg-6">
+                                            <div class="row">
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/users/list" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-profile-user text-primary fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Utlizadores</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Lista de Todos os Utlizadores</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/users/disabled-list" class="menu-link">
-                                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-profile-user text-danger fs-1"></i>
-                                                        </span>
-                                                        <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Utilizadores Desativados</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Todos os Utlizadores Desativados</span>
-                                                        </span>
-                                                    </a>
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/users/disabled-list" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-profile-user text-danger fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Utilizadores Desativados</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Todos os Utlizadores Desativados</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/users/add" class="menu-link">
-                                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-plus-square text-danger fs-1"></i>
-                                                        </span>
-                                                        <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Adicionar - Utilizadores</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Administradores, Médico e Utentes</span>
-                                                        </span>
-                                                    </a>
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/users/add" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-plus-square text-danger fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Adicionar - Utilizadores</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Administradores, Médico e Utentes</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
                                                 </div>
+                                                <!-- <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/users/add" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-lock text-info fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Gerir Permissões</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Gerir as Permissões dos Utilizadores</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div> -->
                                             </div>
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/users/add" class="menu-link">
-                                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-lock text-info fs-1"></i>
-                                                        </span>
-                                                        <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Gerir Permissões</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Gerir as Permissões dos Utilizadores</span>
-                                                        </span>
-                                                    </a>
+                                        </div>
+                                        <!--end:Col-->
+
+                                    </div>
+                                    <!--end:Row-->
+                                </div>
+                                <!--end:Dashboards menu-->
+                            </div>
+                            <!--end:Menu sub-->
+                        </div>
+
+                        <!-- Consultas -->
+                        <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="-50,0" class="menu-item here show menu-here-bg menu-lg-down-accordion me-0 me-lg-2">
+                            <!--begin:Menu link-->
+                            <span class="menu-link">
+                                <span class="menu-title">Consultas</span>
+                                <span class="menu-arrow d-lg-none"></span>
+                            </span>
+                            <!--end:Menu link-->
+                            <!--begin:Menu sub-->
+                            <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown p-0 w-100 w-lg-700px">
+                                <!--begin:Dashboards menu-->
+                                <div class="menu-state-bg menu-extended overflow-hidden overflow-lg-visible" data-kt-menu-dismiss="true">
+                                    <!--begin:Row-->
+                                    <div class="row">
+                                        <!--begin:Col-->
+                                        <div class="col-lg-12 mb-3 mb-lg-0 py-3 px-3 py-lg-6 px-lg-6">
+                                            <div class="row">
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/consultations/list" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-calendar-add text-primary fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Todas as Consultas</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Lista de Todas as Consultas</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/consultations/add" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-plus-square text-danger fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Adicionar Consulta</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Adicionar uma Nova Consulta</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <!-- <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/users/disabled-list" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-profile-user text-danger fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Utilizadores Desativados</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Todos os Utlizadores Desativados</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div> -->
+                                                <!-- <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/users/add" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-plus-square text-danger fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Adicionar - Utilizadores</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Administradores, Médico e Utentes</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div> -->
+                                                <!-- <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/users/add" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-lock text-info fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Gerir Permissões</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Gerir as Permissões dos Utilizadores</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div> -->
+                                            </div>
+                                        </div>
+                                        <!--end:Col-->
+
+                                    </div>
+                                    <!--end:Row-->
+                                </div>
+                                <!--end:Dashboards menu-->
+                            </div>
+                            <!--end:Menu sub-->
+                        </div>
+
+                        <!-- Unidades de Saúde -->
+                        <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="-50,0" class="menu-item here show menu-here-bg menu-lg-down-accordion me-0 me-lg-2">
+                            <!--begin:Menu link-->
+                            <span class="menu-link">
+                                <span class="menu-title">Unidades Saúde</span>
+                                <span class="menu-arrow d-lg-none"></span>
+                            </span>
+                            <!--end:Menu link-->
+                            <!--begin:Menu sub-->
+                            <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown p-0 w-100 w-lg-700px">
+                                <!--begin:Dashboards menu-->
+                                <div class="menu-state-bg menu-extended overflow-hidden overflow-lg-visible" data-kt-menu-dismiss="true">
+                                    <!--begin:Row-->
+                                    <div class="row">
+                                        <!--begin:Col-->
+                                        <div class="col-lg-12 mb-3 mb-lg-0 py-3 px-3 py-lg-6 px-lg-6">
+                                            <div class="row">
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/health-units/list" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-bank text-primary fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Unidades de Saúde</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Listar Unidades de Saúde</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/health-units/disabled-list" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-bank text-danger fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Unidades de Saúde Desativadas</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Listar Unidades de Saúde Desativadas</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/health-units/add" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-plus-square text-danger fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Adicionar - Unidades de Saúde</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Adicionar Unidades de Saúde</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
+                                        <!--end:Col-->
+
                                     </div>
-                                    <!--end:Col-->
-
+                                    <!--end:Row-->
                                 </div>
-                                <!--end:Row-->
+                                <!--end:Dashboards menu-->
                             </div>
-                            <!--end:Dashboards menu-->
+                            <!--end:Menu sub-->
                         </div>
-                        <!--end:Menu sub-->
-                    </div>
 
-                    <!-- Unidades de Saúde -->
-                    <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="-50,0" class="menu-item here show menu-here-bg menu-lg-down-accordion me-0 me-lg-2">
-                        <!--begin:Menu link-->
-                        <span class="menu-link">
-                            <span class="menu-title">Unidades Saúde</span>
-                            <span class="menu-arrow d-lg-none"></span>
-                        </span>
-                        <!--end:Menu link-->
-                        <!--begin:Menu sub-->
-                        <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown p-0 w-100 w-lg-700px">
-                            <!--begin:Dashboards menu-->
-                            <div class="menu-state-bg menu-extended overflow-hidden overflow-lg-visible" data-kt-menu-dismiss="true">
-                                <!--begin:Row-->
-                                <div class="row">
-                                    <!--begin:Col-->
-                                    <div class="col-lg-12 mb-3 mb-lg-0 py-3 px-3 py-lg-6 px-lg-6">
-                                        <div class="row">
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/health-units/list" class="menu-link">
-                                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-bank text-primary fs-1"></i>
-                                                        </span>
-                                                        <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Unidades de Saúde</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Listar Unidades de Saúde</span>
-                                                        </span>
-                                                    </a>
+                        <!-- Exames -->
+                        <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="-50,0" class="menu-item here show menu-here-bg menu-lg-down-accordion me-0 me-lg-2">
+                            <!--begin:Menu link-->
+                            <span class="menu-link">
+                                <span class="menu-title">Exames</span>
+                                <span class="menu-arrow d-lg-none"></span>
+                            </span>
+                            <!--end:Menu link-->
+                            <!--begin:Menu sub-->
+                            <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown p-0 w-100 w-lg-700px">
+                                <!--begin:Dashboards menu-->
+                                <div class="menu-state-bg menu-extended overflow-hidden overflow-lg-visible" data-kt-menu-dismiss="true">
+                                    <!--begin:Row-->
+                                    <div class="row">
+                                        <!--begin:Col-->
+                                        <div class="col-lg-12 mb-3 mb-lg-0 py-3 px-3 py-lg-6 px-lg-6">
+                                            <div class="row">
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/exams/list" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-document text-primary fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Prescrição de Exames</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Listar as Prescrições dos Exames</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/health-units/disabled-list" class="menu-link">
-                                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-bank text-danger fs-1"></i>
-                                                        </span>
-                                                        <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Unidades de Saúde Desativadas</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Listar Unidades de Saúde Desativadas</span>
-                                                        </span>
-                                                    </a>
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/exams/disabled-list" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-document text-danger fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Prescrição de Exames Desativadas</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Prescrições dos Exames Desativadas</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/health-units/add" class="menu-link">
-                                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-plus-square text-danger fs-1"></i>
-                                                        </span>
-                                                        <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Adicionar - Unidades de Saúde</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Adicionar Unidades de Saúde</span>
-                                                        </span>
-                                                    </a>
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/exams/add" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-plus-square text-danger fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Adicionar - Prescrição de Exame</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Adicionar Prescrição de Exame</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
+                                        <!--end:Col-->
+
                                     </div>
-                                    <!--end:Col-->
-
+                                    <!--end:Row-->
                                 </div>
-                                <!--end:Row-->
+                                <!--end:Dashboards menu-->
                             </div>
-                            <!--end:Dashboards menu-->
+                            <!--end:Menu sub-->
                         </div>
-                        <!--end:Menu sub-->
-                    </div>
 
-                    <!-- Exames -->
-                    <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="-50,0" class="menu-item here show menu-here-bg menu-lg-down-accordion me-0 me-lg-2">
-                        <!--begin:Menu link-->
-                        <span class="menu-link">
-                            <span class="menu-title">Exames</span>
-                            <span class="menu-arrow d-lg-none"></span>
-                        </span>
-                        <!--end:Menu link-->
-                        <!--begin:Menu sub-->
-                        <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown p-0 w-100 w-lg-700px">
-                            <!--begin:Dashboards menu-->
-                            <div class="menu-state-bg menu-extended overflow-hidden overflow-lg-visible" data-kt-menu-dismiss="true">
-                                <!--begin:Row-->
-                                <div class="row">
-                                    <!--begin:Col-->
-                                    <div class="col-lg-12 mb-3 mb-lg-0 py-3 px-3 py-lg-6 px-lg-6">
-                                        <div class="row">
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/exams/list" class="menu-link">
-                                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-document text-primary fs-1"></i>
-                                                        </span>
-                                                        <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Prescrição de Exames</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Listar as Prescrições dos Exames</span>
-                                                        </span>
-                                                    </a>
+                        <!-- Vacines -->
+                        <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="-50,0" class="menu-item here show menu-here-bg menu-lg-down-accordion me-0 me-lg-2">
+                            <!--begin:Menu link-->
+                            <span class="menu-link">
+                                <span class="menu-title">Vacinas</span>
+                                <span class="menu-arrow d-lg-none"></span>
+                            </span>
+                            <!--end:Menu link-->
+                            <!--begin:Menu sub-->
+                            <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown p-0 w-100 w-lg-700px">
+                                <!--begin:Dashboards menu-->
+                                <div class="menu-state-bg menu-extended overflow-hidden overflow-lg-visible" data-kt-menu-dismiss="true">
+                                    <!--begin:Row-->
+                                    <div class="row">
+                                        <!--begin:Col-->
+                                        <div class="col-lg-12 mb-3 mb-lg-0 py-3 px-3 py-lg-6 px-lg-6">
+                                            <div class="row">
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/vaccines/list" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-syringe text-primary fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Prescrição de Vacinas</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Listar as Prescrições das Vacinas</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/exams/disabled-list" class="menu-link">
-                                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-document text-danger fs-1"></i>
-                                                        </span>
-                                                        <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Prescrição de Exames Desativadas</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Prescrições dos Exames Desativadas</span>
-                                                        </span>
-                                                    </a>
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/vaccines/disabled-list" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-syringe text-danger fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Prescrição de Vacinas Desativadas</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Prescrições das Vacinas Desativadas</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/exams/add" class="menu-link">
-                                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-plus-square text-danger fs-1"></i>
-                                                        </span>
-                                                        <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Adicionar - Prescrição de Exame</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Adicionar Prescrição de Exame</span>
-                                                        </span>
-                                                    </a>
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/vaccines/add" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-plus-square text-danger fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Adicionar - Prescrição de Vacina</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Adicionar Prescrição de Vacina</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
+                                        <!--end:Col-->
+
                                     </div>
-                                    <!--end:Col-->
-
+                                    <!--end:Row-->
                                 </div>
-                                <!--end:Row-->
+                                <!--end:Dashboards menu-->
                             </div>
-                            <!--end:Dashboards menu-->
+                            <!--end:Menu sub-->
                         </div>
-                        <!--end:Menu sub-->
-                    </div>
 
-                    <!-- Vacines -->
-                    <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="-50,0" class="menu-item here show menu-here-bg menu-lg-down-accordion me-0 me-lg-2">
-                        <!--begin:Menu link-->
-                        <span class="menu-link">
-                            <span class="menu-title">Vacinas</span>
-                            <span class="menu-arrow d-lg-none"></span>
-                        </span>
-                        <!--end:Menu link-->
-                        <!--begin:Menu sub-->
-                        <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown p-0 w-100 w-lg-700px">
-                            <!--begin:Dashboards menu-->
-                            <div class="menu-state-bg menu-extended overflow-hidden overflow-lg-visible" data-kt-menu-dismiss="true">
-                                <!--begin:Row-->
-                                <div class="row">
-                                    <!--begin:Col-->
-                                    <div class="col-lg-12 mb-3 mb-lg-0 py-3 px-3 py-lg-6 px-lg-6">
-                                        <div class="row">
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/vaccines/list" class="menu-link">
-                                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-syringe text-primary fs-1"></i>
-                                                        </span>
-                                                        <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Prescrição de Vacinas</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Listar as Prescrições das Vacinas</span>
-                                                        </span>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/vaccines/disabled-list" class="menu-link">
-                                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-syringe text-danger fs-1"></i>
-                                                        </span>
-                                                        <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Prescrição de Vacinas Desativadas</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Prescrições das Vacinas Desativadas</span>
-                                                        </span>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="menu-item p-0 m-0">
-                                                    <a href="<?php echo $link_home; ?>pages/admin/vaccines/add" class="menu-link">
-                                                        <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
-                                                            <i class="ki-outline ki-plus-square text-danger fs-1"></i>
-                                                        </span>
-                                                        <span class="d-flex flex-column">
-                                                            <span class="fs-6 fw-bold text-gray-800">Adicionar - Prescrição de Vacina</span>
-                                                            <span class="fs-7 fw-semibold text-muted">Adicionar Prescrição de Vacina</span>
-                                                        </span>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!--end:Col-->
-
-                                </div>
-                                <!--end:Row-->
-                            </div>
-                            <!--end:Dashboards menu-->
-                        </div>
-                        <!--end:Menu sub-->
                     </div>
 
                 </div>
-
-            </div>
-            <!--Admin NavBar-->
+                <!--Admin NavBar-->
             <?php } ?>
 
             <!--begin::Navbar-->
