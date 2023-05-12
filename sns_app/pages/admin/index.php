@@ -27,6 +27,36 @@
 
 	<script>
 		var calendarEl = document.getElementById("kt_docs_fullcalendar_drag");
+
+		const handleCalendarEventClick = (info) => {
+			if (!info.jsEvent.isTrusted) return;
+
+			const event = info.event;
+			const eventData = event.extendedProps;
+			calendarCurrentEventId = event.id;
+
+			console.log(eventData);
+		};
+
+		const handleCalendarSelect = (info) => {
+			if (!info.jsEvent.isTrusted) return;
+
+			const event = info;
+			console.log(event);
+		};
+
+		const calendarEvents = [{
+			url: "http://localhost:3000/api/appointments/calendar",
+			method: "POST",
+			error: () => {
+				Swal.fire({
+					icon: "error",
+					title: "Oops...",
+					text: "Não foi possível carregar os feriados."
+				});
+			}
+		}];
+
 		var calendar = new FullCalendar.Calendar(calendarEl, {
 			headerToolbar: {
 				left: "prev,next today",
@@ -34,15 +64,25 @@
 				right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek"
 			},
 			locale: "pt",
-			editable: true,
-			droppable: true, // this allows things to be dropped onto the calendar
+			slotMinTime: "07:00",
+			slotMaxTime: "23:00",
+			expandRows: true,
+			slotEventOverlap: false,
+			allDaySlot: false,
+			selectable: true,
+			validRange: {
+				//start: new Date()
+			},
 			drop: function(arg) {
 				// is the "remove after drop" checkbox checked?
 				if (document.getElementById("drop-remove").checked) {
 					// if so, remove the element from the "Draggable Events" list
 					arg.draggedEl.parentNode.removeChild(arg.draggedEl);
 				}
-			}
+			},
+			eventSources: calendarEvents,
+			eventClick: (info) => handleCalendarEventClick(info),
+			select: (info) => handleCalendarSelect(info),
 		});
 
 		calendar.render();

@@ -380,7 +380,92 @@ $$ LANGUAGE plpgsql;
 
 
 
+-----------------------------------------
+-----------START CREATE EXAM-------------
+-----------------------------------------
 
 
+CREATE OR REPLACE FUNCTION create_exam(
+	hashed_id VARCHAR(255),
+	exam_name VARCHAR(255),
+	status INT,
+	created_at VARCHAR(255)
+) RETURNS BOOLEAN AS $$
+BEGIN
+	
+	IF(hashed_id IS NULL OR hashed_id='') THEN
+		RAISE EXCEPTION 'Hashed ID nula ou vazia';
+		RETURN FALSE;
+	END IF;
+	
+	IF(exam_name IS NULL OR exam_name='') THEN
+		RAISE EXCEPTION 'Nome do exame nulo ou vazio';
+		RETURN FALSE;
+	END IF;
+	
+	IF(status IS NULL OR status='') THEN
+		RAISE EXCEPTION 'Status nulo ou vazio';
+		RETURN FALSE;
+	END IF;
+	
+	IF(created_at IS NULL OR created_at='') THEN
+		RAISE EXCEPTION 'Data de Criação nula ou vazia';
+		RETURN FALSE;
+	END IF;
+	
+    INSERT INTO exam (hashed_id,exam_name,status,created_at) VALUES (hashed_id,exam_name,status,created_at);
+	RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql;
 
+-----------------------------------------
+-----------END CREATE EXAM-------------
+-----------------------------------------
+
+
+-----------------------------------------
+------------START LIST EXAM--------------
+-----------------------------------------
+
+CREATE OR REPLACE FUNCTION list_exams() 
+RETURNS TABLE (
+    id_exam BIGINT,
+    hashed_id VARCHAR(255),
+    exam_name VARCHAR(255),
+    status INT,
+    created_at TIMESTAMP
+) AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM exam;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-----------------------------------------
+------------END LIST EXAM--------------
+-----------------------------------------
+
+
+-----------------------------------------
+------------START DELETE EXAM------------
+-----------------------------------------
+
+
+CREATE OR REPLACE FUNCTION delete_exam(
+    id_exam BIGINT
+) RETURNS BOOLEAN AS $$
+BEGIN
+	IF NOT EXISTS (SELECT 1 FROM exam WHERE id_exam = id_exam) THEN
+    	RAISE EXCEPTION 'Exame não encontrado';
+    RETURN FALSE;
+	END IF;
+	
+    DELETE FROM exam WHERE id_exam = id_exam;
+	 RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql;
+
+-----------------------------------------
+------------END DELETE EXAM------------
+-----------------------------------------
 
