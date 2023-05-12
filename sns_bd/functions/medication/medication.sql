@@ -5,8 +5,8 @@ CREATE OR REPLACE FUNCTION check_medication_name(
 DECLARE
     medication_name_exists BOOLEAN;
 BEGIN
-    SELECT EXISTS(SELECT 1 FROM medication WHERE medication.medication_name = check_medication_name.medication_name) INTO medication_medication_exists;
-    RETURN medication_medication_exists;
+    SELECT EXISTS(SELECT 1 FROM medication WHERE medication.medication_name = check_medication_name.medication_name) INTO medication_name_exists;
+    RETURN medication_name_exists;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -118,13 +118,13 @@ BEGIN
             m.hashed_id, m.medication_name, m.status, m.created_at
         FROM medication m 
         WHERE m.status = status_in;
-    ELSEIF hashed_id_in IS NULL THEN
+    ELSEIF hashed_id_in IS NULL OR hashed_id_in = '' THEN
         RETURN QUERY SELECT 
             m.hashed_id, m.medication_name, m.status, m.created_at
         FROM medication m 
         WHERE m.id_medication = id_medication_in AND m.status = status_in;
         IF NOT FOUND THEN
-            RAISE EXCEPTION 'Medicação com o id "%" não existe', id_medication_in; --USER NOT FOUND
+            RAISE EXCEPTION 'Medicação com o id "%" não existe', id_medication_in; --MEDICATION NOT FOUND
         END IF;
     ELSEIF id_medication_in IS NULL THEN
         RETURN QUERY SELECT 
@@ -132,7 +132,7 @@ BEGIN
         FROM medication m
         WHERE m.hashed_id = hashed_id_in AND m.status = status_in;
         IF NOT FOUND THEN
-            RAISE EXCEPTION 'Medicação com o hashed_id "%" não existe', hashed_id_in; --USER NOT FOUND
+            RAISE EXCEPTION 'Medicação com o hashed_id "%" não existe', hashed_id_in; --MEDICATION NOT FOUND
         END IF;
     END IF;
 END;
@@ -177,9 +177,9 @@ BEGIN
         RETURN TRUE;
     ELSE
         IF status_in = 0 THEN
-            RAISE EXCEPTION 'A medicação já está desativado';
+            RAISE EXCEPTION 'A medicação já está desativada';
         ELSE
-            RAISE EXCEPTION 'A medicação já está ativado';
+            RAISE EXCEPTION 'A medicação já está ativada';
         END IF;
     END IF;
 END;
