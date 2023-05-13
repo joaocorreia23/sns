@@ -12,6 +12,7 @@ const examRoutes = require('./src/exam/routes');
 const vaccineRoutes = require('./src/vaccine/routes');
 const appointmentRoutes = require('./src/appointment/routes');
 const medicationRoutes = require('./src/medication/routes');
+const prescription = require('./src/prescription/routes');
 
 const app = express();
 app.use(cors());
@@ -41,6 +42,8 @@ app.use('/api/vaccines', vaccineRoutes);
 app.use('/api/appointments', appointmentRoutes);
 
 app.use('/api/medications', medicationRoutes);
+
+app.use('/api/prescriptions', prescription);
 
 
 
