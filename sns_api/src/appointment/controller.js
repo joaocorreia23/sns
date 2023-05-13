@@ -15,7 +15,7 @@ const Get_Appointments = (req, res) => {
             res.status(400).json({ "status": false, "error": error.message });
             return;
         }
-        res.status(200).json({ "status": true, "data": results.rows });
+        res.status(201).json({ "status": true, "data": results.rows });
     });
 };
 
@@ -33,7 +33,7 @@ const Get_Appointments_Calendar = (req, res) => {
             res.status(400).json({ "status": false, "error": error.message });
             return;
         }
-        res.status(200).json(results.rows);
+        res.status(201).json(results.rows);
     });
 };
 
@@ -62,7 +62,7 @@ const Get_AppointmentByHashedId = (req, res) => {
             res.status(400).json({ "status": false, "error": error.message });
             return;
         }
-        res.status(200).json({ "status": true, "data": results.rows });
+        res.status(201).json({ "status": true, "data": results.rows });
     });
 };
 
