@@ -39,7 +39,7 @@ $patients_list = $patients["response"]["data"];
                                     <!--begin::Content-->
                                     <div id="kt_account_settings_profile_details" class="collapse show">
                                         <!--begin::Form-->
-                                        <form id="form-add-consultation" class="form fv-plugins-bootstrap5 fv-plugins-framework" novalidate="novalidate">
+                                        <form id="form-add-appointment" class="form fv-plugins-bootstrap5 fv-plugins-framework" novalidate="novalidate">
                                             <!--begin::Card body-->
                                             <div class="card-body border-top p-9">
 
@@ -145,16 +145,16 @@ $patients_list = $patients["response"]["data"];
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const form = document.getElementById("form-add-consultation");
-            form.addEventListener("submit", insertConsultation);
+            const form = document.getElementById("form-add-appointment");
+            form.addEventListener("submit", insertappointment);
 
             const api_url = "http://localhost:3000/api/";
             const path = "appointments/";
 
-            function insertConsultation() {
+            function insertappointment() {
                 event.preventDefault();
 
-                var form = document.getElementById("form-add-consultation");
+                var form = document.getElementById("form-add-appointment");
 
                 const formData = {
                     hashed_id_health_unit: form.hashed_id_health_unit.value,

@@ -62,7 +62,7 @@ const Get_AppointmentByHashedId = (req, res) => {
             res.status(400).json({ "status": false, "error": error.message });
             return;
         }
-        res.status(201).json({ "status": true, "data": results.rows });
+        res.status(200).json({ "status": true, "data": results.rows[0] });
     });
 };
 

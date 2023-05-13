@@ -120,7 +120,7 @@ $page_name = "Unidade de Saúde -" . ' ' . $health_unit_data["name"];
 												<a class="nav-link text-active-primary pb-4" data-bs-toggle="tab" href="#patients" aria-selected="false" role="tab" tabindex="-1">Utentes</a>
 											</li>
 											<li class="nav-item" role="presentation">
-												<a class="nav-link text-active-primary pb-4" data-kt-countup-tabs="true" data-bs-toggle="tab" href="#consultations" data-kt-initialized="1" aria-selected="false" role="tab" tabindex="-1">Consultas</a>
+												<a class="nav-link text-active-primary pb-4" data-kt-countup-tabs="true" data-bs-toggle="tab" href="#appointments" data-kt-initialized="1" aria-selected="false" role="tab" tabindex="-1">Consultas</a>
 											</li>
 											<li class="nav-item ms-auto">
 												<a class="btn btn-primary ps-7" data-kt-menu-trigger="click" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">Associar
@@ -216,7 +216,7 @@ $page_name = "Unidade de Saúde -" . ' ' . $health_unit_data["name"];
 											</div>
 
 											<!-- Consultas -->
-											<div class="tab-pane fade" id="consultations" role="tabpanel">
+											<div class="tab-pane fade" id="appointments" role="tabpanel">
 												<h1>Consultas</h1>
 											</div>
 											<!--end:::Tab pane-->
