@@ -127,7 +127,7 @@
                                             <div class="row">
                                                 <div class="col-lg-6 mb-3">
                                                     <div class="menu-item p-0 m-0">
-                                                        <a href="<?php echo $link_home; ?>pages/admin/consultations/list" class="menu-link">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/appointments/list" class="menu-link">
                                                             <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
                                                                 <i class="ki-outline ki-calendar-add text-primary fs-1"></i>
                                                             </span>
@@ -140,7 +140,7 @@
                                                 </div>
                                                 <div class="col-lg-6 mb-3">
                                                     <div class="menu-item p-0 m-0">
-                                                        <a href="<?php echo $link_home; ?>pages/admin/consultations/add" class="menu-link">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/appointments/add" class="menu-link">
                                                             <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
                                                                 <i class="ki-outline ki-plus-square text-danger fs-1"></i>
                                                             </span>
