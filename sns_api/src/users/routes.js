@@ -29,5 +29,4 @@ router.get('/roles/:hashed_id', controller.Get_User_Roles);
 
 router.get('/:hashed_id', controller.Get_UserByHashedId);
 
-
 module.exports = router;
