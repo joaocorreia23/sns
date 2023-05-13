@@ -406,6 +406,75 @@
                             <!--end:Menu sub-->
                         </div>
 
+                        <!-- Medication -->
+                        <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="-50,0" class="menu-item here show menu-here-bg menu-lg-down-accordion me-0 me-lg-2">
+                            <!--begin:Menu link-->
+                            <span class="menu-link">
+                                <span class="menu-title">Medicação</span>
+                                <span class="menu-arrow d-lg-none"></span>
+                            </span>
+                            <!--end:Menu link-->
+                            <!--begin:Menu sub-->
+                            <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown p-0 w-100 w-lg-700px">
+                                <!--begin:Dashboards menu-->
+                                <div class="menu-state-bg menu-extended overflow-hidden overflow-lg-visible" data-kt-menu-dismiss="true">
+                                    <!--begin:Row-->
+                                    <div class="row">
+                                        <!--begin:Col-->
+                                        <div class="col-lg-12 mb-3 mb-lg-0 py-3 px-3 py-lg-6 px-lg-6">
+                                            <div class="row">
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/medications/list" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-capsule text-primary fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Prescrição de Medicação</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Listar as Prescrições das Medicação</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/medications/disabled-list" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-capsule text-danger fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Prescrição de Medicação Desativadas</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Prescrições das Medicação Desativadas</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/admin/medications/add" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-plus-square text-danger fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Adicionar - Prescrição de Medicação</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Adicionar Prescrição de Medicação</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--end:Col-->
+
+                                    </div>
+                                    <!--end:Row-->
+                                </div>
+                                <!--end:Dashboards menu-->
+                            </div>
+                            <!--end:Menu sub-->
+                        </div>
+                        
+
                     </div>
 
                 </div>
