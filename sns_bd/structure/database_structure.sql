@@ -324,8 +324,8 @@ CREATE TABLE prescription (
     prescription_date TIMESTAMP NOT NULL DEFAULT NOW(),
     status INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (id_doctor) REFERENCES doctor(id_doctor),
-    FOREIGN KEY (id_patient) REFERENCES patient(id_patient),
+    FOREIGN KEY (id_doctor) REFERENCES users(id_user),
+    FOREIGN KEY (id_patient) REFERENCES users(id_user),
     FOREIGN KEY (id_appointment) REFERENCES appointment(id_appointment)
 );
 
@@ -356,7 +356,7 @@ CREATE TABLE usual_medication (
     status INT NOT NULL DEFAULT 1,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (id_patient) REFERENCES patient(id_patient),
+    FOREIGN KEY (id_patient) REFERENCES users(id_user),
     FOREIGN KEY (id_medication) REFERENCES medication(id_medication),
     FOREIGN KEY (id_medication_prescription) REFERENCES medication_prescription(id_medication_prescription)
 );
