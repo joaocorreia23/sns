@@ -18,4 +18,11 @@ router.post('/activate', controller.Activate_Vaccine);
 
 router.get('/:hashed_id', controller.Get_VaccineByHashedId);
 
+
+router.post('/administered', controller.Get_Administered_Vaccines);
+router.post('/administered/table', controller.Get_Administered_Vaccines_DataTable);
+router.post('/administered/insert', controller.Add_Administered_Vaccine);
+router.post('/administered/cancel', controller.Cancel_Administered_Vaccine);
+router.post('/administered/administer', controller.Administer_Administered_Vaccine);
+
 module.exports = router;
