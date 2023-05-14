@@ -396,15 +396,17 @@ CREATE TABLE administered_vaccine (
     id_doctor BIGINT NOT NULL,
     id_patient BIGINT NOT NULL,
     id_appointment BIGINT NOT NULL,
-    administered_date TIMESTAMP NOT NULL DEFAULT NOW(),
+    administered_date TIMESTAMP NULL,
     status INT NOT NULL DEFAULT 0,
     dosage FLOAT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     FOREIGN KEY (id_vaccine) REFERENCES vaccine(id_vaccine),
-    FOREIGN KEY (id_doctor) REFERENCES doctor(id_doctor),
-    FOREIGN KEY (id_patient) REFERENCES patient(id_patient),
+    FOREIGN KEY (id_doctor) REFERENCES users(id_user),
+    FOREIGN KEY (id_patient) REFERENCES users(id_user),
     FOREIGN KEY (id_appointment) REFERENCES appointment(id_appointment)
 );
+
+ALTER TABLE administered_vaccine ADD COLUMN due_date DATE NOT NULL;
 
 -- =======================
 -- END: VACCINE
