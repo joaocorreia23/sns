@@ -39,8 +39,8 @@ const Get_Prescriptions_DataTable = (req, res) => {
 };
 
 const Add_Prescription = (req, res) => {
-    const { hashed_id_doctor, hashed_id_patient, hashed_id_appointment, prescription_date } = req.body;
-    pool.query("SELECT * FROM create_prescription(NULL, $1, NULL, $2, NULL, $3, $4, NULL)", [hashed_id_doctor, hashed_id_patient, hashed_id_appointment, prescription_date], (error, results) => {
+    const { hashed_id_appointment, prescription_date } = req.body;
+    pool.query("SELECT * FROM create_prescription(NULL, $1, $2, NULL)", [hashed_id_appointment, prescription_date], (error, results) => {
         if (error) {
             res.status(400).json({ "status": false, "error": error.message });
             return;
@@ -50,8 +50,8 @@ const Add_Prescription = (req, res) => {
 };
 
 const Update_Prescription = (req, res) => {
-    const { hashed_id_prescription, hashed_id_doctor, hashed_id_patient, hashed_id_appointment, prescription_date } = req.body;
-    pool.query("SELECT * FROM update_prescription(NULL, $1, NULL, $2, NULL, $3, NULL, $4, $5, NULL)", [hashed_id_prescription, hashed_id_doctor, hashed_id_patient, hashed_id_appointment, prescription_date], (error, results) => {
+    const { hashed_id_prescription, hashed_id_appointment, prescription_date } = req.body;
+    pool.query("SELECT * FROM update_prescription(NULL, $1, NULL, $2, $3, NULL)", [hashed_id_prescription, hashed_id_appointment, prescription_date], (error, results) => {
         if (error) {
             res.status(400).json({ "status": false, "error": error.message });
             return;

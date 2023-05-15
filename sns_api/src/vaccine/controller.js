@@ -140,8 +140,8 @@ const Get_Administered_Vaccines_DataTable = (req, res) => {
 };
 
 const Add_Administered_Vaccine = (req, res) => {
-    const { hashed_id_vaccine, hashed_id_doctor, hashed_id_patient, hashed_id_appointment, administered_date, dosage, due_date } = req.body;
-    pool.query("SELECT * FROM create_administered_vaccine(NULL, $1, NULL, $2, NULL, $3, NULL, $4, $5, $6, NULL, $7)", [hashed_id_vaccine, hashed_id_doctor, hashed_id_patient, hashed_id_appointment, administered_date, dosage, due_date], (error, results) => {
+    const { hashed_id_vaccine, hashed_id_appointment, administered_date, dosage, due_date } = req.body;
+    pool.query("SELECT * FROM create_administered_vaccine(NULL, $1, NULL, $2, $3, $4, NULL, $5)", [hashed_id_vaccine, hashed_id_appointment, administered_date, dosage, due_date], (error, results) => {
         if (error) {
             res.status(400).json({ "status": false, "error": error.message });
             return;

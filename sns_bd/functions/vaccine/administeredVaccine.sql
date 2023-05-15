@@ -9,12 +9,6 @@ CREATE OR REPLACE FUNCTION create_administered_vaccine(
     id_vaccine_in BIGINT DEFAULT NULL,
     hashed_id_vaccine_in VARCHAR(255) DEFAULT NULL,
 
-    id_doctor_in BIGINT DEFAULT NULL,
-    hashed_id_doctor_in VARCHAR(255) DEFAULT NULL,
-
-    id_patient_in BIGINT DEFAULT NULL,
-    hashed_id_patient_in VARCHAR(255) DEFAULT NULL,
-
 	id_appointment_in BIGINT DEFAULT NULL,
     hashed_id_appointment_in VARCHAR(255) DEFAULT NULL,
 
@@ -25,8 +19,6 @@ CREATE OR REPLACE FUNCTION create_administered_vaccine(
 ) RETURNS BOOLEAN AS $$
 DECLARE
     vaccine_id BIGINT;
-    doctor_id BIGINT;
-    patient_id BIGINT;
     appointment_id BIGINT;
 BEGIN
 
@@ -54,38 +46,7 @@ BEGIN
         END IF;
     END IF;
 
-    IF id_doctor_in IS NULL AND (hashed_id_doctor_in IS NULL OR hashed_id_doctor_in = '') THEN
-        RAISE EXCEPTION 'É necessário passar o id_doctor ou o hashed_id_doctor';
-    ELSEIF id_doctor_in IS NOT NULL AND (hashed_id_doctor_in IS NOT NULL OR hashed_id_doctor_in <> '') THEN
-        RAISE EXCEPTION 'Não é possível passar o id_doctor e o hashed_id_doctor';
-    ELSEIF id_doctor_in IS NULL THEN
-        SELECT id_user INTO doctor_id FROM users WHERE hashed_id = hashed_id_doctor_in;	
-        IF NOT FOUND THEN
-            RAISE EXCEPTION 'Médico com o hashed_id "%" não existe', hashed_id_doctor_in; --doctor NOT FOUND
-        END IF;
-    ELSEIF hashed_id_doctor_in IS NULL OR hashed_id_doctor_in = '' THEN
-        SELECT id_user INTO doctor_id FROM users WHERE id_user = id_doctor_in;	
-        IF NOT FOUND THEN
-            RAISE EXCEPTION 'Médico com o id "%" não existe', id_doctor_in; --doctor NOT FOUND
-        END IF;
-    END IF;
-
-    IF id_patient_in IS NULL AND (hashed_id_patient_in IS NULL OR hashed_id_patient_in = '') THEN
-        RAISE EXCEPTION 'É necessário passar o id_patient ou o hashed_id_patient';
-    ELSEIF id_patient_in IS NOT NULL AND (hashed_id_patient_in IS NOT NULL OR hashed_id_patient_in <> '') THEN
-        RAISE EXCEPTION 'Não é possível passar o id_patient e o hashed_id_patient';
-    ELSEIF id_patient_in IS NULL THEN
-        SELECT id_user INTO patient_id FROM users WHERE hashed_id = hashed_id_patient_in;	
-        IF NOT FOUND THEN
-            RAISE EXCEPTION 'Utente com o hashed_id "%" não existe', hashed_id_patient_in; --patient NOT FOUND
-        END IF;
-    ELSEIF hashed_id_patient_in IS NULL OR hashed_id_patient_in = '' THEN
-        SELECT id_user INTO patient_id FROM users WHERE id_user = id_patient_in;	
-        IF NOT FOUND THEN
-            RAISE EXCEPTION 'Utente com o id "%" não existe', id_patient_in; --patient NOT FOUND
-        END IF;
-    END IF;
-
+    
     IF id_appointment_in IS NULL AND (hashed_id_appointment_in IS NULL OR hashed_id_appointment_in = '') THEN
         RAISE EXCEPTION 'É necessário passar o id_appointment ou o hashed_id_appointment';
     ELSEIF id_appointment_in IS NOT NULL AND (hashed_id_appointment_in IS NOT NULL OR hashed_id_appointment_in <> '') THEN
@@ -102,9 +63,6 @@ BEGIN
         END IF;
     END IF;
 
-    IF doctor_id = patient_id THEN
-        RAISE EXCEPTION 'O médico não pode ser o mesmo que o utente.';
-    END IF;
 
     IF dosage_in IS NULL THEN
         RAISE EXCEPTION 'É necessário passar a dosagem.';
@@ -123,7 +81,7 @@ BEGIN
         RAISE EXCEPTION 'É necessário passar a Data de nova Vacinação.';
     END IF;
 
-    INSERT INTO administered_vaccine (id_vaccine, id_doctor, id_patient, id_appointment, administered_date, dosage, status, due_date) VALUES (vaccine_id, doctor_id, patient_id, appointment_id, administered_date_in, dosage_in, status, due_date_in);
+    INSERT INTO administered_vaccine (id_vaccine, id_appointment, administered_date, dosage, status, due_date) VALUES (vaccine_id, appointment_id, administered_date_in, dosage_in, status, due_date_in);
     RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql;

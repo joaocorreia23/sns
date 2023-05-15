@@ -1,11 +1,5 @@
 -- Insert Prescription
 CREATE OR REPLACE FUNCTION create_prescription(
-    id_doctor_in BIGINT DEFAULT NULL,
-    hashed_id_doctor_in VARCHAR(255) DEFAULT NULL,
-
-    id_patient_in BIGINT DEFAULT NULL,
-    hashed_id_patient_in VARCHAR(255) DEFAULT NULL,
-
 	id_appointment_in BIGINT DEFAULT NULL,
     hashed_id_appointment_in VARCHAR(255) DEFAULT NULL,
 
@@ -13,42 +7,8 @@ CREATE OR REPLACE FUNCTION create_prescription(
 	status INT DEFAULT 1
 ) RETURNS BOOLEAN AS $$
 DECLARE
-    doctor_id BIGINT;
-    patient_id BIGINT;
     appointment_id BIGINT;
 BEGIN
-
-    IF id_doctor_in IS NULL AND (hashed_id_doctor_in IS NULL OR hashed_id_doctor_in = '') THEN
-        RAISE EXCEPTION 'É necessário passar o id_doctor ou o hashed_id_doctor';
-    ELSEIF id_doctor_in IS NOT NULL AND (hashed_id_doctor_in IS NOT NULL OR hashed_id_doctor_in <> '') THEN
-        RAISE EXCEPTION 'Não é possível passar o id_doctor e o hashed_id_doctor';
-    ELSEIF id_doctor_in IS NULL THEN
-        SELECT id_user INTO doctor_id FROM users WHERE hashed_id = hashed_id_doctor_in;	
-        IF NOT FOUND THEN
-            RAISE EXCEPTION 'Médico com o hashed_id "%" não existe', hashed_id_doctor_in; --doctor NOT FOUND
-        END IF;
-    ELSEIF hashed_id_doctor_in IS NULL OR hashed_id_doctor_in = '' THEN
-        SELECT id_user INTO doctor_id FROM users WHERE id_user = id_doctor_in;	
-        IF NOT FOUND THEN
-            RAISE EXCEPTION 'Médico com o id "%" não existe', id_doctor_in; --doctor NOT FOUND
-        END IF;
-    END IF;
-
-    IF id_patient_in IS NULL AND (hashed_id_patient_in IS NULL OR hashed_id_patient_in = '') THEN
-        RAISE EXCEPTION 'É necessário passar o id_patient ou o hashed_id_patient';
-    ELSEIF id_patient_in IS NOT NULL AND (hashed_id_patient_in IS NOT NULL OR hashed_id_patient_in <> '') THEN
-        RAISE EXCEPTION 'Não é possível passar o id_patient e o hashed_id_patient';
-    ELSEIF id_patient_in IS NULL THEN
-        SELECT id_user INTO patient_id FROM users WHERE hashed_id = hashed_id_patient_in;	
-        IF NOT FOUND THEN
-            RAISE EXCEPTION 'Utente com o hashed_id "%" não existe', hashed_id_patient_in; --patient NOT FOUND
-        END IF;
-    ELSEIF hashed_id_patient_in IS NULL OR hashed_id_patient_in = '' THEN
-        SELECT id_user INTO patient_id FROM users WHERE id_user = id_patient_in;	
-        IF NOT FOUND THEN
-            RAISE EXCEPTION 'Utente com o id "%" não existe', id_patient_in; --patient NOT FOUND
-        END IF;
-    END IF;
 
     IF id_appointment_in IS NULL AND (hashed_id_appointment_in IS NULL OR hashed_id_appointment_in = '') THEN
         RAISE EXCEPTION 'É necessário passar o id_appointment ou o hashed_id_appointment';
@@ -66,10 +26,6 @@ BEGIN
         END IF;
     END IF;
 
-    IF doctor_id = patient_id THEN
-        RAISE EXCEPTION 'O médico não pode ser o mesmo que o utente.';
-    END IF;
-
     IF prescription_date_in IS NULL THEN
         prescription_date_in := NOW();
     END IF;
@@ -80,7 +36,7 @@ BEGIN
         RAISE EXCEPTION 'Estado inválido';
     END IF;
 
-    INSERT INTO prescription (id_doctor, id_patient, id_appointment, prescription_date, status) VALUES (doctor_id, patient_id, appointment_id, prescription_date_in, status);
+    INSERT INTO prescription (id_appointment, prescription_date, status) VALUES (appointment_id, prescription_date_in, status);
     RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql;
@@ -111,12 +67,6 @@ CREATE OR REPLACE FUNCTION update_prescription(
     id_prescription_in BIGINT DEFAULT NULL,
     hashed_id_prescription_in VARCHAR(255) DEFAULT NULL,
 
-    id_doctor_in BIGINT DEFAULT NULL,
-    hashed_id_doctor_in VARCHAR(255) DEFAULT NULL,
-
-    id_patient_in BIGINT DEFAULT NULL,
-    hashed_id_patient_in VARCHAR(255) DEFAULT NULL,
-
     id_appointment_in BIGINT DEFAULT NULL,
     hashed_id_appointment_in VARCHAR(255) DEFAULT NULL,
 
@@ -125,8 +75,6 @@ CREATE OR REPLACE FUNCTION update_prescription(
 ) RETURNS BOOLEAN AS $$
 DECLARE
     prescription_id BIGINT;
-    doctor_id BIGINT;
-    patient_id BIGINT;
     appointment_id BIGINT;
 BEGIN
 
@@ -146,40 +94,8 @@ BEGIN
         END IF;
     END IF;
 
-     IF id_doctor_in IS NULL AND (hashed_id_doctor_in IS NULL OR hashed_id_doctor_in = '') THEN
-        SELECT id_doctor INTO doctor_id FROM prescription WHERE id_prescription = prescription_id;
-    ELSEIF id_doctor_in IS NOT NULL AND (hashed_id_doctor_in IS NOT NULL OR hashed_id_doctor_in <> '') THEN
-        RAISE EXCEPTION 'Não é possível passar o id_doctor e o hashed_id_doctor';
-    ELSEIF id_doctor_in IS NULL THEN
-        SELECT id_user INTO doctor_id FROM users WHERE hashed_id = hashed_id_doctor_in;	
-        IF NOT FOUND THEN
-            RAISE EXCEPTION 'Médico com o hashed_id "%" não existe', hashed_id_doctor_in; --doctor NOT FOUND
-        END IF;
-    ELSEIF hashed_id_doctor_in IS NULL OR hashed_id_doctor_in = '' THEN
-        SELECT id_user INTO doctor_id FROM users WHERE id_user = id_doctor_in;	
-        IF NOT FOUND THEN
-            RAISE EXCEPTION 'Médico com o id "%" não existe', id_doctor_in; --doctor NOT FOUND
-        END IF;
-    END IF;
-
-    IF id_patient_in IS NULL AND (hashed_id_patient_in IS NULL OR hashed_id_patient_in = '') THEN
-        SELECT id_patient INTO patient_id FROM appointment WHERE id_appointment = appointment_id;
-    ELSEIF id_patient_in IS NOT NULL AND (hashed_id_patient_in IS NOT NULL OR hashed_id_patient_in <> '') THEN
-        RAISE EXCEPTION 'Não é possível passar o id_patient e o hashed_id_patient';
-    ELSEIF id_patient_in IS NULL THEN
-        SELECT id_user INTO patient_id FROM users WHERE hashed_id = hashed_id_patient_in;	
-        IF NOT FOUND THEN
-            RAISE EXCEPTION 'Utente com o hashed_id "%" não existe', hashed_id_patient_in; --patient NOT FOUND
-        END IF;
-    ELSEIF hashed_id_patient_in IS NULL OR hashed_id_patient_in = '' THEN
-        SELECT id_user INTO patient_id FROM users WHERE id_user = id_patient_in;	
-        IF NOT FOUND THEN
-            RAISE EXCEPTION 'Utente com o id "%" não existe', id_patient_in; --patient NOT FOUND
-        END IF;
-    END IF;
-
     IF id_appointment_in IS NULL AND (hashed_id_appointment_in IS NULL OR hashed_id_appointment_in = '') THEN
-        SELECT id_appointment INTO appointment_id FROM appointment WHERE id_doctor = doctor_id AND id_patient = patient_id AND status = 1;
+        SELECT id_appointment INTO appointment_id FROM appointment WHERE id_appointment = (SELECT id_appointment FROM prescription WHERE id_prescription = prescription_id);
     ELSEIF id_appointment_in IS NOT NULL AND (hashed_id_appointment_in IS NOT NULL OR hashed_id_appointment_in <> '') THEN
         RAISE EXCEPTION 'Não é possível passar o id_appointment e o hashed_id_appointment';
     ELSEIF id_appointment_in IS NULL THEN
@@ -194,10 +110,6 @@ BEGIN
         END IF;
     END IF;
 
-        IF doctor_id = patient_id THEN
-        RAISE EXCEPTION 'O médico não pode ser o mesmo que o utente.';
-    END IF;
-
     IF prescription_date_in IS NULL THEN
         SELECT prescription_date INTO prescription_date_in FROM prescription WHERE id_prescription = prescription_id;
     END IF;
@@ -209,8 +121,6 @@ BEGIN
     END IF;
 
     UPDATE prescription SET
-        id_doctor = doctor_id,
-        id_patient = patient_id,
         id_appointment = appointment_id,
         prescription_date = prescription_date_in,
         status = status_in
