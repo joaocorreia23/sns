@@ -1,37 +1,64 @@
 
 -- Check Usual Medication ID
 CREATE OR REPLACE FUNCTION check_usual_medication_id(
-    usual_medication_id BIGINT
-) RETURNS BOOLEAN AS $$
+    usual_medication_id_in BIGINT
+)
+RETURNS BOOLEAN AS $$
 BEGIN
-    RETURN EXISTS(SELECT 1 FROM usual_medication WHERE id_usual_medication = usual_medication_id);
+    RETURN EXISTS (
+        SELECT 1 
+        FROM usual_medication 
+        WHERE id_usual_medication = usual_medication_id_in
+    );
 END;
 $$ LANGUAGE plpgsql;
+
 
 
 -- Insert Usual Medication
-CREATE OR REPLACE FUNCTION create_usual_medication(
-    patient_id BIGINT,
-    medication_id BIGINT,
-    medication_prescription_id BIGINT
-) RETURNS BOOLEAN AS $$
+CREATE OR REPLACE FUNCTION add_usual_medication_prescription(
+    id_patient_in BIGINT,
+    id_medication_in BIGINT,
+    id_medication_prescription_in BIGINT,
+    status_in INT DEFAULT 1
+)
+RETURNS BIGINT AS $$
+DECLARE
+    usual_medication_id BIGINT;
 BEGIN
-    IF NOT EXISTS(SELECT 1 FROM users WHERE id_user = patient_id) THEN
-        RAISE EXCEPTION 'Utilizador com o ID "%" não existe', patient_id;
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM users 
+        WHERE id_user = id_patient_in
+    ) THEN
+        RAISE EXCEPTION 'Usuário com o ID "%" não existe', id_patient_in;
     END IF;
-    IF NOT EXISTS(SELECT 1 FROM medication WHERE id_medication = medication_id) THEN
-        RAISE EXCEPTION 'Medicação com o ID "%" não existe', medication_id;
+
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM medication 
+        WHERE id_medication = id_medication_in
+    ) THEN
+        RAISE EXCEPTION 'Medicação com o ID "%" não existe', id_medication_in;
     END IF;
-    IF medication_prescription_id IS NOT NULL AND NOT check_medication_prescription_id(medication_prescription_id) THEN
-        RAISE EXCEPTION 'Prescrição de Medicamento com o ID "%" não existe', medication_prescription_id;
+
+    IF id_medication_prescription_in IS NOT NULL AND NOT EXISTS (
+        SELECT 1 
+        FROM medication_prescription 
+        WHERE id_medication_prescription = id_medication_prescription_in
+    ) THEN
+        RAISE EXCEPTION 'Prescrição de Medicamento com o ID "%" não existe', id_medication_prescription_in;
     END IF;
-    
-    INSERT INTO usual_medication (id_patient, id_medication, id_medication_prescription)
-    VALUES (patient_id, medication_id, medication_prescription_id);
-    
-    RETURN TRUE;
+
+    INSERT INTO usual_medication (id_patient, id_medication, id_medication_prescription, status)
+    VALUES (id_patient_in, id_medication_in, id_medication_prescription_in, status_in)
+    RETURNING id_usual_medication INTO usual_medication_id;
+
+    RETURN usual_medication_id;
 END;
 $$ LANGUAGE plpgsql;
+
+
 
 
 -- Update Usual Medication
@@ -66,23 +93,38 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- Change Usual Medication Status
+-- Change usual medication Status
 CREATE OR REPLACE FUNCTION change_usual_medication_status(
-    usual_medication_id BIGINT,
-    status INT
-) RETURNS BOOLEAN AS $$
+    IN id_patient_in BIGINT,
+    IN id_medication_in BIGINT,
+    IN id_medication_prescription_in BIGINT DEFAULT NULL,
+    IN status_in INT DEFAULT 1
+)
+RETURNS BOOLEAN AS $$
 BEGIN
-    IF NOT check_usual_medication_id(usual_medication_id) THEN
-        RAISE EXCEPTION 'Medicação usual com o ID "%" não existe', usual_medication_id;
-    END IF;
-    
-    IF status <> 0 AND status <> 1 THEN
+    IF status_in <> 0 AND status_in <> 1 THEN
         RAISE EXCEPTION 'O status deve ser 0 ou 1';
     END IF;
+
+    IF id_medication_prescription_in IS NOT NULL AND NOT EXISTS (
+        SELECT 1 
+        FROM medication_prescription 
+        WHERE id_medication_prescription = id_medication_prescription_in
+    ) THEN
+        RAISE EXCEPTION 'Prescrição de Medicamento com o ID "%" não existe', id_medication_prescription_in;
+    END IF;
+
+    UPDATE usual_medication 
+    SET status = status_in, updated_at = NOW() 
+    WHERE id_patient = id_patient_in 
+    AND id_medication = id_medication_in 
+    AND (id_medication_prescription = id_medication_prescription_in OR id_medication_prescription IS NULL AND id_medication_prescription_in IS NULL);
     
-    UPDATE usual_medication SET status = status WHERE id_usual_medication = usual_medication_id;
-    
-    RETURN TRUE;
+    IF FOUND THEN
+        RETURN TRUE;
+    ELSE
+        RETURN FALSE;
+    END IF;
 END;
 $$ LANGUAGE plpgsql;
 
