@@ -318,16 +318,15 @@ CREATE TABLE medication (
 CREATE TABLE prescription (
 	id_prescription BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('prescription_sequence'::regclass),
 	hashed_id VARCHAR(255) NULL,
-    id_doctor BIGINT NOT NULL,
-    id_patient BIGINT NOT NULL,
     id_appointment BIGINT NOT NULL,
     prescription_date TIMESTAMP NOT NULL DEFAULT NOW(),
     status INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (id_doctor) REFERENCES users(id_user),
-    FOREIGN KEY (id_patient) REFERENCES users(id_user),
     FOREIGN KEY (id_appointment) REFERENCES appointment(id_appointment)
 );
+
+ALTER TABLE prescription DROP COLUMN id_doctor;
+ALTER TABLE prescription DROP COLUMN id_patient;
 
 -- Medication Prescription Table
 CREATE TABLE medication_prescription (
@@ -393,20 +392,18 @@ CREATE TABLE administered_vaccine (
     id_administered_vaccine BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('administered_vaccine_sequence'::regclass),
 	hashed_id VARCHAR(255) NULL,
     id_vaccine BIGINT NOT NULL,
-    id_doctor BIGINT NOT NULL,
-    id_patient BIGINT NOT NULL,
     id_appointment BIGINT NOT NULL,
     administered_date TIMESTAMP NULL,
     status INT NOT NULL DEFAULT 0,
     dosage FLOAT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     FOREIGN KEY (id_vaccine) REFERENCES vaccine(id_vaccine),
-    FOREIGN KEY (id_doctor) REFERENCES users(id_user),
-    FOREIGN KEY (id_patient) REFERENCES users(id_user),
     FOREIGN KEY (id_appointment) REFERENCES appointment(id_appointment)
 );
 
-ALTER TABLE administered_vaccine ADD COLUMN due_date DATE NOT NULL;
+ALTER TABLE administered_vaccine DROP COLUMN id_doctor;
+ALTER TABLE administered_vaccine DROP COLUMN id_patient;
+
 
 -- =======================
 -- END: VACCINE
