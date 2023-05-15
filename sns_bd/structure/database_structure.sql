@@ -438,18 +438,18 @@ CREATE TABLE prescribed_exam (
 	hashed_id VARCHAR(255) NULL,
     requisition_date TIMESTAMP NOT NULL DEFAULT NOW(),
     expiration_date TIMESTAMP NOT NULL DEFAULT NOW()+INTERVAL '60 day',
+	scheduled_date TIMESTAMP NULL,
     id_appointment BIGINT NOT NULL,
     id_exam BIGINT NOT NULL,
-    status INT NOT NULL DEFAULT 1,
-    id_user_doctor BIGINT NOT NULL,
-    id_user_patient BIGINT NOT NULL,
+    status INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     FOREIGN KEY (id_appointment) REFERENCES appointment(id_appointment),
-    FOREIGN KEY (id_exam) REFERENCES exam(id_exam),
-    FOREIGN KEY (id_user_doctor) REFERENCES users(id_user),
-	FOREIGN KEY (id_user_patient) REFERENCES users(id_user)
+    FOREIGN KEY (id_exam) REFERENCES exam(id_exam)
 );
+
+ALTER TABLE prescribed_exam ADD COLUMN scheduled_date TIMESTAMP NULL;
 
 -- =======================
 -- END: EXAM
 -- =======================
+
