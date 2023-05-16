@@ -49,6 +49,10 @@ BEGIN
             RAISE EXCEPTION 'Exame com o id "%" não existe', id_exam_in; --exam NOT FOUND
         END IF;
     END IF;
+
+    IF NOT EXISTS (SELECT * FROM appointment WHERE appointment.id_appointment = appointment_id AND appointment.status = 0) THEN
+        RAISE EXCEPTION 'O Estado da consulta não permite a prescrição de exames';
+    END IF;
     
     IF requisition_date_in IS NULL THEN
         requisition_date_in := NOW();

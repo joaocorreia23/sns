@@ -49,6 +49,17 @@ const Add_Prescription = (req, res) => {
     });
 };
 
+const Add_Prescription_New = (req, res) => {
+    const { hashed_id_appointment, prescription_medications } = req.body;
+    pool.query("SELECT * FROM create_prescription_with_medication(NULL, $1, NULL, NULL, $2)", [hashed_id_appointment, prescription_medications], (error, results) => {
+        if (error) {
+            res.status(400).json({ "status": false, "error": error.message });
+            return;
+        }
+        res.status(201).json({ "status": true, "data": results.rows[0], "message": "Prescrição criada com sucesso!" });
+    });
+};
+
 const Update_Prescription = (req, res) => {
     const { hashed_id_prescription, hashed_id_appointment, prescription_date } = req.body;
     pool.query("SELECT * FROM update_prescription(NULL, $1, NULL, $2, $3, NULL)", [hashed_id_prescription, hashed_id_appointment, prescription_date], (error, results) => {
@@ -100,6 +111,7 @@ module.exports = {
     Get_Prescriptions,
     Get_Prescriptions_DataTable,
     Add_Prescription,
+    Add_Prescription_New,
     Update_Prescription,
     Get_PrescriptionByHashedId,
     Deactivate_Prescription,

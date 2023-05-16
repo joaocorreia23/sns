@@ -63,6 +63,9 @@ BEGIN
         END IF;
     END IF;
 
+    IF NOT EXISTS (SELECT * FROM appointment WHERE appointment.id_appointment = appointment_id AND appointment.status = 0) THEN
+        RAISE EXCEPTION 'O Estado da consulta não permite registar Vacinas';
+    END IF;
 
     IF dosage_in IS NULL THEN
         RAISE EXCEPTION 'É necessário passar a dosagem.';
