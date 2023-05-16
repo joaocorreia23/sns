@@ -331,12 +331,8 @@ $medic_list = $doctors["response"]["data"];
                             render: (data, type, row) => {
                                 return `
 									<div>
-										<a href="edit?id=${row.hashed_id_appointment}" class="btn btn-icon btn-bg-light btn-color-primary btn-active-light-primary rounded w-35px h-35px me-1"><i class="ki-outline ki-notepad-edit fs-2"></i></a>
-                                        <button type="button" data-id="${row.hashed_id_appointment}" data-name="${row.email}" data-datatable-action="delete-row" class="btn btn-icon btn-bg-light btn-color-danger btn-active-light-danger rounded w-35px h-35px"><i class="ki-outline ki-information-2 fs-2"></i></button>
-                                        <button type="button" data-id="${row.hashed_id_appointment}" data-name="${row.email}" data-datatable-action="delete-row" class="btn btn-icon btn-bg-light btn-color-danger btn-active-light-danger rounded w-35px h-35px"><i class="ki-outline ki-check-circle fs-2"></i></button>
-										<button type="button" data-id="${row.hashed_id_appointment}" data-name="${row.email}" data-datatable-action="delete-row" class="btn btn-icon btn-bg-light btn-color-danger btn-active-light-danger rounded w-35px h-35px"><i class="ki-outline ki-information-3 fs-2"></i></button>
-										<button type="button" data-id="${row.hashed_id_appointment}" data-name="${row.email}" data-datatable-action="delete-row" class="btn btn-icon btn-bg-light btn-color-danger btn-active-light-danger rounded w-35px h-35px"><i class="ki-outline ki-calendar-remove fs-2"></i></button>
-                                        <button type="button" data-id="${row.hashed_id_appointment}" data-name="${row.email}" data-datatable-action="delete-row" class="btn btn-icon btn-bg-light btn-color-danger btn-active-light-danger rounded w-35px h-35px"><i class="ki-outline ki-trash fs-2"></i></button>
+										<a href="view?id=${row.hashed_id_appointment}" class="btn btn-icon btn-bg-light btn-color-primary btn-active-light-primary rounded w-35px h-35px me-1"><i class="ki-outline ki-information-2 fs-2"></i></a>
+                                        <a href="edit?id=${row.hashed_id_appointment}" class="btn btn-icon btn-bg-light btn-color-primary btn-active-light-primary rounded w-35px h-35px me-1"><i class="ki-outline ki-notepad-edit fs-2"></i></a>
 									</div>
 								`;
                             },
