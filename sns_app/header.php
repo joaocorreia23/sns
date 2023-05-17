@@ -28,6 +28,16 @@
                     <div class="menu menu-rounded menu-active-bg menu-state-primary menu-column menu-lg-row menu-title-gray-700 menu-icon-gray-500 menu-arrow-gray-500 menu-bullet-gray-500 my-5 my-lg-0 align-items-stretch fw-semibold px-2 px-lg-0" id="kt_app_header_menu" data-kt-menu="true">
 
                         <!-- Utilizadores -->
+                        <div class="menu-item here show menu-here-bg me-0 me-lg-2">
+                            <!--begin:Menu link-->
+                            <span class="menu-link">
+                                <a href="<?php echo $link_home; ?>pages/admin/index"><span class="menu-title">Agenda</span></a>
+                                <span class="menu-arrow d-lg-none"></span>
+                            </span>
+                            <!--end:Menu link-->
+                        </div>
+
+                        <!-- Utilizadores -->
                         <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="-50,0" class="menu-item here show menu-here-bg menu-lg-down-accordion me-0 me-lg-2">
                             <!--begin:Menu link-->
                             <span class="menu-link">
@@ -473,7 +483,7 @@
                             </div>
                             <!--end:Menu sub-->
                         </div>
-                        
+
 
                     </div>
 

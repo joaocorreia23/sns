@@ -1,7 +1,6 @@
 <?php
 $data = ["hashed_id_appointment" => $id_appointment];
 $vaccines_info = $api->post("vaccines/administered", $data, null);
-
 $vaccines_info = $vaccines_info["response"]["data"];
 ?>
 
@@ -28,7 +27,7 @@ $vaccines_info = $vaccines_info["response"]["data"];
                             <tr>
                                 <td><?php echo isset($value["vaccine_name"]) ? $value["vaccine_name"] : "N/A" ?></td>
                                 <td><?php echo isset($value["administered_dosage"]) ? $value["administered_dosage"] : "N/A" ?></td>
-                                <td><?php echo (new DateTime($value["due_date"]))->format("d/m/Y"); ?></td>
+                                <td><?php echo isset($value["due_date"]) ? (new DateTime($value["due_date"]))->format("d/m/Y") : "N/A"; ?></td>
                                 <td><?php
                                     if ($value["administered_date_status"] === 0) {
                                         echo "Não Administrada";
@@ -48,12 +47,3 @@ $vaccines_info = $vaccines_info["response"]["data"];
         </div>
     </div>
 </div>
-
-<!-- [hashed_id_administered_vaccine] => ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d
-[administered_date] =>
-[administered_date_status] => 0
-[administered_dosage] => 12.5
-[due_date] => 2023-08-12T23:00:00.000Z
-[hashed_id_vaccine] => 4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce
-[vaccine_name] => Covid-21
-[vaccine_status] => 1 -->

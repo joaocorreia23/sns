@@ -7,12 +7,21 @@ $get_tab = isset($_GET["tab"]) ? $_GET["tab"] : "appointment_tab_1";
 $id_appointment = $_GET["id"];
 $api = new Api();
 $appointment_info = $api->fetch("appointments", null, $id_appointment);
+
 if (!$appointment_info['status']) {
-	header("Location: /pages/admin/appointments/list");
-	exit();
+	// header("Location: /pages/admin/appointments/list");
+	// exit();
 } else {
 	$appointment_info = $appointment_info["response"]['data'];
 }
+
+$vaccines = $api->fetch("vaccines/", null, null);
+$vaccines_list = $vaccines["response"];
+
+$exams = $api->fetch("exams/", null, null);
+$exams_list = $exams["response"];
+
+
 $page_name = $appointment_info["title"] . ' - ' . (new DateTime($appointment_info["start"]))->format("d/m/Y");;
 ?>
 
@@ -203,10 +212,9 @@ $page_name = $appointment_info["title"] . ' - ' . (new DateTime($appointment_inf
 											<!--end::Documents-->
 										</div>
 
-
 										<div class="separator separator-content border-dark my-15"><span class="w-250px fw-bold text-primary">Informação Completa da Consulta</span></div>
 
-										
+
 										<div class="d-flex flex-column flex-xl-row mt-6">
 											<!--begin::Sidebar-->
 											<div class="flex-column flex-lg-row-auto w-100 w-xl-350px mb-10">
@@ -295,22 +303,42 @@ $page_name = $appointment_info["title"] . ' - ' . (new DateTime($appointment_inf
 													<li class="nav-item" role="presentation">
 														<a class="nav-link text-active-primary pb-4" data-bs-toggle="tab" role="tab" href="#vaccines" aria-selected="false" tabindex="-1">Vacinas</a>
 													</li>
+													<?php if ($appointment_info["appointment_status"] === 0) { ?>
+														<li class="nav-item ms-auto">
+															<a class="btn btn-primary ps-7" data-kt-menu-trigger="click" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">Prescrever
+																<i class="ki-outline ki-down fs-2 me-0"></i></a>
+															<div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-semibold py-4 w-250px fs-6" data-kt-menu="true" style="">
+																<div class="menu-item px-5">
+																	<div class="menu-content text-muted pb-2 px-5 fs-7 text-uppercase">Prescrever:</div>
+																</div>
+																<div class="menu-item px-5">
+																	<a data-bs-toggle="modal" data-bs-target="#modal-medication" class="menu-link px-5">Medicação</a>
+																</div>
+																<div class="menu-item px-5">
+																	<a data-bs-toggle="modal" data-bs-target="#modal-exams" class="menu-link px-5">Exames</a>
+																</div>
+																<div class="menu-item px-5">
+																	<a data-bs-toggle="modal" data-bs-target="#modal-vaccines" class="menu-link px-5">Vacinas</a>
+																</div>
+															</div>
+														</li>
+													<?php } ?>
 												</ul>
 												<!--end:::Tabs-->
 												<!--begin:::Tab content-->
 												<div class="tab-content" id="myTabContent">
 
 													<div id="info" class="py-0 tab-pane fade show active" role="tabpanel">
-														<?php require_once($_SERVER["DOCUMENT_ROOT"] . "/pages/admin/appointments/components/details.php"); ?>
+														<?php require($_SERVER["DOCUMENT_ROOT"] . "/pages/admin/appointments/components/details.php"); ?>
 													</div>
 													<div id="medication" class="py-0 tab-pane fade" role="tabpanel">
-														<?php require_once($_SERVER["DOCUMENT_ROOT"] . "/pages/admin/appointments/components/medications.php"); ?>
+														<?php require($_SERVER["DOCUMENT_ROOT"] . "/pages/admin/appointments/components/medications.php"); ?>
 													</div>
 													<div id="exams" class="py-0 tab-pane fade" role="tabpanel">
-														<?php require_once($_SERVER["DOCUMENT_ROOT"] . "/pages/admin/appointments/components/exams.php"); ?>
+														<?php require($_SERVER["DOCUMENT_ROOT"] . "/pages/admin/appointments/components/exams.php"); ?>
 													</div>
 													<div id="vaccines" class="py-0 tab-pane fade" role="tabpanel">
-														<?php require_once($_SERVER["DOCUMENT_ROOT"] . "/pages/admin/appointments/components/vaccines.php"); ?>
+														<?php require($_SERVER["DOCUMENT_ROOT"] . "/pages/admin/appointments/components/vaccines.php"); ?>
 													</div>
 												</div>
 												<!--end:::Tab content-->
@@ -318,8 +346,119 @@ $page_name = $appointment_info["title"] . ' - ' . (new DateTime($appointment_inf
 											<!--end::Content-->
 										</div>
 
+										<!-- MODALS -->
+										<!-- Modal for add Vaccine to Patient -->
+										<div class="modal fade" id="modal-vaccines" tabindex="-1" aria-modal="true" role="dialog">
+											<div class="modal-dialog modal-dialog-centered mw-650px">
+												<div class="modal-content">
+													<div class="modal-header" id="modal-vaccines-header">
+														<h3 class="fw-bold">Prescrever uma Vacina ao Utente - <?php echo $appointment_info["patient_first_name"]; ?></h3>
+														<div class="btn btn-icon btn-sm btn-active-icon-primary" data-bs-dismiss="modal">
+															<i class="las la-times fs-1"></i>
+														</div>
+													</div>
+
+													<div class="modal-body mx-5 mx-xl-15 my-7">
+														<form id="modal-vaccines-form" class="form" action="#">
+															<div class="d-flex flex-column me-n7 pe-7" id="modal-vaccines-form-scroll" data-kt-scroll="true" data-kt-scroll-activate="{default: false, lg: true}" data-kt-scroll-max-height="auto" data-kt-scroll-dependencies="#modal-edit-treatment-header" data-kt-scroll-wrappers="#modal-edit-treatment-form-scroll" data-kt-scroll-offset="350px" style="max-height: 91px;">
+																<div class="row g-6">
+
+																	<div class="col-12">
+																		<div class="fv-row">
+																			<label class="required fw-semibold fs-6">Selecione a Vacina</label>
+																			<select class="form-select form-select-solid" name="id_vaccine" data-control="select2" data-placeholder="Selecione uma Vacina para Prescrever">
+																				<option></option>
+																				<?php foreach ($vaccines_list as $key => $value) { ?>
+																					<option value="<?php echo $value["hashed_id"] ?>"><?php echo $value["vaccine_name"] ?></option>
+																				<?php } ?>
+																			</select>
+																		</div>
+																	</div>
+
+																	<div class="col-6">
+																		<div class="fv-row">
+																			<label class="required fw-semibold fs-6">Dosagem</label>
+																			<input type="number" step="0.01" class="form-control form-control-solid" placeholder="Insira a Dosagem" name="dosage" />
+																		</div>
+																	</div>
+
+																	<div class="col-6">
+																		<div class="fv-row mt-8 ms-4">
+																			<div class="form-check form-check-custom form-check-success form-check-solid">
+																				<input class="form-check-input" type="checkbox" name="administered" id="administered" value="" />
+																				<label class="form-check-label" for="administered">
+																					Administrada
+																				</label>
+																			</div>
+																		</div>
+																	</div>
+
+																</div>
+															</div>
+
+															<div class="text-center pt-15">
+																<button type="reset" data-bs-dismiss="modal" class="btn btn-light me-3">Cancelar</button>
+																<button type="submit" id="submit_vaccine" class="btn btn-light-primary">
+																	<span class="indicator-label">Prescrever</span>
+																	<span class="indicator-progress">Por Favor Aguarde...
+																		<span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+																	</span>
+																</button>
+															</div>
+														</form>
+													</div>
+												</div>
+											</div>
+										</div>
+
+										<!-- Modal for add Exam to Patient -->
+										<div class="modal fade" id="modal-exams" tabindex="-1" aria-modal="true" role="dialog">
+											<div class="modal-dialog modal-dialog-centered mw-650px">
+												<div class="modal-content">
+													<div class="modal-header" id="modal-exams-header">
+														<h3 class="fw-bold">Prescrever um Exame ao Utente - <?php echo $appointment_info["patient_first_name"]; ?></h3>
+														<div class="btn btn-icon btn-sm btn-active-icon-primary" data-bs-dismiss="modal">
+															<i class="las la-times fs-1"></i>
+														</div>
+													</div>
+
+													<div class="modal-body mx-5 mx-xl-15 my-7">
+														<form id="modal-exams-form" class="form" action="#">
+															<div class="d-flex flex-column me-n7 pe-7" id="modal-exams-form-scroll" data-kt-scroll="true" data-kt-scroll-activate="{default: false, lg: true}" data-kt-scroll-max-height="auto" data-kt-scroll-dependencies="#modal-edit-treatment-header" data-kt-scroll-wrappers="#modal-edit-treatment-form-scroll" data-kt-scroll-offset="350px" style="max-height: 91px;">
+																<div class="row g-6">
+
+																	<div class="col-12">
+																		<div class="fv-row">
+																			<label class="required fw-semibold fs-6">Selecione um Exame</label>
+																			<select class="form-select form-select-solid" name="id_exam" data-control="select2" data-placeholder="Selecione o Exame para Prescrever">
+																				<option></option>
+																				<?php foreach ($exams_list as $key => $value) { ?>
+																					<option value="<?php echo $value["hashed_id"] ?>"><?php echo $value["exam_name"] ?></option>
+																				<?php } ?>
+																			</select>
+																		</div>
+																	</div>
+
+																</div>
+															</div>
+
+															<div class="text-center pt-15">
+																<button type="reset" data-bs-dismiss="modal" class="btn btn-light me-3">Cancelar</button>
+																<button type="submit" class="btn btn-light-primary">
+																	<span class="indicator-label">Prescrever</span>
+																	<span class="indicator-progress">Por Favor Aguarde...
+																		<span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+																	</span>
+																</button>
+															</div>
+														</form>
+													</div>
+												</div>
+											</div>
+										</div>
 
 									</div>
+
 
 								</div>
 							</div>
@@ -335,6 +474,139 @@ $page_name = $appointment_info["title"] . ' - ' . (new DateTime($appointment_inf
 
 	<?php require_once($_SERVER["DOCUMENT_ROOT"] . "/foo.php") ?>
 
+	<script>
+		const form = document.getElementById("modal-vaccines-form");
+		form.addEventListener("submit", addVaccine);
+
+		const api_url = "http://localhost:3000/api/";
+		const path = "vaccines/administered/insert";
+
+		function addVaccine() {
+			event.preventDefault();
+			var form = document.getElementById("modal-vaccines-form");
+
+			const currentDate = new Date();
+
+			const formData = {
+				hashed_id_appointment: "<?php echo $id_appointment ?>",
+				hashed_id_vaccine: form.id_vaccine.value,
+				administered_date: form.administered.checked ? currentDate : null,
+				dosage: form.dosage.value,
+				due_date: null,
+			};
+
+
+			fetch(api_url + path, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify(formData),
+				})
+				.then((response) => response.json())
+				.then((data) => {
+					if (data.status) {
+						Swal.fire({
+							icon: "success",
+							title: "Sucesso!",
+							text: data.message,
+							buttonsStyling: false,
+							allowOutsideClick: false,
+							didOpen: () => {
+								const confirmButton = Swal.getConfirmButton();
+								confirmButton.blur();
+							},
+							customClass: {
+								confirmButton: "btn fw-bold btn-primary",
+							},
+						}).then((result) => {
+							if (result.isConfirmed) {
+								location.reload();
+							}
+						});
+					} else {
+						Swal.fire({
+							icon: "error",
+							title: "Ocorreu um Erro!",
+							text: data.error,
+							confirmButtonText: "Voltar a Edição",
+							buttonsStyling: false,
+							customClass: {
+								confirmButton: "btn btn-danger",
+							},
+						});
+					}
+				})
+				.catch((error) => {
+					console.error("Error:", error);
+				});
+		}
+	</script>
+
+	<script>
+		const form2 = document.getElementById("modal-exams-form");
+		form2.addEventListener("submit", addExam);
+
+		const api_url2 = "http://localhost:3000/api/";
+		const path2 = "exams/prescribed/insert";
+
+		function addExam() {
+			event.preventDefault();
+			var form = document.getElementById("modal-exams-form");
+
+
+			const formData = {
+				hashed_id_appointment: "<?php echo $id_appointment ?>",
+				hashed_id_exam: form.id_exam.value,
+			};
+
+
+			fetch(api_url2 + path2, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify(formData),
+				})
+				.then((response) => response.json())
+				.then((data) => {
+					if (data.status) {
+						Swal.fire({
+							icon: "success",
+							title: "Sucesso!",
+							text: data.message,
+							buttonsStyling: false,
+							allowOutsideClick: false,
+							didOpen: () => {
+								const confirmButton = Swal.getConfirmButton();
+								confirmButton.blur();
+							},
+							customClass: {
+								confirmButton: "btn fw-bold btn-primary",
+							},
+						}).then((result) => {
+							if (result.isConfirmed) {
+								location.reload();
+							}
+						});
+					} else {
+						Swal.fire({
+							icon: "error",
+							title: "Ocorreu um Erro!",
+							text: data.error,
+							confirmButtonText: "Voltar a Edição",
+							buttonsStyling: false,
+							customClass: {
+								confirmButton: "btn btn-danger",
+							},
+						});
+					}
+				})
+				.catch((error) => {
+					console.error("Error:", error);
+				});
+		}
+	</script>
 
 </body>
 
