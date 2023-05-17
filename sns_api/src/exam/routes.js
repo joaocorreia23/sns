@@ -22,7 +22,7 @@ router.post('/prescribed/table', controller.Get_Prescribed_Exams_DataTable);
 
 router.get('/prescribed/:hashed_id', controller.Get_Prescribed_ExamByHashedId);
 
-router.get('/prescribed/insert', controller.Add_Prescribed_Exam);
+router.post('/prescribed/insert', controller.Add_Prescribed_Exam);
 
 router.post('/prescribed/schedule', controller.ScheduleExam);
 
