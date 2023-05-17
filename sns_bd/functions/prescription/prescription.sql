@@ -2,7 +2,7 @@
 CREATE OR REPLACE FUNCTION create_prescription_with_medication(
 	id_appointment_in BIGINT DEFAULT NULL,
     hashed_id_appointment_in VARCHAR(255) DEFAULT NULL,
-    prescription_date_in DATE DEFAULT NULL,
+    prescription_date_in TIMESTAMP DEFAULT NULL,
 	status INT DEFAULT 1,
     medication_prescription_list JSON[] DEFAULT NULL
 ) RETURNS BOOLEAN AS $$
@@ -305,7 +305,7 @@ BEGIN
         p.hashed_id as hashed_id_prescription,
         p.prescription_date as prescription_date,
         p.status as prescription_status,
-        array_to_json(array_agg(mp.*)) as medication_prescription_list,
+        array_to_json(array_agg(json_build_object(''option_pin'', mp.option_pin, ''access_pin'', mp.access_pin, ''expiration_date'', mp.expiration_date, ''prescribed_amount'', mp.prescribed_amount, ''available_amount'', mp.available_amount, ''use_description'', mp.use_description, ''prescription_status'', mp.status, ''medication_name'', m.medication_name, ''medication_status'', m.status))) as medication_prescription_list,
         a.hashed_id as hashed_id_appointment,
         a.hashed_id as id,
         a.status as appointment_status,
@@ -363,7 +363,8 @@ BEGIN
         u_patient_ct.country_name as patient_country_name,
         u_patient.status as patient_status
         FROM prescription p
-        JOIN medication_prescription mp ON mp.id_prescription = p.id_prescription
+        INNER JOIN medication_prescription mp ON mp.id_prescription = p.id_prescription
+        INNER JOIN medication m ON m.id_medication = mp.id_medication
         INNER JOIN appointment a ON a.id_appointment = p.id_appointment
         INNER JOIN health_unit hu ON hu.id_health_unit = a.id_health_unit
         LEFT JOIN address hu_a ON hu_a.id_address = hu.id_address
