@@ -163,8 +163,7 @@ $medication_info = $medication_info["response"]["data"];
                             return `
                                 <td class="text-end">
                                     <button type="button" class="btn btn-sm btn-icon btn-light btn-active-light-primary toggle fw-bold fs-7 py-4" data-kt-docs-datatable-subtable="expand_row" data-hashed_id="${row.hashed_id_prescription}">
-                                     
-
+                                    
                                         <span class="toggle-off">
                                         <i class="ki-outline ki-eye fs-2"></i>
                                         </span>
@@ -172,8 +171,7 @@ $medication_info = $medication_info["response"]["data"];
                                         <span class="toggle-on fs-3">
                                         <i class="ki-outline ki-eye-slash fs-2"></i>
                                         </span>
-                                            
-                                      
+                                    
                                     </button>
                                 </td>
                         `;

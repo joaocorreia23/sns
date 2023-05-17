@@ -27,7 +27,7 @@
 
                     <div class="menu menu-rounded menu-active-bg menu-state-primary menu-column menu-lg-row menu-title-gray-700 menu-icon-gray-500 menu-arrow-gray-500 menu-bullet-gray-500 my-5 my-lg-0 align-items-stretch fw-semibold px-2 px-lg-0" id="kt_app_header_menu" data-kt-menu="true">
 
-                        <!-- Utilizadores -->
+                        <!-- Agenda -->
                         <div class="menu-item here show menu-here-bg me-0 me-lg-2">
                             <!--begin:Menu link-->
                             <span class="menu-link">
@@ -489,6 +489,55 @@
 
                 </div>
                 <!--Admin NavBar-->
+            <?php } ?>
+
+            <?php if ($_SESSION["active_role"] === "Patient") { ?>
+                <!-- Patient NavBar -->
+                <div class="app-header-menu app-header-mobile-drawer align-items-stretch" data-kt-drawer="true" data-kt-drawer-name="app-header-menu" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="250px" data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_app_header_menu_toggle" data-kt-swapper="true" data-kt-swapper-mode="{default: 'append', lg: 'prepend'}" data-kt-swapper-parent="{default: '#kt_app_body', lg: '#kt_app_header_wrapper'}">
+                    <div class="menu menu-rounded menu-active-bg menu-state-primary menu-column menu-lg-row menu-title-gray-700 menu-icon-gray-500 menu-arrow-gray-500 menu-bullet-gray-500 my-5 my-lg-0 align-items-stretch fw-semibold px-2 px-lg-0" id="kt_app_header_menu" data-kt-menu="true">
+
+                        <!-- Agenda -->
+                        <div class="menu-item here show menu-here-bg me-0 me-lg-2">
+                            <span class="menu-link">
+                                <a href="<?php echo $link_home; ?>pages/patient/index"><span class="menu-title">Agenda</span></a>
+                                <span class="menu-arrow d-lg-none"></span>
+                            </span>
+                        </div>
+
+                         <!-- Consultas -->
+                         <div class="menu-item here show menu-here-bg me-0 me-lg-2">
+                            <span class="menu-link">
+                                <a href="<?php echo $link_home; ?>pages/patient/appointments/list"><span class="menu-title">Consultas</span></a>
+                                <span class="menu-arrow d-lg-none"></span>
+                            </span>
+                        </div>
+
+                         <!-- Medicação -->
+                         <div class="menu-item here show menu-here-bg me-0 me-lg-2">
+                            <span class="menu-link">
+                                <a href="<?php echo $link_home; ?>pages/patient/medications/list"><span class="menu-title">Medicação</span></a>
+                                <span class="menu-arrow d-lg-none"></span>
+                            </span>
+                        </div>
+
+                         <!-- Exames -->
+                         <div class="menu-item here show menu-here-bg me-0 me-lg-2">
+                            <span class="menu-link">
+                                <a href="<?php echo $link_home; ?>pages/patient/index"><span class="menu-title">Exames</span></a>
+                                <span class="menu-arrow d-lg-none"></span>
+                            </span>
+                        </div>
+
+                          <!-- Vacinas -->
+                          <div class="menu-item here show menu-here-bg me-0 me-lg-2">
+                            <span class="menu-link">
+                                <a href="<?php echo $link_home; ?>pages/patient/index"><span class="menu-title">Vacinas</span></a>
+                                <span class="menu-arrow d-lg-none"></span>
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
             <?php } ?>
 
             <!--begin::Navbar-->
