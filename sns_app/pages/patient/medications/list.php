@@ -134,7 +134,8 @@ $id_patient = $_SESSION["hashed_id"];
                     columns: [{
                         data: "prescription_date"
                     }, {
-                        data: "prescription_status"
+                        data: "prescription_status", //colspan="2"
+
                     }, {
                         data: null
                     }],
@@ -158,7 +159,7 @@ $id_patient = $_SESSION["hashed_id"];
                         },
                         {
                             targets: 1,
-                            className: 'text-end',
+                            className: 'text-center',
                             render: function(data, type, row) {
                                 if (row.prescription_status === 1) {
                                     return `<span class="badge badge-success">Prescrita</span>`;
@@ -172,12 +173,11 @@ $id_patient = $_SESSION["hashed_id"];
                             data: null,
                             orderable: false,
                             className: 'text-end',
-                            colSpan: 2,
                             render: function(data, type, row) {
                                 contents = row.medication_prescription_list;
                                 contents_data[row.hashed_id_prescription] = contents;
                                 return `
-                                <td colspan="4">
+                                
                                     <button type="button" class="btn btn-sm btn-icon btn-light btn-active-light-primary toggle fw-bold fs-7 py-4" data-kt-docs-datatable-subtable="expand_row" data-hashed_id="${row.hashed_id_prescription}">
                                     
                                         <span class="toggle-off">
@@ -189,11 +189,15 @@ $id_patient = $_SESSION["hashed_id"];
                                         </span>
                                     
                                     </button>
-                                </td>
+                                
                         `;
                             },
                         },
-                    ]
+                    ],
+                    createdRow: function (row, data, index) {
+                        $('td', row).eq(1).attr('colspan', 2);
+                        $('td', row).eq(2).attr('colspan', 2);
+                    },
                 });
 
                 table = dt.$;
