@@ -1,13 +1,16 @@
 -- Insert Prescription
-CREATE OR REPLACE FUNCTION create_prescription(
+CREATE OR REPLACE FUNCTION create_prescription_with_medication(
 	id_appointment_in BIGINT DEFAULT NULL,
     hashed_id_appointment_in VARCHAR(255) DEFAULT NULL,
-
     prescription_date_in DATE DEFAULT NULL,
-	status INT DEFAULT 1
+	status INT DEFAULT 1,
+    medication_prescription_list JSON[] DEFAULT NULL
 ) RETURNS BOOLEAN AS $$
 DECLARE
     appointment_id BIGINT;
+    prescription_id BIGINT;
+    medication_name_out VARCHAR(255);
+	medication_exists BOOLEAN;
 BEGIN
 
     IF id_appointment_in IS NULL AND (hashed_id_appointment_in IS NULL OR hashed_id_appointment_in = '') THEN
@@ -36,7 +39,66 @@ BEGIN
         RAISE EXCEPTION 'Estado inválido';
     END IF;
 
-    INSERT INTO prescription (id_appointment, prescription_date, status) VALUES (appointment_id, prescription_date_in, status);
+    INSERT INTO prescription (id_appointment, prescription_date, status) VALUES (appointment_id, prescription_date_in, status) RETURNING id_prescription INTO prescription_id;
+
+    /* 
+    create_medication_prescription(
+        id_prescription_in BIGINT DEFAULT NULL,
+        hashed_id_prescription_in VARCHAR(255) DEFAULT NULL,
+        id_medication_in BIGINT DEFAULT NULL,
+        hashed_id_medication_in VARCHAR(255) DEFAULT NULL,
+        prescribed_amount_in INT DEFAULT NULL,
+        use_description_in VARCHAR(255) DEFAULT NULL
+    )
+    */
+
+    IF array_length(medication_prescription_list, 1) > 0 THEN
+        FOR i IN 1..array_length(medication_prescription_list, 1) LOOP
+            SELECT EXISTS (
+                SELECT 1 FROM medication WHERE hashed_id = medication_prescription_list[i]->>'hashed_id_medication'
+            ) INTO medication_exists;
+
+            IF NOT medication_exists THEN
+                RAISE EXCEPTION 'Medicamento com o hashed_id "%" não existe', medication_prescription_list[i]->>'hashed_id_medication';
+            END IF;
+
+            SELECT medication_name INTO medication_name_out
+            FROM medication
+            WHERE hashed_id = medication_prescription_list[i]->>'hashed_id_medication';
+
+            IF NOT EXISTS (
+                SELECT 1 FROM medication WHERE medication.hashed_id = medication_prescription_list[i]->>'hashed_id_medication' AND medication.status = 1
+            ) THEN
+                RAISE EXCEPTION 'O Medicamento com o nome "%" está desativado', medication_name_out;
+            END IF;
+
+            IF (medication_prescription_list[i]->>'prescribed_amount')::INT IS NULL THEN
+                RAISE EXCEPTION 'É necessário passar a quantidade prescrita do medicamento "%"', medication_name_out;
+            ELSIF (medication_prescription_list[i]->>'prescribed_amount')::INT <= 0 THEN
+                RAISE EXCEPTION 'A quantidade prescrita do medicamento "%" deve ser maior que 0', medication_name_out;
+            END IF;
+        END LOOP;
+
+        FOR i IN 1..array_length(medication_prescription_list, 1) LOOP
+			IF EXISTS (SELECT * FROM medication_prescription WHERE id_prescription = prescription_id AND id_medication = (SELECT id_medication FROM medication WHERE hashed_id = (medication_prescription_list[i]->>'hashed_id_medication')::VARCHAR(255))) THEN
+                DELETE FROM medication_prescription WHERE id_prescription = prescription_id;
+                DELETE FROM prescription WHERE id_prescription = prescription_id;
+                RAISE EXCEPTION 'Não é possível inserir o medicamento "%" duas vezes', medication_name_out;
+            END IF;
+            PERFORM create_medication_prescription(
+                prescription_id,
+                NULL,
+                NULL,
+                (medication_prescription_list[i]->>'hashed_id_medication')::VARCHAR(255),
+                (medication_prescription_list[i]->>'prescribed_amount')::INT,
+                (medication_prescription_list[i]->>'use_description')::VARCHAR(255)
+            );
+        END LOOP;
+    ELSE 
+        DELETE FROM prescription WHERE id_prescription = prescription_id;
+        RAISE EXCEPTION 'É necessário passar pelo menos um medicamento';
+    END IF;
+        
     RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql;
@@ -66,10 +128,8 @@ EXECUTE PROCEDURE set_prescription_hashed_id_function();
 CREATE OR REPLACE FUNCTION update_prescription(
     id_prescription_in BIGINT DEFAULT NULL,
     hashed_id_prescription_in VARCHAR(255) DEFAULT NULL,
-
     id_appointment_in BIGINT DEFAULT NULL,
     hashed_id_appointment_in VARCHAR(255) DEFAULT NULL,
-
     prescription_date_in DATE DEFAULT NULL,
     status_in INT DEFAULT NULL
 ) RETURNS BOOLEAN AS $$
@@ -152,6 +212,7 @@ RETURNS TABLE (
     hashed_id_prescription VARCHAR(255),
     prescription_date TIMESTAMP,
     prescription_status INT,
+    medication_prescription_list JSON,
     hashed_id_appointment VARCHAR(255),
     id VARCHAR(255),
     appointment_status INT,
@@ -244,6 +305,7 @@ BEGIN
         p.hashed_id as hashed_id_prescription,
         p.prescription_date as prescription_date,
         p.status as prescription_status,
+        array_to_json(array_agg(mp.*)) as medication_prescription_list,
         a.hashed_id as hashed_id_appointment,
         a.hashed_id as id,
         a.status as appointment_status,
@@ -301,6 +363,7 @@ BEGIN
         u_patient_ct.country_name as patient_country_name,
         u_patient.status as patient_status
         FROM prescription p
+        JOIN medication_prescription mp ON mp.id_prescription = p.id_prescription
         INNER JOIN appointment a ON a.id_appointment = p.id_appointment
         INNER JOIN health_unit hu ON hu.id_health_unit = a.id_health_unit
         LEFT JOIN address hu_a ON hu_a.id_address = hu.id_address
@@ -466,7 +529,64 @@ BEGIN
         query := query || 'p.status = ' || quote_literal(status_in);
     END IF;
 
-    query := query || ' ORDER BY p.prescription_date DESC';
+    query := query || ' GROUP BY
+        p.hashed_id,
+        p.prescription_date,
+        p.status,
+        a.hashed_id,
+        a.status,
+        a.start_date,
+        a.start_time,
+        a.end_time,
+        a.created_at,
+        hu.hashed_id,
+        hu.name,
+        hu.email,
+        hu.phone_number,
+        hu.type,
+        hu.tax_number,
+        hu_zc.address,
+        hu_a.door_number,
+        hu_a.floor,
+        hu_zc.zip_code,
+        hu_c.county_name,
+        hu_d.district_name,
+        hu_ct.country_name,
+        hu.status,
+        u_doctor.hashed_id,
+        u_doctor.username,
+        u_doctor.email,
+        ui_doctor.first_name,
+        ui_doctor.last_name,
+        ui_doctor.birth_date,
+        ui_doctor.gender,
+        ui_doctor.tax_number,
+        ui_doctor.phone_number,
+        u_doctor_zc.address,
+        u_doctor_a.door_number,
+        u_doctor_a.floor,
+        u_doctor_zc.zip_code,
+        u_doctor_c.county_name,
+        u_doctor_d.district_name,
+        u_doctor_ct.country_name,
+        u_doctor.status,
+        u_patient.hashed_id,
+        u_patient.username,
+        u_patient.email,
+        ui_patient.first_name,
+        ui_patient.last_name,
+        ui_patient.birth_date,
+        ui_patient.gender,
+        ui_patient.tax_number,
+        ui_patient.phone_number,
+        u_patient_zc.address,
+        u_patient_a.door_number,
+        u_patient_a.floor,
+        u_patient_zc.zip_code,
+        u_patient_c.county_name,
+        u_patient_d.district_name,
+        u_patient_ct.country_name,
+        u_patient.status';
     RETURN QUERY EXECUTE query;
 
 END;
@@ -518,3 +638,105 @@ BEGIN
     END IF;
 END;
 $$ LANGUAGE plpgsql;
+--
+--
+--
+-- Generate Code
+CREATE OR REPLACE FUNCTION generate_digit_code(num_digits INTEGER)
+  RETURNS INTEGER AS $$
+DECLARE
+  code INTEGER;
+  min_value INTEGER;
+  max_value INTEGER;
+BEGIN
+  IF num_digits <= 3 THEN
+    RAISE EXCEPTION 'O número de dígitos deve ser maior ou igual a 4.';
+  ELSEIF num_digits >= 10 THEN
+    RAISE EXCEPTION 'O número de dígitos deve ser menor ou igual a 9.';
+  END IF;
+
+  min_value := 10 ^ (num_digits - 1);
+  max_value := (10 ^ num_digits) - 1;
+  code := FLOOR(random() * (max_value - min_value + 1) + min_value);
+
+  RETURN code;
+END;
+$$ LANGUAGE plpgsql;
+--
+--
+--
+-- Prescription Medication
+CREATE OR REPLACE FUNCTION create_medication_prescription(
+	id_prescription_in BIGINT DEFAULT NULL,
+    hashed_id_prescription_in VARCHAR(255) DEFAULT NULL,
+    id_medication_in BIGINT DEFAULT NULL,
+    hashed_id_medication_in VARCHAR(255) DEFAULT NULL,
+    prescribed_amount_in INT DEFAULT NULL,
+    use_description_in VARCHAR(255) DEFAULT NULL
+) RETURNS BOOLEAN AS $$
+DECLARE
+    prescription_id BIGINT;
+    medication_id BIGINT;
+    access_pin INT;
+    option_pin INT;
+    status INT;
+    expiration_date TIMESTAMP;
+BEGIN
+
+    IF id_prescription_in IS NULL AND (hashed_id_prescription_in IS NULL OR hashed_id_prescription_in = '') THEN
+        RAISE EXCEPTION 'É necessário passar o id_prescription ou o hashed_id_prescription';
+    ELSEIF id_prescription_in IS NOT NULL AND (hashed_id_prescription_in IS NOT NULL OR hashed_id_prescription_in <> '') THEN
+        RAISE EXCEPTION 'Não é possível passar o id_prescription e o hashed_id_prescription';
+    ELSEIF id_prescription_in IS NULL THEN
+        SELECT id_prescription INTO prescription_id FROM prescription WHERE hashed_id = hashed_id_prescription_in;	
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Prescrição com o hashed_id "%" não existe', hashed_id_prescription_in; --Prescription NOT FOUND
+        END IF;
+    ELSEIF hashed_id_prescription_in IS NULL OR hashed_id_prescription_in = '' THEN
+        SELECT id_prescription INTO prescription_id FROM prescription WHERE id_prescription = id_prescription_in;	
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Prescrição com o id "%" não existe', id_prescription_in; --Prescription NOT FOUND
+        END IF;
+    END IF;
+
+    IF id_medication_in IS NULL AND (hashed_id_medication_in IS NULL OR hashed_id_medication_in = '') THEN
+        RAISE EXCEPTION 'É necessário passar o id_medication ou o hashed_id_medication';
+    ELSEIF id_medication_in IS NOT NULL AND (hashed_id_medication_in IS NOT NULL OR hashed_id_medication_in <> '') THEN
+        RAISE EXCEPTION 'Não é possível passar o id_medication e o hashed_id_medication';
+    ELSEIF id_medication_in IS NULL THEN
+        SELECT id_medication INTO medication_id FROM medication WHERE hashed_id = hashed_id_medication_in;	
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Medicamento com o hashed_id "%" não existe', hashed_id_medication_in; --Medication NOT FOUND
+        END IF;
+    ELSEIF hashed_id_medication_in IS NULL OR hashed_id_medication_in = '' THEN
+        SELECT id_medication INTO medication_id FROM medication WHERE id_medication = id_medication_in;	
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Medicamento com o id "%" não existe', id_medication_in; --Medication NOT FOUND
+        END IF;
+    END IF;
+
+    access_pin := generate_digit_code(4);
+    option_pin := generate_digit_code(6);
+    status := 1;
+    expiration_date := NOW() + INTERVAL '6 months';
+
+    INSERT INTO medication_prescription (id_prescription, id_medication, access_pin, option_pin, prescribed_amount, expiration_date, available_amount, use_description, status) VALUES (prescription_id, medication_id, access_pin, option_pin, prescribed_amount_in, expiration_date, prescribed_amount_in, use_description_in, status);
+    RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION set_medication_prescription_hashed_id_function()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE medication_prescription SET hashed_id = hash_id(NEW.id_medication_prescription) WHERE id_medication_prescription = NEW.id_medication_prescription;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+--
+--
+--
+-- Trigger to Set Hashed ID on New Rows
+CREATE OR REPLACE TRIGGER set_medication_prescription_hashed_id_trigger
+AFTER INSERT ON medication_prescription
+FOR EACH ROW
+EXECUTE PROCEDURE set_medication_prescription_hashed_id_function();

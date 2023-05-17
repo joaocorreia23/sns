@@ -17,4 +17,16 @@ router.post('/activate', controller.Activate_Exam);
 
 router.get('/:hashed_id', controller.Get_ExamByHashedId);
 
+router.post('/prescribed', controller.Get_Prescribed_Exams);
+router.post('/prescribed/table', controller.Get_Prescribed_Exams_DataTable);
+
+router.get('/prescribed/:hashed_id', controller.Get_Prescribed_ExamByHashedId);
+
+router.post('/prescribed/insert', controller.Add_Prescribed_Exam);
+
+router.post('/prescribed/schedule', controller.ScheduleExam);
+
+router.post('/prescribed/cancel', controller.CancelExam);
+router.post('/prescribed/confirm', controller.ConfirmExam);
+
 module.exports = router;

@@ -1,52 +1,23 @@
--- STATUS
--- 0 - Not Administered
--- 1 - Administered
--- 2 - Not Administered - Canceled
-
---Insert Administered Vaccine
-CREATE OR REPLACE FUNCTION create_administered_vaccine(
-
-    id_vaccine_in BIGINT DEFAULT NULL,
-    hashed_id_vaccine_in VARCHAR(255) DEFAULT NULL,
-
+--STATUS
+-- 0 - Prescrito
+-- 1 - Realizado
+-- 2 - Cancelado
+-- Insert Prescribed Exam
+CREATE OR REPLACE FUNCTION create_prescribed_exam(
 	id_appointment_in BIGINT DEFAULT NULL,
     hashed_id_appointment_in VARCHAR(255) DEFAULT NULL,
-
-    administered_date_in TIMESTAMP DEFAULT NULL,
-    dosage_in FLOAT DEFAULT NULL,
+    id_exam_in BIGINT DEFAULT NULL,
+    hashed_id_exam_in VARCHAR(255) DEFAULT NULL,
+    requisition_date_in DATE DEFAULT NULL,
 	status INT DEFAULT 0,
-    due_date_in DATE DEFAULT NULL
+    scheduled_date_in DATE DEFAULT NULL
 ) RETURNS BOOLEAN AS $$
 DECLARE
-    vaccine_id BIGINT;
     appointment_id BIGINT;
+    exam_id BIGINT;
+    expiration_date_out DATE;
 BEGIN
 
-    IF id_vaccine_in IS NULL AND (hashed_id_vaccine_in IS NULL OR hashed_id_vaccine_in = '') THEN
-        RAISE EXCEPTION 'É necessário passar o id_vaccine ou o hashed_id_vaccine';
-    ELSEIF id_vaccine_in IS NOT NULL AND (hashed_id_vaccine_in IS NOT NULL OR hashed_id_vaccine_in <> '') THEN
-        RAISE EXCEPTION 'Não é possível passar o id_vaccine e o hashed_id_vaccine';
-    ELSEIF id_vaccine_in IS NULL THEN
-        SELECT id_vaccine INTO vaccine_id FROM vaccine v WHERE v.hashed_id = hashed_id_vaccine_in AND v. status = 1;
-        IF NOT FOUND THEN
-            RAISE EXCEPTION 'Vacina com o hashed_id "%" não existe', hashed_id_vaccine_in; --vaccine NOT FOUND
-        ELSE 
-            IF EXISTS (SELECT id_vaccine FROM vaccine v WHERE v.hashed_id = hashed_id_vaccine_in AND v.status = 0) THEN
-                RAISE EXCEPTION 'Vacina com o hashed_id "%" não Permite Vacinar', hashed_id_vaccine_in; --vaccine NOT ACTIVE
-            END IF;
-        END IF;
-    ELSEIF hashed_id_vaccine_in IS NULL OR hashed_id_vaccine_in = '' THEN
-        SELECT id_vaccine INTO vaccine_id FROM vaccine v WHERE v.id_vaccine = id_vaccine_in AND v.status = 1;	
-        IF NOT FOUND THEN
-            RAISE EXCEPTION 'Vacina com o id "%" não existe', id_vaccine_in; --vaccine NOT FOUND
-        ELSE
-            IF EXISTS (SELECT id_vaccine FROM vaccine v WHERE v.id_vaccine = id_vaccine_in AND v.status = 0) THEN
-                RAISE EXCEPTION 'Vacina com o id "%" não Permite Vacinar', id_vaccine_in; --vaccine NOT ACTIVE
-            END IF;
-        END IF;
-    END IF;
-
-    
     IF id_appointment_in IS NULL AND (hashed_id_appointment_in IS NULL OR hashed_id_appointment_in = '') THEN
         RAISE EXCEPTION 'É necessário passar o id_appointment ou o hashed_id_appointment';
     ELSEIF id_appointment_in IS NOT NULL AND (hashed_id_appointment_in IS NOT NULL OR hashed_id_appointment_in <> '') THEN
@@ -63,36 +34,50 @@ BEGIN
         END IF;
     END IF;
 
-    IF NOT EXISTS (SELECT * FROM appointment WHERE appointment.id_appointment = appointment_id AND appointment.status = 0) THEN
-        RAISE EXCEPTION 'O Estado da consulta não permite registar Vacinas';
+    IF id_exam_in IS NULL AND (hashed_id_exam_in IS NULL OR hashed_id_exam_in = '') THEN
+        RAISE EXCEPTION 'É necessário passar o id_exam ou o hashed_id_exam';
+    ELSEIF id_exam_in IS NOT NULL AND (hashed_id_exam_in IS NOT NULL OR hashed_id_exam_in <> '') THEN
+        RAISE EXCEPTION 'Não é possível passar o id_exam e o hashed_id_exam';
+    ELSEIF id_exam_in IS NULL THEN
+        SELECT id_exam INTO exam_id FROM exam WHERE hashed_id = hashed_id_exam_in;	
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Exame com o hashed_id "%" não existe', hashed_id_exam_in; --exam NOT FOUND
+        END IF;
+    ELSEIF hashed_id_exam_in IS NULL OR hashed_id_exam_in = '' THEN
+        SELECT id_exam INTO exam_id FROM exam WHERE id_exam = id_exam_in;	
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Exame com o id "%" não existe', id_exam_in; --exam NOT FOUND
+        END IF;
     END IF;
 
-    IF dosage_in IS NULL THEN
-        RAISE EXCEPTION 'É necessário passar a dosagem.';
-    ELSIF dosage_in <= 0 THEN
-        RAISE EXCEPTION 'A dosagem deve ser maior que 0.';
+    IF NOT EXISTS (SELECT * FROM appointment WHERE appointment.id_appointment = appointment_id AND appointment.status = 0) THEN
+        RAISE EXCEPTION 'O Estado da consulta não permite a prescrição de exames';
     END IF;
+    
+    IF requisition_date_in IS NULL THEN
+        requisition_date_in := NOW();
+    END IF;
+
+    expiration_date_out := requisition_date_in + INTERVAL '6 months';
 
     IF status IS NULL THEN
         status := 0;
-    --ALOWED STATUS
-    ELSIF status <> 0 AND status <> 1 AND status <> 2 THEN
-        RAISE EXCEPTION 'O status deve ser 0, 1 ou 2.';
+    ELSEIF status <> 0 AND status <> 1 AND status <> 2 THEN
+        RAISE EXCEPTION 'Estado inválido';
     END IF;
 
-    IF due_date_in IS NULL THEN
-        RAISE EXCEPTION 'É necessário passar a Data de nova Vacinação.';
-    END IF;
-
-    INSERT INTO administered_vaccine (id_vaccine, id_appointment, administered_date, dosage, status, due_date) VALUES (vaccine_id, appointment_id, administered_date_in, dosage_in, status, due_date_in);
+    INSERT INTO prescribed_exam (id_appointment, id_exam, requisition_date, status, scheduled_date, expiration_date) VALUES (appointment_id, exam_id, requisition_date_in, status, scheduled_date_in, expiration_date_out);
     RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION set_administered_vaccine_hashed_id_function()
+--
+--
+--
+-- Set Hashed ID on New Rows
+CREATE OR REPLACE FUNCTION set_prescribed_exam_hashed_id_function()
 RETURNS TRIGGER AS $$
 BEGIN
-    UPDATE administered_vaccine SET hashed_id = hash_id(NEW.id_administered_vaccine) WHERE id_administered_vaccine = NEW.id_administered_vaccine;
+    UPDATE prescribed_exam SET hashed_id = hash_id(NEW.id_prescribed_exam) WHERE id_prescribed_exam = NEW.id_prescribed_exam;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -100,78 +85,19 @@ $$ LANGUAGE plpgsql;
 --
 --
 -- Trigger to Set Hashed ID on New Rows
-CREATE OR REPLACE TRIGGER set_administered_vaccine_hashed_id_trigger
-AFTER INSERT ON administered_vaccine
+CREATE OR REPLACE TRIGGER set_prescribed_exam_hashed_id_trigger
+AFTER INSERT ON prescribed_exam
 FOR EACH ROW
-EXECUTE PROCEDURE set_administered_vaccine_hashed_id_function();
+EXECUTE PROCEDURE set_prescribed_exam_hashed_id_function();
 --
 --
 --
--- Update Status
-CREATE OR REPLACE FUNCTION change_administered_vaccine_status(
-    IN id_administered_vaccine_in BIGINT DEFAULT NULL,
-    IN hashed_id_in VARCHAR(255) DEFAULT NULL,
-    IN status_in INT DEFAULT NULL
-)
-RETURNS BOOLEAN AS $$
-DECLARE
-    administered_vaccine_id BIGINT;
-    administered_date_in TIMESTAMP DEFAULT NULL;
-BEGIN
-
-    IF status_in <> 0 AND status_in <> 1 AND status_in <> 2 THEN
-        RAISE EXCEPTION 'O status deve ser 0 ou 1 ou 2.';
-    END IF;
-
-    IF id_administered_vaccine_in IS NULL AND hashed_id_in IS NULL THEN
-        RAISE EXCEPTION 'É necessário passar o id_administered_vaccine ou o hashed_id';
-    END IF;
-
-    IF hashed_id_in IS NOT NULL THEN
-        SELECT id_administered_vaccine INTO administered_vaccine_id FROM administered_vaccine WHERE hashed_id = hashed_id_in;
-    ELSE
-        administered_vaccine_id := id_administered_vaccine_in;
-    END IF;
-
-    IF administered_vaccine_id IS NULL AND id_administered_vaccine_in IS NOT NULL THEN
-        RAISE EXCEPTION 'Não existe nenhum registo de vacinação com o id_administered_vaccine "%"', id_administered_vaccine_in;
-    ELSIF administered_vaccine_id IS NULL AND hashed_id_in IS NOT NULL THEN
-        RAISE EXCEPTION 'Não existe nenhum registo de vacinação com o hashed_id "%"', hashed_id_in;
-    END IF;
-
-    IF status_in IS NOT NULL THEN
-        IF status_in = 1 THEN
-            administered_date_in := NOW();
-        END IF;
-    ELSE  
-        RAISE EXCEPTION 'É necessário passar o status da vacina';
-    END IF;
-
-    IF NOT EXISTS (SELECT * FROM administered_vaccine WHERE id_administered_vaccine = administered_vaccine_id ) THEN
-        RAISE EXCEPTION 'Não existe nenhum registo de vacinação com o id_administered_vaccine "%"', administered_vaccine_id;
-    END IF;
-   
-    IF EXISTS (SELECT * FROM administered_vaccine WHERE id_administered_vaccine = administered_vaccine_id AND status = 2) THEN
-        RAISE EXCEPTION 'Não é possível alterar o status de uma vacina que já foi cancelada';
-    END IF;
-
-    IF EXISTS (SELECT * FROM administered_vaccine WHERE id_administered_vaccine = administered_vaccine_id AND status = 1) AND status_in != 2 THEN
-        RAISE EXCEPTION 'Não é possível alterar o status de uma vacina que já foi administrada. Apenas é possível cancelar a vacina';
-    END IF;
-
-    UPDATE administered_vaccine SET status = status_in, administered_date = administered_date_in WHERE id_administered_vaccine = administered_vaccine_id;
-    RETURN TRUE;
-    
-END;
-$$ LANGUAGE plpgsql;
---
---
---
-CREATE OR REPLACE FUNCTION get_administered_vaccines(
-    IN id_administered_vaccine_in BIGINT DEFAULT NULL,
-    IN hashed_id_administered_vaccine_in VARCHAR(255) DEFAULT NULL,
-    IN id_vaccine_in BIGINT DEFAULT NULL,
-    IN hashed_id_vaccine_in VARCHAR(255) DEFAULT NULL,
+--Get Prescribed Exam
+CREATE OR REPLACE FUNCTION get_prescribed_exam(
+    IN id_prescribed_exam_in BIGINT DEFAULT NULL,
+    IN hashed_id_prescribed_exam_in VARCHAR(255) DEFAULT NULL,
+    IN id_exam_in BIGINT DEFAULT NULL,
+    IN hashed_id_exam_in VARCHAR(255) DEFAULT NULL,
     IN id_doctor_in BIGINT DEFAULT NULL,
     IN hashed_id_doctor_in VARCHAR(255) DEFAULT NULL,
     IN id_patient_in BIGINT DEFAULT NULL,
@@ -180,19 +106,20 @@ CREATE OR REPLACE FUNCTION get_administered_vaccines(
     IN hashed_id_appointment_in VARCHAR(255) DEFAULT NULL,
     IN id_health_unit_in BIGINT DEFAULT NULL,
     IN hashed_id_health_unit_in VARCHAR(255) DEFAULT NULL,
-    IN administered_vaccine_date_in TIMESTAMP DEFAULT NULL,
-    IN due_date_in TIMESTAMP DEFAULT NULL,
+    IN requisition_date_in DATE DEFAULT NULL,
+    IN scheduled_date_in DATE DEFAULT NULL,
+    IN expiration_date_in DATE DEFAULT NULL,
     IN status_in INT DEFAULT NULL
 )
 RETURNS TABLE (
-    hashed_id_administered_vaccine VARCHAR(255),
-    administered_date TIMESTAMP,
-    administered_date_status INT,
-    administered_dosage FLOAT,
-    due_date DATE,
-    hashed_id_vaccine VARCHAR(255),
-    vaccine_name VARCHAR(255),
-    vaccine_status INT,
+    hashed_id_prescribed_exam VARCHAR(255),
+    requisition_date DATE,
+    expiration_date TIMESTAMP,
+    sheduled_date DATE,
+    prescribed_exam_status INT,
+    hashed_id_exam VARCHAR(255),
+    exam_name VARCHAR(255),
+    exam_status INT,
     hashed_id_appointment VARCHAR(255),
     id VARCHAR(255),
     appointment_status INT,
@@ -251,8 +178,8 @@ RETURNS TABLE (
     patient_status INT
 ) AS $$
 DECLARE
-    administered_vaccine_id BIGINT DEFAULT NULL;
-    vaccine_id BIGINT DEFAULT NULL;
+    exam_id BIGINT DEFAULT NULL;
+    prescribed_exam_id BIGINT DEFAULT NULL;
     appointment_id BIGINT DEFAULT NULL;
     health_unit_id BIGINT DEFAULT NULL;
     doctor_id BIGINT DEFAULT NULL;
@@ -261,12 +188,12 @@ DECLARE
     first_condition BOOLEAN DEFAULT TRUE;
 BEGIN
 
-    IF id_administered_vaccine_in IS NOT NULL AND hashed_id_administered_vaccine_in IS NOT NULL THEN
-        RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_administered_vaccine. Ambos foram passados.';
+    IF id_prescribed_exam_in IS NOT NULL AND hashed_id_prescribed_exam_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_prescribed_exam. Ambos foram passados.';
     END IF;
 
-    IF id_vaccine_in IS NOT NULL AND hashed_id_vaccine_in IS NOT NULL THEN
-        RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_vaccine. Ambos foram passados.';
+    IF id_exam_in IS NOT NULL AND hashed_id_exam_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_exam. Ambos foram passados.';
     END IF;
 
     IF id_appointment_in IS NOT NULL AND hashed_id_appointment_in IS NOT NULL THEN
@@ -287,14 +214,13 @@ BEGIN
 
     query := '
         SELECT 
-        av.hashed_id as hashed_id_administered_vaccine,
-        av.administered_date as administered_date,
-        av.status as administered_date_status,
-        av.dosage as administered_dosage,
-        av.due_date as due_date,
-        v.hashed_id as hashed_id_vaccine,
-        v.vaccine_name as vaccine_name,
-        v.status as vaccine_status,
+        pe.hashed_id as hashed_id_prescribed_exam,
+        pe.requisition_date as requisition_date,
+        pe.expiration_date as expiration_date,
+        pe.scheduled_date as sheduled_date,
+        e.hashed_id as hashed_id_exam,
+        e.exam_name as exam_name,
+        e.status as exam_status,
         a.hashed_id as hashed_id_appointment,
         a.hashed_id as id,
         a.status as appointment_status,
@@ -351,9 +277,9 @@ BEGIN
         u_patient_d.district_name as patient_district_name,
         u_patient_ct.country_name as patient_country_name,
         u_patient.status as patient_status
-        FROM administered_vaccine av
-        INNER JOIN vaccine v ON v.id_vaccine = av.id_vaccine
-        INNER JOIN appointment a ON a.id_appointment = av.id_appointment
+        FROM prescribed_exam pe
+        INNER JOIN exam e ON e.id_exam = pe.id_exam
+        INNER JOIN appointment a ON a.id_appointment = pe.id_appointment
         INNER JOIN health_unit hu ON hu.id_health_unit = a.id_health_unit
         LEFT JOIN address hu_a ON hu_a.id_address = hu.id_address
         LEFT JOIN zip_code hu_zc ON hu_zc.id_zip_code = hu_a.id_zip_code
@@ -376,33 +302,35 @@ BEGIN
         LEFT JOIN country u_patient_ct ON u_patient_ct.id_country = u_patient_d.id_country
     ';
 
-    IF id_administered_vaccine_in IS NOT NULL THEN
-        administered_vaccine_id := id_administered_vaccine_in;
-        SELECT id_administered_vaccine INTO administered_vaccine_id FROM administered_vaccine WHERE id_administered_vaccine = id_administered_vaccine_in;
+    
+
+    IF id_prescribed_exam_in IS NOT NULL THEN
+        prescribed_exam_id := id_prescribed_exam_in;
+        SELECT id_prescribed_exam INTO prescribed_exam_id FROM prescribed_exam WHERE id_prescribed_exam = id_prescribed_exam_in;
         IF NOT FOUND
         THEN
-            RAISE EXCEPTION 'Não existe vacinação com o id passado.';
+            RAISE EXCEPTION 'Não existe exame prescrito com o id passado.';
         END IF;
-    ELSIF hashed_id_administered_vaccine_in IS NOT NULL AND hashed_id_administered_vaccine_in != '' THEN
-        SELECT id_administered_vaccine INTO administered_vaccine_id FROM administered_vaccine WHERE hashed_id = hashed_id_administered_vaccine_in;
+    ELSIF hashed_id_prescribed_exam_in IS NOT NULL AND hashed_id_prescribed_exam_in != '' THEN
+        SELECT id_prescribed_exam INTO prescribed_exam_id FROM prescribed_exam WHERE hashed_id = hashed_id_prescribed_exam_in;
         IF NOT FOUND
         THEN
-            RAISE EXCEPTION 'Não existe vacinação com o hashed_id passado.';
+            RAISE EXCEPTION 'Não existe exame prescrito com o hashed_id passado.';
         END IF;
     END IF;
 
-    IF id_vaccine_in IS NOT NULL THEN
-        vaccine_id := id_vaccine_in;
-        SELECT id_vaccine INTO vaccine_id FROM vaccine WHERE id_vaccine = id_vaccine_in;
+    IF id_exam_in IS NOT NULL THEN
+        exam_id := id_exam_in;
+        SELECT id_exam INTO exam_id FROM exam WHERE id_exam = id_exam_in;
         IF NOT FOUND
         THEN
-            RAISE EXCEPTION 'Não existe vacina com o id passado.';
+            RAISE EXCEPTION 'Não existe exame com o id passado.';
         END IF;
-    ELSIF hashed_id_vaccine_in IS NOT NULL AND hashed_id_vaccine_in != '' THEN
-        SELECT id_vaccine INTO vaccine_id FROM vaccine WHERE hashed_id = hashed_id_vaccine_in;
+    ELSIF hashed_id_exam_in IS NOT NULL AND hashed_id_exam_in != '' THEN
+        SELECT id_exam INTO exam_id FROM exam WHERE hashed_id = hashed_id_exam_in;
         IF NOT FOUND
         THEN
-            RAISE EXCEPTION 'Não existe vacina com o hashed_id passado.';
+            RAISE EXCEPTION 'Não existe exame com o hashed_id passado.';
         END IF;
     END IF;
 
@@ -466,26 +394,26 @@ BEGIN
         END IF;
     END IF;
 
-    IF administered_vaccine_id IS NOT NULL OR vaccine_id IS NOT NULL OR appointment_id IS NOT NULL OR health_unit_id IS NOT NULL OR doctor_id IS NOT NULL OR patient_id IS NOT NULL OR status_in IS NOT NULL OR administered_vaccine_date_in IS NOT NULL OR due_date IS NOT NULL OR status_in IS NOT NULL THEN
+    IF exam_id IS NOT NULL OR prescribed_exam_id IS NOT NULL OR appointment_id IS NOT NULL OR health_unit_id IS NOT NULL OR doctor_id IS NOT NULL OR patient_id IS NOT NULL OR requisition_date_in IS NOT NULL OR scheduled_date_in IS NOT NULL OR expiration_date_in IS NOT NULL OR status_in IS NOT NULL THEN
         query := query || ' WHERE ';
     END IF;
 
-    IF administered_vaccine_id IS NOT NULL THEN
+    IF exam_id IS NOT NULL THEN
         IF first_condition THEN
             first_condition := FALSE;
         ELSE
             query := query || ' AND ';
         END IF;
-        query := query || 'av.id_administered_vaccine = ' || quote_literal(administered_vaccine_id);
+        query := query || 'pe.id_exam = ' || quote_literal(exam_id);
     END IF;
 
-    IF vaccine_id IS NOT NULL THEN
+    IF prescribed_exam_id IS NOT NULL THEN
         IF first_condition THEN
             first_condition := FALSE;
         ELSE
             query := query || ' AND ';
         END IF;
-        query := query || 'av.id_vaccine = ' || quote_literal(vaccine_id);
+        query := query || 'pe.id_prescribed_exam = ' || quote_literal(prescribed_exam_id);
     END IF;
 
     IF appointment_id IS NOT NULL THEN
@@ -524,22 +452,31 @@ BEGIN
         query := query || 'a.id_user_patient = ' || quote_literal(patient_id);
     END IF;
 
-    IF administered_vaccine_date_in IS NOT NULL THEN
+    IF requisition_date_in IS NOT NULL THEN
         IF first_condition THEN
             first_condition := FALSE;
         ELSE
             query := query || ' AND ';
         END IF;
-        query := query || 'DATE(av.administered_date) = ' || quote_literal(administered_vaccine_date_in);
+        query := query || 'pe.requisition_date = ' || quote_literal(requisition_date_in);
     END IF;
 
-    IF due_date_in IS NOT NULL THEN
+    IF scheduled_date_in IS NOT NULL THEN
         IF first_condition THEN
             first_condition := FALSE;
         ELSE
             query := query || ' AND ';
         END IF;
-        query := query || 'DATE(av.due_date) = ' || quote_literal(due_date_in);
+        query := query || 'pe.sheduled_date = ' || quote_literal(scheduled_date_in);
+    END IF;
+
+    IF expiration_date_in IS NOT NULL THEN
+        IF first_condition THEN
+            first_condition := FALSE;
+        ELSE
+            query := query || ' AND ';
+        END IF;
+        query := query || 'pe.expiration_date = ' || quote_literal(expiration_date_in);
     END IF;
 
     IF status_in IS NOT NULL THEN
@@ -548,11 +485,105 @@ BEGIN
         ELSE
             query := query || ' AND ';
         END IF;
-        query := query || 'av.status = ' || quote_literal(status_in);
+        query := query || 'pe.status = ' || quote_literal(status_in);
     END IF;
 
-    query := query || ' ORDER BY av.administered_date DESC';
+    query := query || ' ORDER BY pe.requisition_date DESC';
     RETURN QUERY EXECUTE query;
-    
 END;
 $$ LANGUAGE plpgsql; 
+--
+--
+--
+-- Shedule Exam
+CREATE OR REPLACE FUNCTION schedule_exam(
+    id_prescribed_exam_in BIGINT DEFAULT NULL,
+    hashed_id_prescribed_exam_in VARCHAR(255) DEFAULT NULL,
+    scheduled_date_in TIMESTAMP DEFAULT NULL
+) RETURNS BOOLEAN AS $$
+DECLARE
+    prescribed_exam_id BIGINT;
+BEGIN
+    IF id_prescribed_exam_in IS NOT NULL AND hashed_id_prescribed_exam_in IS NOT NULL AND hashed_id_prescribed_exam_in != '' THEN
+        RAISE EXCEPTION 'Não é possível passar o id e o hashed_id ao mesmo tempo.';
+    END IF;
+
+    IF scheduled_date_in IS NULL THEN
+        RAISE EXCEPTION 'É necessário passar a data de agendamento do exame.';
+    END IF;
+
+    IF id_prescribed_exam_in IS NOT NULL THEN
+        prescribed_exam_id := id_prescribed_exam_in;
+        SELECT id_prescribed_exam INTO prescribed_exam_id FROM prescribed_exam WHERE id_prescribed_exam = id_prescribed_exam_in;
+        IF NOT FOUND
+        THEN
+            RAISE EXCEPTION 'Não existe exame prescrito com o id passado.';
+        END IF;
+    ELSIF hashed_id_prescribed_exam_in IS NOT NULL AND hashed_id_prescribed_exam_in != '' THEN
+        SELECT id_prescribed_exam INTO prescribed_exam_id FROM prescribed_exam WHERE hashed_id = hashed_id_prescribed_exam_in;
+        IF NOT FOUND
+        THEN
+            RAISE EXCEPTION 'Não existe exame prescrito com o hashed_id passado.';
+        END IF;
+    END IF;
+
+    UPDATE prescribed_exam SET scheduled_date = scheduled_date_in WHERE id_prescribed_exam = prescribed_exam_id;
+	RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql;
+--
+--
+--
+-- Change Status
+CREATE OR REPLACE FUNCTION change_prescribed_exam_status(
+    IN id_prescribed_exam_in BIGINT DEFAULT NULL,
+    IN hashed_id_in VARCHAR(255) DEFAULT NULL,
+    IN status_in INT DEFAULT 1
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+    prescribed_exam_id BIGINT;
+BEGIN
+
+    IF status_in <> 0 AND status_in <> 1 AND status_in <> 2 THEN
+        RAISE EXCEPTION 'O status deve ser 0 ou 1 ou 2.';
+    END IF;
+
+    IF id_prescribed_exam_in IS NOT NULL AND hashed_id_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_prescribed_exam.';
+    END IF;
+
+    IF hashed_id_in IS NOT NULL THEN
+        SELECT id_prescribed_exam INTO prescribed_exam_id FROM prescribed_exam WHERE hashed_id = hashed_id_in;
+    ELSE
+        prescribed_exam_id := id_prescribed_exam_in;
+    END IF;
+
+    IF prescribed_exam_id IS NULL AND id_prescribed_exam_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Não existe nenhum exame prescrito com o id passado';
+    ELSEIF prescribed_exam_id IS NULL AND hashed_id_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Não existe nenhum exame prescrito com o hashed_id passado';
+    END IF;
+
+   
+    IF NOT EXISTS (SELECT * FROM prescribed_exam WHERE id_prescribed_exam = prescribed_exam_id AND status = status_in) THEN
+        UPDATE prescribed_exam SET status = status_in WHERE id_prescribed_exam = prescribed_exam_id;
+        RETURN TRUE;
+    ELSE
+        IF status_in = 0 THEN
+            RAISE EXCEPTION 'O exame já está Pendente';
+        ELSEIF status_in = 1 THEN
+            RAISE EXCEPTION 'O exame já está Agendado';
+        ELSEIF status_in = 2 THEN
+            RAISE EXCEPTION 'O exame já está Realizado';
+        END IF;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+
+
+
+
