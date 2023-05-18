@@ -1,5 +1,10 @@
 <?php require_once($_SERVER["DOCUMENT_ROOT"] . "/head.php") ?>
-<?php $page_name = "Listagem de Consultas" ?>
+<?php require_once($_SERVER["DOCUMENT_ROOT"] . "/api/api.php") ?>
+<?php $page_name = "As Minhas Consultas Marcadas" ?>
+<?php
+$api = new Api();
+$id_doctor = $_SESSION["hashed_id"];
+?>
 
 <body id="kt_app_body" data-kt-app-header-fixed-mobile="true" data-kt-app-toolbar-enabled="true" class="app-default">
     <div class="d-flex flex-column flex-root app-root" id="kt_app_root">
@@ -35,13 +40,10 @@
                                             </div>
 
                                             <div class="d-flex flex-column flex-sm-row align-items-center justify-content-md-end gap-3">
+                                                <!-- Sincronizar Tabela -->
                                                 <button type="button" class="btn btn-icon btn-active-light-primary lh-1" data-datatable-action="sync" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss="click" title="Sincronizar tabela">
                                                     <i class="ki-outline ki-arrows-circle fs-2"></i>
                                                 </button>
-
-                                                <a href="add" class="btn btn-light-primary d-flex align-items-center lh-1">
-                                                    <i class="ki-outline ki-plus fs-2"></i>Adicionar
-                                                </a>
                                             </div>
                                         </div>
 
@@ -51,9 +53,10 @@
                                                     <tr class="fw-bold text-muted bg-light">
                                                         <th class="ps-4 fs-6 min-w-150px rounded-start" data-priority="1">Médico</th>
                                                         <th class="ps-4 fs-6 min-w-150px rounded-start" data-priority="2">Utente</th>
-                                                        <th class="ps-4 fs-6 min-w-100px rounded-start" data-priority="3">Hora</th>
-                                                        <th class="ps-4 fs-6 min-w-80px rounded-start" data-priority="4">Estado</th>
-                                                        <th class="pe-4 fs-6 min-w-50px text-sm-end rounded-end" data-priority="5">Ações</th>
+                                                        <th class="ps-4 fs-6 min-w-150px rounded-start" data-priority="3">Unidade de Saúde</th>
+                                                        <th class="ps-4 fs-6 min-w-100px rounded-start" data-priority="4">Hora</th>
+                                                        <th class="ps-4 fs-6 min-w-80px rounded-start" data-priority="5">Estado</th>
+                                                        <th class="pe-4 fs-6 min-w-50px text-sm-end rounded-end" data-priority="6">Ações</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody></tbody>
@@ -98,7 +101,7 @@
                         data: () => {
                             return JSON.stringify({
                                 'start_date': moment(document.querySelector(`input[data-datatable-action="date"]`).value, "DD/MM/YYYY").format("YYYY-MM-DD"),
-                                'hashed_id_doctor': "<?php echo $_SESSION["hashed_id"] ?>"
+                                'hashed_id_doctor': "<?php echo $id_doctor ?>"
                             });
                         }
                     },
@@ -107,6 +110,9 @@
                         },
                         {
                             data: "patient_first_name"
+                        },
+                        {
+                            data: "health_unit_name"
                         },
                         {
                             data: "start_time"
@@ -151,6 +157,20 @@
                             targets: 2,
                             orderable: true,
                             render: (data, type, row) => {
+                                return `
+									<div class="d-inline-flex align-items-center">                                
+										<div class="d-flex justify-content-center flex-column">
+										<span class="mb-1 fs-6 lh-sm">${row.health_unit_name}</span>
+										</div>
+									</div>
+								`;
+
+                            },
+                        },
+                        {
+                            targets: 3,
+                            orderable: true,
+                            render: (data, type, row) => {
 
                                 const start_tim = moment(row.start_time, 'HH:mm:ss').format('HH:mm');
                                 const end_tim = moment(row.end_time, 'HH:mm:ss').format('HH:mm');
@@ -159,14 +179,14 @@
                                 return `
 									<div class="d-inline-flex align-items-center">                                
 										<div class="d-flex justify-content-center flex-column">
-											<span class="text-dark fw-bold text-hover-primary mb-1 fs-6 lh-sm">${formattedHour}</span>
+											<span class="mb-1 fs-6 lh-sm">${formattedHour}</span>
 										</div>
 									</div>
 								`;
                             },
                         },
                         {
-                            targets: 3,
+                            targets: 4,
                             orderable: true,
                             render: (data, type, row) => {
                                 if (row.appointment_status === 0) {
@@ -213,13 +233,19 @@
                             orderable: false,
                             className: "text-sm-end",
                             render: (data, type, row) => {
-                                return `
+                                if (row.appointment_status === 0) {
+                                    return `
 									<div>
-										<a href="edit?id=${row.hashed_id}" class="btn btn-icon btn-bg-light btn-color-primary btn-active-light-primary rounded w-35px h-35px me-1"><i class="ki-outline ki-notepad-edit fs-2"></i></a>
-										<a href="permissions?id=${row.hashed_id}" class="btn btn-icon btn-bg-light btn-color-info btn-active-light-info rounded w-35px h-35px me-1"><i class="ki-outline ki-lock fs-2"></i></a>
-										<button type="button" data-id="${row.hashed_id}" data-name="${row.email}" data-datatable-action="delete-row" class="btn btn-icon btn-bg-light btn-color-danger btn-active-light-danger rounded w-35px h-35px"><i class="ki-outline ki-trash fs-2"></i></button>
+										<a href="view?id=${row.hashed_id_appointment}" class="btn btn-icon btn-bg-light btn-color-primary btn-active-light-primary rounded w-35px h-35px me-1"><i class="ki-outline ki-google-play fs-2"></i></a>
 									</div>
 								`;
+                                } else {
+                                    return `
+									<div>
+										<a href="view?id=${row.hashed_id_appointment}" class="btn btn-icon btn-bg-light btn-color-primary btn-active-light-primary rounded w-35px h-35px me-1"><i class="ki-outline ki-information-2 fs-2"></i></a>
+									</div>
+								`;
+                                }
                             },
                         },
                     ],
@@ -351,6 +377,14 @@
                 });
             };
 
+            var handleFilterDatatable = () => {
+                const filterButton = document.querySelector(`[data-datatable-action="filter"]`);
+
+                filterButton.addEventListener("click", () => {
+                    dt.ajax.reload()
+                });
+            };
+
             return {
                 init: () => {
                     initDatatable()
@@ -358,6 +392,7 @@
                     handleSearchDatatable()
                     handleDeleteRows()
                     handleDateFilter()
+                    handleFilterDatatable()
                 },
             }
         })()
