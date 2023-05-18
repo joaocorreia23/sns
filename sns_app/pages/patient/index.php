@@ -1,4 +1,5 @@
 <?php require_once($_SERVER["DOCUMENT_ROOT"] . "/head.php") ?>
+<?php $page_name = "A Minha Agenda" ?>
 <?php $id_patient = $_SESSION["hashed_id"]; ?>
 
 <body id="kt_app_body" data-kt-app-header-fixed-mobile="true" data-kt-app-toolbar-enabled="true" class="app-default">
@@ -52,19 +53,50 @@
             hashed_id_patient: "<?php echo $id_patient ?>",
         };
 
-        const calendarEvents = [{
-            url: "http://localhost:3000/api/appointments/calendar",
-            method: "POST",
-            contentType: "application/json",
-            body: JSON.stringify(requestBody),
-            error: () => {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Não foi possível carregar as Consultas."
+        const failureCallbackMessage = () => {
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Não foi possível carregar as consultas."
+            });
+        }
+
+        const calendarCurrentEvents = function(info, successCallback, failureCallback) {
+            fetch("http://localhost:3000/api/appointments/calendar", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        hashed_id_patient: "<?php echo $id_patient ?>",
+                    }),
+                })
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data);
+
+                    if (data.length > 0) {
+                        const events = data.map((event) => {
+                            return {
+                                id: event.id,
+                                title: event.title,
+                                start: event.start,
+                                end: event.end
+                            };
+                        });
+                        console.log(events);
+                        successCallback(events);
+                    } else {
+                        //failureCallbackMessage();
+                        //failureCallback();
+                    }
+
+                })
+                .catch((error) => {
+                    failureCallbackMessage();
+                    //failureCallback();
                 });
-            }
-        }];
+        }
 
         var calendar = new FullCalendar.Calendar(calendarEl, {
             headerToolbar: {
@@ -89,7 +121,7 @@
                     arg.draggedEl.parentNode.removeChild(arg.draggedEl);
                 }
             },
-            eventSources: calendarEvents,
+            events: calendarCurrentEvents,
             eventClick: (info) => handleCalendarEventClick(info),
             select: (info) => handleCalendarSelect(info),
         });

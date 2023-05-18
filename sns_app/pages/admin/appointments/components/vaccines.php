@@ -17,7 +17,7 @@ $vaccines_info = $vaccines_info["response"]["data"];
                     <tbody>
                         <thead class="border-bottom border-gray-200 fs-7 fw-bold">
                             <tr class="text-start text-muted text-uppercase gs-0">
-                                <th class="min-w-150px sorting">Nome</th>
+                                <th class="min-w-150px sorting">Nome da Vacina</th>
                                 <th class="min-w-150px sorting">Dosagem</th>
                                 <th class="min-w-80px sorting">Validade</th>
                                 <th class="min-w-80px sorting">Estado</th>
