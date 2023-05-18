@@ -526,7 +526,7 @@
                         <!-- Agenda -->
                         <div class="menu-item here show menu-here-bg me-0 me-lg-2">
                             <span class="menu-link">
-                                <a href="<?php echo $link_home; ?>pages/patient/index"><span class="menu-title">Agenda</span></a>
+                                <a href="<?php echo $link_home; ?>pages/patient/schedule/index"><span class="menu-title">Agenda</span></a>
                                 <span class="menu-arrow d-lg-none"></span>
                             </span>
                         </div>

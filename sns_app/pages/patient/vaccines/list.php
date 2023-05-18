@@ -67,9 +67,12 @@
                     ajax: {
                         url: "http://localhost:3000/api/vaccines/administered/table",
                         type: "POST",
-                        data: {
-                            hashed_id_patient: "<?php echo $id_patient ?>",
-                        },
+                        contentType: "application/json",
+                        data: () => {
+                            return JSON.stringify({
+                                'hashed_id_patient': "<?php echo $id_patient ?>"
+                            });
+                        }
                     },
                     columns: [{
                             data: "vaccine_name"
