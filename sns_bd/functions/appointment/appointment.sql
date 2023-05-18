@@ -168,6 +168,7 @@ CREATE OR REPLACE FUNCTION get_appointments(
     doctor_district_name VARCHAR(255),
     doctor_country_name VARCHAR(255),
     doctor_status INT,
+    doctor_number VARCHAR(255),
     hashed_id_patient VARCHAR(255),
     patient_username VARCHAR(255),
     patient_email VARCHAR(255),
@@ -184,7 +185,8 @@ CREATE OR REPLACE FUNCTION get_appointments(
     patient_county_name VARCHAR(255),
     patient_district_name VARCHAR(255),
     patient_country_name VARCHAR(255),
-    patient_status INT
+    patient_status INT,
+    patient_number VARCHAR(255)
 
 ) AS $$
 DECLARE
@@ -248,6 +250,7 @@ BEGIN
         u_doctor_d.district_name as doctor_district_name,
         u_doctor_ct.country_name as doctor_country_name,
         u_doctor.status as doctor_status,
+        doc.doctor_number as doctor_number,
         u_patient.hashed_id as hashed_id_patient,
         u_patient.username as patient_username,
         u_patient.email as patient_email,
@@ -264,7 +267,8 @@ BEGIN
         u_patient_c.county_name as patient_county_name,
         u_patient_d.district_name as patient_district_name,
         u_patient_ct.country_name as patient_country_name,
-        u_patient.status as patient_status
+        u_patient.status as patient_status,
+        pat.patient_number as patient_number
         FROM appointment a
         INNER JOIN health_unit hu ON hu.id_health_unit = a.id_health_unit
         LEFT JOIN address hu_a ON hu_a.id_address = hu.id_address
@@ -286,6 +290,8 @@ BEGIN
         LEFT JOIN county u_patient_c ON u_patient_c.id_county = u_patient_zc.id_county
         LEFT JOIN district u_patient_d ON u_patient_d.id_district = u_patient_c.id_district
         LEFT JOIN country u_patient_ct ON u_patient_ct.id_country = u_patient_d.id_country
+        LEFT JOIN doctor doc ON doc.id_user = u_doctor.id_user
+        LEFT JOIN patient pat ON pat.id_user = u_patient.id_user
     ';
 
     IF id_appointment_in IS NOT NULL THEN

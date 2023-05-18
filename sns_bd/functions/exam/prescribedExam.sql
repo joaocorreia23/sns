@@ -527,7 +527,7 @@ BEGIN
         END IF;
     END IF;
 
-    UPDATE prescribed_exam SET scheduled_date = scheduled_date_in WHERE id_prescribed_exam = prescribed_exam_id;
+    UPDATE prescribed_exam SET scheduled_date = scheduled_date_in, status=1 WHERE id_prescribed_exam = prescribed_exam_id;
 	RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql;

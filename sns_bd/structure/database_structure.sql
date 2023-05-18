@@ -153,7 +153,7 @@ CREATE TABLE admin (
 CREATE TABLE doctor (
 	id_doctor BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('doctor_sequence'::regclass),
 	id_user BIGINT NOT NULL,
-	doctor_number INT UNIQUE NOT NULL,
+	doctor_number VARCHAR(255) UNIQUE NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	FOREIGN KEY (id_user) REFERENCES users(id_user)
 );
@@ -162,10 +162,11 @@ CREATE TABLE doctor (
 CREATE TABLE patient (
 	id_patient BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('patient_sequence'::regclass),
 	id_user BIGINT NOT NULL,
-	patient_number INT UNIQUE NOT NULL,
+	patient_number VARCHAR(255) UNIQUE NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	FOREIGN KEY (id_user) REFERENCES users(id_user)
 );
+
 
 -- =======================
 -- END: USER

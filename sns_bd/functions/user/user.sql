@@ -482,7 +482,9 @@ RETURNS TABLE (
     county_name VARCHAR(255),
     district_name VARCHAR(255),
     country_name VARCHAR(255),
-    id_country BIGINT
+    id_country BIGINT,
+    patient_number VARCHAR(255),
+    doctor_number VARCHAR(255)
 ) AS $$
 BEGIN
     IF hashed_id_in IS NOT NULL AND id_user_in IS NOT NULL THEN
@@ -497,7 +499,8 @@ BEGIN
             zc.address, zc.zip_code,
             c.county_name,
             d.district_name,
-            cty.country_name, cty.id_country
+            cty.country_name, cty.id_country,
+            p.patient_number, doc.doctor_number
         FROM users u 
         LEFT JOIN user_info uf ON u.id_user=uf.id_user
         LEFT JOIN address ad ON uf.id_address=ad.id_address
@@ -506,6 +509,8 @@ BEGIN
         LEFT JOIN district d ON c.id_district=d.id_district
         LEFT JOIN country cty ON d.id_country=cty.id_country
         LEFT JOIN country cty_n ON uf.nationality=cty_n.id_country
+        LEFT JOIN patient p ON u.id_user=p.id_user
+        LEFT JOIN doctor doc ON u.id_user=doc.id_user
         WHERE u.status = status_in;
 
     ELSEIF hashed_id_in IS NULL AND id_user_in IS NULL AND role_in IS NOT NULL THEN
@@ -542,7 +547,8 @@ BEGIN
             zc.address, zc.zip_code,
             c.county_name,
             d.district_name,
-            cty.country_name, cty.id_country
+            cty.country_name, cty.id_country,
+            p.patient_number, doc.doctor_number
         FROM users u 
         LEFT JOIN user_info uf ON u.id_user=uf.id_user
         LEFT JOIN address ad ON uf.id_address=ad.id_address
@@ -551,6 +557,8 @@ BEGIN
         LEFT JOIN district d ON c.id_district=d.id_district
         LEFT JOIN country cty ON d.id_country=cty.id_country
         LEFT JOIN country cty_n ON uf.nationality=cty_n.id_country
+        LEFT JOIN patient p ON u.id_user=p.id_user
+        LEFT JOIN doctor doc ON u.id_user=doc.id_user
         WHERE u.id_user = get_users.id_user_in AND u.status = status_in;
         IF NOT FOUND THEN
             RAISE EXCEPTION 'Utilizador com o id_user "%" não existe', id_user_in; --USER NOT FOUND
@@ -563,7 +571,8 @@ BEGIN
             zc.address, zc.zip_code,
             c.county_name,
             d.district_name,
-            cty.country_name, cty.id_country
+            cty.country_name, cty.id_country,
+            p.patient_number, doc.doctor_number
         FROM users u 
         LEFT JOIN user_info uf ON u.id_user=uf.id_user
         LEFT JOIN address ad ON uf.id_address=ad.id_address
@@ -572,6 +581,8 @@ BEGIN
         LEFT JOIN district d ON c.id_district=d.id_district
         LEFT JOIN country cty ON d.id_country=cty.id_country
         LEFT JOIN country cty_n ON uf.nationality=cty_n.id_country
+        LEFT JOIN patient p ON u.id_user=p.id_user
+        LEFT JOIN doctor doc ON u.id_user=doc.id_user
         WHERE u.hashed_id = get_users.hashed_id_in AND u.status = status_in;
         IF NOT FOUND THEN
             RAISE EXCEPTION 'Utilizador com o hased_id "%" não existe', hashed_id_in; --USER NOT FOUND
@@ -657,7 +668,7 @@ $$ LANGUAGE plpgsql;
 --
 --
 -- Create Admin
-/* CREATE OR REPLACE FUNCTION create_admin(
+/* CREATE OR REPLACE FUNCTION create_or_update_admin(
     IN id_user BIGINT DEFAULT NULL,
     IN hashed_id VARCHAR(255) DEFAULT NULL,
     IN username VARCHAR(64) DEFAULT NULL,
@@ -719,66 +730,207 @@ $$ LANGUAGE plpgsql; */
 --
 --
 --
--- Create Doctor
-/* CREATE OR REPLACE FUNCTION create_doctor(
+-- Check Doctor Number Usage
+CREATE OR REPLACE FUNCTION check_doctor_number_usage(
+    IN doctor_number VARCHAR(255),
     IN id_user BIGINT DEFAULT NULL,
-    IN hashed_id VARCHAR(255) DEFAULT NULL,
-    IN username VARCHAR(64) DEFAULT NULL,
-    IN email VARCHAR(255) DEFAULT NULL,
-    IN password VARCHAR(255) DEFAULT NULL,
-    IN avatar_path VARCHAR(255) DEFAULT NULL
+    IN hashed_id VARCHAR(255) DEFAULT NULL
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+    out_id_user BIGINT DEFAULT NULL;
+    out_id_doctor BIGINT;
+BEGIN
+    IF id_user IS NOT NULL AND (hashed_id IS NOT NULL AND hashed_id != '') THEN
+        RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_user. Ambos foram passados.';
+    END IF;
+
+    IF hashed_id IS NOT NULL AND hashed_id != '' THEN
+        SELECT users.id_user INTO out_id_user FROM users WHERE hashed_id = hashed_id;
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Não existe nenhum utilizador com o hashed_id passado';
+        END IF;
+    ELSE
+        SELECT users.id_user INTO out_id_user FROM users WHERE users.id_user = check_doctor_number_usage.id_user;
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Não existe nenhum utilizador com o id_user passado';
+        END IF;
+    END IF;
+
+    IF out_id_user IS NOT NULL THEN
+        IF EXISTS (SELECT doctor.id_user FROM doctor WHERE doctor.id_user != out_id_user AND doctor.doctor_number = check_doctor_number_usage.doctor_number) THEN
+            RETURN FALSE;
+        ELSE
+            RETURN TRUE;
+        END IF;
+    ELSE
+        IF EXISTS (SELECT doctor.id_user FROM doctor WHERE doctor.doctor_number = check_doctor_number_usage.doctor_number) THEN
+            RETURN FALSE;
+        ELSE
+            RETURN TRUE;
+        END IF;
+    END IF;
+
+END;
+$$ LANGUAGE plpgsql;
+--
+--
+--
+-- Create Doctor
+CREATE OR REPLACE FUNCTION create_or_update_doctor(
+    IN id_user_in BIGINT DEFAULT NULL,
+    IN hashed_id_user_in VARCHAR(255) DEFAULT NULL,
+    IN doctor_number VARCHAR(255) DEFAULT NULL
 )
 RETURNS BIGINT AS $$
 DECLARE
     out_id_user BIGINT;
     out_id_doctor BIGINT;
 BEGIN
-    IF id_user IS NOT NULL AND hashed_id IS NOT NULL THEN
+    IF id_user_in IS NOT NULL AND (hashed_id_user_in IS NOT NULL AND hashed_id_user_in != '') THEN
         RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_user. Ambos foram passados.';
     END IF;
 
-    IF hashed_id IS NOT NULL THEN
-        SELECT id_user INTO out_id_user FROM users WHERE hashed_id = hashed_id;
+    IF hashed_id_user_in IS NOT NULL AND hashed_id_user_in != '' THEN
+        SELECT id_user INTO out_id_user FROM users WHERE hashed_id = hashed_id_user_in;
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Não existe nenhum utilizador com o hashed_id passado';
+        END IF;
     ELSE
-        out_id_user := id_user;
-    END IF;
-
-    IF out_id_user IS NULL THEN
-        out_id_user := create_user(username, email, password, avatar_path);
-        --GET HASHED ID
-        SELECT users.hashed_id INTO create_doctor.hashed_id FROM users WHERE users.id_user = out_id_user;
-    ELSE
-        SELECT users.hashed_id INTO create_doctor.hashed_id FROM users WHERE users.id_user = out_id_user;
-    END IF;
-
-    --Check if user exists
-    IF NOT EXISTS (SELECT get_users(out_id_user)) THEN
-        IF id_user IS NOT NULL THEN
-            RAISE EXCEPTION 'Utilizador com o id_user "%" não existe', id_user; --USER NOT FOUND
-        ELSE
-            RAISE EXCEPTION 'Utilizador com o hashed_id "%" não existe', hashed_id; --USER NOT FOUND
+        SELECT id_user INTO out_id_user FROM users WHERE id_user = id_user_in;
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Não existe nenhum utilizador com o id_user passado';
         END IF;
     END IF;
 
-    --Check if user is already a doctor
-    IF EXISTS (SELECT 1 FROM doctor WHERE doctor.id_user = out_id_user) THEN
-        IF id_user IS NOT NULL THEN
-           RAISE EXCEPTION 'Utilizador com o id_user "%" já é um Médico', id_user; --USER ALREADY DOCTOR
-        ELSE
-            RAISE EXCEPTION 'Utilizador com o hashed_id "%" já é um Médico', hashed_id; --USER ALREADY DOCTOR
-        END IF;
-    ELSE
-        INSERT INTO doctor (id_user) VALUES (out_id_user) RETURNING id_doctor INTO out_id_doctor;
-        INSERT INTO user_role (id_user, role) VALUES (out_id_user, 'Doctor');
+    IF doctor_number IS NULL OR doctor_number = '' THEN
+        RAISE EXCEPTION 'O número de médico não pode ser nulo';
     END IF;
 
-    RETURN out_id_doctor;
+    IF check_doctor_number_usage(doctor_number, out_id_user, NULL) = FALSE THEN
+        RAISE EXCEPTION 'O número de médico já está a ser utilizado';
+    END IF;
+
+    IF check_user_role(out_id_user, NULL, 'Doctor') = FALSE THEN
+        RAISE EXCEPTION 'O utilizador não é um médico';
+    ELSE
+        SELECT id_doctor INTO out_id_doctor FROM doctor WHERE id_user = out_id_user;
+        IF NOT FOUND THEN
+            INSERT INTO doctor (id_user, doctor_number) VALUES (out_id_user, create_or_update_doctor.doctor_number) RETURNING id_doctor INTO out_id_doctor;
+        ELSE
+            UPDATE doctor SET doctor_number = create_or_update_doctor.doctor_number WHERE id_user = out_id_user RETURNING id_doctor INTO out_id_doctor;
+        END IF;
+    END IF;
+
+    IF out_id_doctor IS NULL THEN
+        RAISE EXCEPTION 'Não foi possível adicionar o Numero da Cédula Profissional ao médico';
+    ELSE
+        RETURN out_id_doctor;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+--
+--
+--
+-- Check Patient Number Usage
+CREATE OR REPLACE FUNCTION check_patient_number_usage(
+    IN patient_number_in VARCHAR(255),
+    IN id_user_in BIGINT DEFAULT NULL,
+    IN hashed_id_in VARCHAR(255) DEFAULT NULL
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+    out_id_user BIGINT DEFAULT NULL;
+    out_id_doctor BIGINT;
+BEGIN
+    IF id_user_in IS NOT NULL AND (hashed_id_in IS NOT NULL AND hashed_id_in != '') THEN
+        RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_user. Ambos foram passados.';
+    END IF;
+
+    IF hashed_id_in IS NOT NULL AND hashed_id_in != '' THEN
+        SELECT id_user INTO out_id_user FROM users WHERE hashed_id = hashed_id_in;
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Não existe nenhum utilizador com o hashed_id passado';
+        END IF;
+    ELSE
+        SELECT id_user INTO out_id_user FROM users WHERE id_user = id_user_in;
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Não existe nenhum utilizador com o id_user passado';
+        END IF;
+    END IF;
+
+    IF out_id_user IS NOT NULL THEN
+        IF EXISTS (SELECT id_user FROM patient WHERE id_user != out_id_user AND patient_number = patient_number_in) THEN
+            RETURN FALSE;
+        ELSE
+            RETURN TRUE;
+        END IF;
+    ELSE
+        IF EXISTS (SELECT id_user FROM patient WHERE patient_number = patient_number_in) THEN
+            RETURN FALSE;
+        ELSE
+            RETURN TRUE;
+        END IF;
+    END IF;
 
 END;
-$$ LANGUAGE plpgsql; */
---SELECT create_doctor(13, '3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278', NULL, NULL, NULL, NULL); --Both id_user and hashed_id error
---SELECT create_doctor(13, NULL, NULL, NULL, NULL, NULL); --id_user already doctor
---SELECT create_doctor(NULL, '3fdba35f04dc8c462986c992bcf875546257113072a909c162f7e470e581e278', NULL, NULL, NULL, NULL); --Hashed_id already doctor
+$$ LANGUAGE plpgsql;
+--
+--
+--
+-- Create or update Patient
+CREATE OR REPLACE FUNCTION create_or_update_patient(
+    IN id_user_in BIGINT DEFAULT NULL,
+    IN hashed_id_user_in VARCHAR(255) DEFAULT NULL,
+    IN patient_number_in VARCHAR(255) DEFAULT NULL
+)
+RETURNS BIGINT AS $$
+DECLARE
+    out_id_user BIGINT;
+    out_id_patient BIGINT;
+BEGIN
+    IF id_user_in IS NOT NULL AND (hashed_id_user_in IS NOT NULL AND hashed_id_user_in != '') THEN
+        RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_user. Ambos foram passados.';
+    END IF;
+
+    IF hashed_id_user_in IS NOT NULL AND hashed_id_user_in != '' THEN
+        SELECT id_user INTO out_id_user FROM users WHERE hashed_id = hashed_id_user_in;
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Não existe nenhum utilizador com o hashed_id passado';
+        END IF;
+    ELSE
+        SELECT id_user INTO out_id_user FROM users WHERE id_user = id_user_in;
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Não existe nenhum utilizador com o id_user passado';
+        END IF;
+    END IF;
+
+    IF patient_number_in IS NULL OR patient_number_in = '' THEN
+        RAISE EXCEPTION 'O número de Utente não pode ser nulo';
+    END IF;
+
+    IF check_patient_number_usage(patient_number_in, out_id_user, NULL) = FALSE THEN
+        RAISE EXCEPTION 'O número de Utente já está a ser utilizado';
+    END IF;
+
+    IF check_user_role(out_id_user, NULL, 'Patient') = FALSE THEN
+        RAISE EXCEPTION 'O utilizador não é um Utente';
+    ELSE
+        SELECT id_patient INTO out_id_patient FROM patient WHERE id_user = out_id_user;
+        IF NOT FOUND THEN
+            INSERT INTO patient (id_user, patient_number) VALUES (out_id_user, patient_number_in) RETURNING id_patient INTO out_id_patient;
+        ELSE
+            UPDATE patient SET patient_number = patient_number_in WHERE id_user = out_id_user RETURNING id_patient INTO out_id_patient;
+        END IF;
+    END IF;
+
+    IF out_id_patient IS NULL THEN
+        RAISE EXCEPTION 'Não foi possível adicionar o Numero da Utente ao Utente';
+    ELSE
+        RETURN out_id_patient;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
 --
 --
 --
@@ -861,7 +1013,9 @@ CREATE OR REPLACE FUNCTION update_user_info(
     county VARCHAR(255) DEFAULT NULL,
     district VARCHAR(255) DEFAULT NULL,
     id_country BIGINT DEFAULT NULL,
-    avatar_path VARCHAR(255) DEFAULT NULL
+    avatar_path VARCHAR(255) DEFAULT NULL,
+    doctor_number VARCHAR(255) DEFAULT NULL,
+    patient_number VARCHAR(255) DEFAULT NULL
 )
 RETURNS BIGINT AS $$
 DECLARE
@@ -940,6 +1094,18 @@ BEGIN
         ELSE 
             UPDATE user_info SET id_address = out_id_address WHERE id_user = out_id_user;
         END IF;
+
+        IF doctor_number IS NOT NULL THEN
+            IF create_or_update_doctor(out_id_user, NULL, doctor_number) IS NULL THEN
+                RAISE EXCEPTION 'Não foi possível criar ou atualizar o médico';
+            END IF;
+        END IF;
+
+        IF patient_number IS NOT NULL THEN
+            IF create_or_update_patient(out_id_user, NULL, patient_number) IS NULL THEN
+                RAISE EXCEPTION 'Não foi possível criar ou atualizar o paciente';
+            END IF;
+        END IF;
     
         RETURN out_id_user;
     ELSE 
@@ -976,6 +1142,18 @@ BEGIN
 
         INSERT INTO user_info (first_name, last_name, avatar_path, birth_date, gender, tax_number, phone_number, contact_email, nationality, id_address, id_user) VALUES (update_user_info.first_name, update_user_info.last_name, update_user_info.avatar_path, update_user_info.birth_date, update_user_info.gender, update_user_info.tax_number, update_user_info.phone_number, update_user_info.contact_email, update_user_info.nationality, out_id_address, out_id_user); 
         UPDATE users SET status=1 WHERE id_user = out_id_user;
+
+        IF doctor_number IS NOT NULL THEN
+            IF create_or_update_doctor(out_id_user, NULL, doctor_number) IS NULL THEN
+                RAISE EXCEPTION 'Não foi possível criar ou atualizar o médico';
+            END IF;
+        END IF;
+
+        IF patient_number IS NOT NULL THEN
+            IF create_or_update_patient(out_id_user, NULL, patient_number) IS NULL THEN
+                RAISE EXCEPTION 'Não foi possível criar ou atualizar o paciente';
+            END IF;
+        END IF;
         RETURN out_id_user;
     END IF;
 END;
