@@ -6,10 +6,11 @@ $api = new Api();
 $id_patient = $_SESSION["hashed_id"];
 ?>
 <style>
-    .select-info{
-        display: none!important;
+    .select-info {
+        display: none !important;
     }
 </style>
+
 <body id="kt_app_body" data-kt-app-header-fixed-mobile="true" data-kt-app-toolbar-enabled="true" class="app-default">
     <div class="d-flex flex-column flex-root app-root" id="kt_app_root">
         <div class="app-page flex-column flex-column-fluid" id="kt_app_page">
@@ -131,9 +132,12 @@ $id_patient = $_SESSION["hashed_id"];
                     ajax: {
                         url: "http://localhost:3000/api/prescriptions/table",
                         type: "POST",
-                        data: {
-                            hashed_id_patient: "<?php echo $id_patient ?>",
-                        },
+                        contentType: "application/json",
+                        data: () => {
+                            return JSON.stringify({
+                                'hashed_id_patient': "<?php echo $id_patient ?>"
+                            });
+                        }
                     },
                     columns: [{
                         data: "prescription_date"
@@ -198,7 +202,7 @@ $id_patient = $_SESSION["hashed_id"];
                             },
                         },
                     ],
-                    createdRow: function (row, data, index) {
+                    createdRow: function(row, data, index) {
                         $('td', row).eq(1).attr('colspan', 2);
                         $('td', row).eq(2).attr('colspan', 2);
                     },
