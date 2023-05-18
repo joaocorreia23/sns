@@ -210,6 +210,12 @@ $id_patient = $_SESSION["hashed_id"];
 
                 table = dt.$;
                 console.log('table', table);
+                if(dt.rows.length < 1){
+                    setInterval(function() {
+                        $('.dataTables_empty').attr('colspan', 4);    
+                    }, 50);
+                                    
+                }
 
                 // Re-init functions on every table re-draw -- more info: https://datatables.net/reference/event/draw
                 dt.on('draw', function() {
