@@ -113,10 +113,9 @@ $countries_list = $countries["response"];
                                             <!--begin::Card body-->
                                             <div class="card-body border-top p-9">
 
-
                                                 <div class="row mb-6">
-                                                    <label class="col-lg-4 col-form-label fw-semibold fs-6">Avatar</label>
-                                                    <div class="col-lg-8">
+                                                    <label class="col-form-label fw-semibold fs-6">Avatar</label>
+                                                    <div class="">
                                                         <div class="image-input image-input-outline" data-kt-image-input="true" style="background-image: url('assets/media/svg/avatars/blank.svg')">
                                                             <div class="image-input-wrapper w-125px h-125px" style="background-image: url(<?php echo $user_info_data["avatar_path"] ?>)"></div>
                                                             <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="change" data-bs-toggle="tooltip" aria-label="Change avatar" data-bs-original-title="Change avatar" data-kt-initialized="1">
@@ -136,8 +135,8 @@ $countries_list = $countries["response"];
                                                 </div>
 
                                                 <div class="row mb-6">
-                                                    <label class="col-lg-4 col-form-label required fw-semibold fs-6">Nome Completo</label>
-                                                    <div class="col-lg-8">
+                                                    <label class="col-form-label required fw-semibold fs-6">Nome Completo</label>
+                                                    <div class="">
                                                         <div class="row">
                                                             <div class="col-lg-6 fv-row fv-plugins-icon-container">
                                                                 <input type="text" name="first_name" class="form-control form-control-lg form-control-solid mb-3 mb-lg-0" placeholder="Primeiro Nome" value="<?php echo $user_info_data["first_name"] ?>">
@@ -262,6 +261,29 @@ $countries_list = $countries["response"];
 
 
                                             </div>
+                                            <?php if($_SESSION['active_role'] === "Patient" || $_SESSION['active_role'] === "Doctor") { ?>
+                                                <div class="card-body border-top p-9">
+                                                    <div class="row">
+                                                        <?php if($_SESSION['active_role'] === "Patient") { ?>
+                                                            <div class="col-12 col-lg-4">
+                                                                <label class="col-lg-12 col-form-label fw-semibold fs-6">Numero de Utente</label>
+                                                                <div class="col-lg-12 fv-row fv-plugins-icon-container">
+                                                                    <input type="text" name="patient_number" class="form-control form-control-lg form-control-solid" placeholder="Numero de Utente" value="<?php echo $user_info_data["patient_number"] ?>">
+                                                                    <div class="fv-plugins-message-container invalid-feedback"></div>
+                                                                </div>
+                                                            </div>
+                                                        <?php } else if($_SESSION['active_role'] === "Doctor") { ?>
+                                                            <div class="col-12 col-lg-4">
+                                                                <label class="col-lg-12 col-form-label fw-semibold fs-6">Número de Cédula Profissional</label>
+                                                                <div class="col-lg-12 fv-row fv-plugins-icon-container">
+                                                                    <input type="text" name="doctor_number" class="form-control form-control-lg form-control-solid" placeholder="Número de Cédula Profissional" value="<?php echo $user_info_data["doctor_number"] ?>">
+                                                                    <div class="fv-plugins-message-container invalid-feedback"></div>
+                                                                </div>
+                                                            </div>
+                                                        <?php } ?>
+                                                    </div>
+                                                </div>
+                                            <?php } ?>
                                             <!--end::Card body-->
                                             <!--begin::Actions-->
                                             <div class="card-footer d-flex justify-content-end py-6 px-9">
@@ -347,6 +369,8 @@ $countries_list = $countries["response"];
                     door_number: form.door_number.value,
                     floor: form.floor.value,
                     avatar_path: "assets/media/uploads/ico.png",
+                    patient_number: <?php if($_SESSION['active_role'] === "Patient") { echo "form.patient_number.value,"; } else { echo "null,"; } ?>
+                    doctor_number: <?php if($_SESSION['active_role'] === "Doctor") { echo "form.doctor_number.value,"; } else { echo "null,"; } ?>
                 };
 
 

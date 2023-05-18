@@ -1,9 +1,3 @@
-<?php
-$data = ["hashed_id_appointment" => $id_appointment];
-$medication_info = $api->post("prescriptions/", $data, null);
-
-$medication_info = $medication_info["response"]["data"];
-?>
 
 <style>
     .select-info {
@@ -112,9 +106,12 @@ $medication_info = $medication_info["response"]["data"];
                 ajax: {
                     url: "http://localhost:3000/api/prescriptions/table",
                     type: "POST",
-                    data: {
-                        hashed_id_appointment: "<?php echo $id_appointment ?>",
-                    },
+                    contentType: "application/json",
+                        data: () => {
+                            return JSON.stringify({
+                                'hashed_id_appointment': "<?php echo $id_appointment ?>"
+                            });
+                        }
                 },
                 columns: [{
                     data: "prescription_date"
