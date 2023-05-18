@@ -160,7 +160,7 @@ $page_name = $appointment_info["title"] . ' - ' . (new DateTime($appointment_inf
 																<tr>
 																	<td class="fw-bold d-flex">
 																		<span class="text-muted me-2"><i class="ki-outline ki-wallet fs-2 me-2"></i></span>
-																		Cedula Médico Por Fazer
+																		<?php echo $appointment_info["doctor_number"] ?>
 																	</td>
 																</tr>
 															</tbody>
@@ -207,7 +207,7 @@ $page_name = $appointment_info["title"] . ' - ' . (new DateTime($appointment_inf
 																<tr>
 																	<td class="fw-bold d-flex">
 																		<span class="text-muted me-2"><i class="ki-outline ki-wallet fs-2 me-2"></i></span>
-																		Numero Utente Por Fazer
+																		<?php echo $appointment_info["patient_number"] ?>
 																	</td>
 																</tr>
 															</tbody>
@@ -280,6 +280,9 @@ $page_name = $appointment_info["title"] . ' - ' . (new DateTime($appointment_inf
 
 																<div class="fw-bold mt-5">NIF</div>
 																<div class="text-gray-600"><?php echo $appointment_info["patient_tax_number"] ?></div>
+
+																<div class="fw-bold mt-5">Número de Utente</div>
+																<div class="text-gray-600"><?php echo $appointment_info["patient_number"] ?></div>
 
 																<div class="fw-bold mt-5">Género</div>
 																<span class="badge badge-warning"><?php echo $appointment_info["patient_gender"] ?></span>

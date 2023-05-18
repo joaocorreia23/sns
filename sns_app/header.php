@@ -595,6 +595,7 @@
                         <!--begin::Menu separator-->
                         <div class="separator my-2"></div>
                         <!--end::Menu separator-->
+                        
                         <!--begin::Menu item-->
                         <div class="menu-item px-5">
                             <a href="<?php echo $link_home ?>profile" class="menu-link px-5">Meu Perfil</a>
@@ -605,6 +606,18 @@
                         <div class="separator my-2"></div>
                         <!--end::Menu separator-->
 
+                        <?php if(count($_SESSION['roles']) > 1){ ?>
+                            <!--begin::Menu item-->
+                            <div class="menu-item px-5">
+                                <a href="<?php echo $link_home ?>" class="menu-link px-5">Trocar de Conta</a>
+                            </div>
+                            <!--end::Menu item-->
+                            <!--begin::Menu separator-->
+                            <div class="separator my-2"></div>
+                            <!--end::Menu separator-->
+                        <?php } ?>
+                        
+                        
                         <!--begin::Menu item-->
                         <div class="menu-item px-5">
                             <a href="<?php echo $link_home ?>pages/auth/logout" class="menu-link px-5">Terminar Sessão</a>

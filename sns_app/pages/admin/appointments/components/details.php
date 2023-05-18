@@ -81,7 +81,7 @@
                 <div class="fw-bold fs-6 mt-4"><?php echo $appointment_info["doctor_first_name"] . ' ' . $appointment_info["doctor_last_name"] ?></span></div>
                 <div class="mt-5"><span class="fw-bold">Email: </span><?php echo $appointment_info["doctor_email"] ?></span></div>
                 <div class="mt-5"><span class="fw-bold">Telefone: </span><?php echo $appointment_info["doctor_phone_number"] ?></span></div>
-                <div class="mt-5"><span class="fw-bold">Cédula: </span><?php echo 'Cédula Por Fazer' ?></span></div>
+                <div class="mt-5"><span class="fw-bold">Cédula: </span><?php echo $appointment_info["doctor_number"] ?></span></div>
             </div>
         </div>
         <!--end::Card body-->
