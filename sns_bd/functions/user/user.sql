@@ -527,7 +527,8 @@ BEGIN
             zc.address, zc.zip_code,
             c.county_name,
             d.district_name,
-            cty.country_name, cty.id_country
+            cty.country_name, cty.id_country,
+            p.patient_number, doc.doctor_number
         FROM users u 
         LEFT JOIN user_info uf ON u.id_user=uf.id_user
         LEFT JOIN address ad ON uf.id_address=ad.id_address
@@ -536,6 +537,8 @@ BEGIN
         LEFT JOIN district d ON c.id_district=d.id_district
         LEFT JOIN country cty ON d.id_country=cty.id_country
         LEFT JOIN country cty_n ON uf.nationality=cty_n.id_country
+        LEFT JOIN patient p ON u.id_user=p.id_user
+        LEFT JOIN doctor doc ON u.id_user=doc.id_user
         JOIN user_role ur ON u.id_user=ur.id_user AND ur.role=role_in::role
         WHERE u.status = status_in;
 

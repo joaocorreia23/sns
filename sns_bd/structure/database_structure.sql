@@ -245,12 +245,14 @@ CREATE TABLE patient_doctor (
 	id_patient_doctor BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('patient_doctor_sequence'::regclass),
 	id_health_unit_doctor BIGINT NOT NULL,
 	id_health_unit_patient BIGINT NOT NULL,
-	start_date DATE NOT NULL,
-	end_date DATE NULL,
-	status INT NOT NULL DEFAULT 0,
+	start_date TIMESTAMP NOT NULL DEFAULT NOW(),
+	end_date TIMESTAMP NULL,
+	status INT NOT NULL DEFAULT 1,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+
+--start date from date to timestam
 
 -- =======================
 -- END: HEALTH UNIT

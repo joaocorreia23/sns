@@ -169,6 +169,39 @@ const Get_Health_Unit_Patients = (req, res) => {
     });
 };
 
+const Add_Patient_Doctor = (req, res) => {
+    const { hashed_id_health_unit, hashed_id_doctor, hashed_id_patient } = req.body;
+    pool.query("SELECT * FROM add_patient_doctor(NULL, $1, NULL, $2, NULL, $3)", [hashed_id_health_unit, hashed_id_doctor, hashed_id_patient], (error, results) => {
+        if (error) {
+            res.status(400).json({ "status": false, error: error.message, "message": "Não foi possível adicionar o Utente ao Médico!" });
+            return;
+        }
+        res.status(201).json({ "status": true, "message": "Utente adicionado ao Médico com Sucesso!" });
+    });
+};
+
+const Remove_Patient_Doctor = (req, res) => {
+    const { hashed_id_health_unit, hashed_id_doctor, hashed_id_patient } = req.body;
+    pool.query("SELECT * FROM remove_patient_doctor(NULL, $1, NULL, $2, NULL, $3)", [hashed_id_health_unit, hashed_id_doctor, hashed_id_patient], (error, results) => {
+        if (error) {
+            res.status(400).json({ "status": false, error: error.message, "message": "Não foi possível remover o Utente do Médico!" });
+            return;
+        }
+        res.status(201).json({ "status": true, "message": "Utente removido do Médico com Sucesso!" });
+    });
+};
+
+const Get_Patient_Doctor = (req, res) => {
+    const hashed_id_patient = req.params.hashed_id_patient;
+    pool.query("SELECT * FROM get_patient_current_health_unit_doctor(NULL, $1)", [hashed_id_patient], (error, results) => {
+        if (error) {
+            res.status(400).json({ "status": false, error: error.message, "message": "Não foi possível obter o Médico do Utente!" });
+            return;
+        }
+        res.status(200).json({ "status": true, "message": "Médico do Utente obtido com Sucesso!", "data": results.rows });
+    });
+};
+
 module.exports = {
     Get_Health_Units,
     Get_Health_Units_Disabled,
@@ -184,5 +217,8 @@ module.exports = {
     Get_Health_Unit_Doctors,
     Link_Patient,
     Unlink_Patient,
-    Get_Health_Unit_Patients
+    Get_Health_Unit_Patients,
+    Add_Patient_Doctor,
+    Remove_Patient_Doctor,
+    Get_Patient_Doctor
 };
