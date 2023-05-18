@@ -89,9 +89,6 @@ const Update_Appointment_Status = (req, res) => {
     });
 };
 
-
-
-
 module.exports = {
     Get_Appointments,
     Get_Appointments_Calendar,

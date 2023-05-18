@@ -31,6 +31,12 @@ router.post('/unlink_patient', controller.Unlink_Patient);
 
 router.get('/patients/:hashed_id', controller.Get_Health_Unit_Patients);
 
+router.post('/add_patient_doctor', controller.Add_Patient_Doctor);
+
+router.post('/remove_patient_doctor', controller.Remove_Patient_Doctor);
+
+router.get('/get_patient_doctor/:hashed_id_patient', controller.Get_Patient_Doctor);
+
 router.get('/:hashed_id', controller.Get_Health_UnitByHashedId);
 
 
