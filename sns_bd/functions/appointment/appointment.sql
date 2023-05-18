@@ -1,3 +1,9 @@
+--0
+--1
+--2
+--3
+--4
+
 -- Create Appointment
 CREATE OR REPLACE FUNCTION create_appointment(
     id_health_unit_in BIGINT DEFAULT NULL,
@@ -132,6 +138,10 @@ CREATE OR REPLACE FUNCTION get_appointments(
     status_in INT DEFAULT NULL
 ) RETURNS TABLE (
     hashed_id_appointment VARCHAR(255),
+    id BIGINT,
+    title VARCHAR(255),
+    start TIMESTAMP,
+    "end" TIMESTAMP,
     appointment_status INT,
     start_date DATE,
     start_time TIME,
@@ -213,7 +223,12 @@ BEGIN
         RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id_patient. Ambos foram passados.';
     END IF;
 
-    query := 'SELECT a.hashed_id as hashed_id_appointment, 
+    query := 'SELECT 
+        a.hashed_id as hashed_id_appointment, 
+        a.id_appointment as id,
+        (''Consulta - '' || ui_patient.first_name || '' '' || ui_patient.last_name)::varchar as title,
+        (a.start_date || ''T'' || a.start_time)::timestamp as start,
+        (a.start_date || ''T'' || a.end_time)::timestamp as "end",
         a.status as appointment_status,
 		a.start_date as start_date,
         a.start_time as start_time,
@@ -434,6 +449,7 @@ CREATE OR REPLACE FUNCTION get_appointments_for_calendar(
 ) RETURNS TABLE (
     hashed_id_appointment VARCHAR(255),
     id VARCHAR(255),
+    title VARCHAR(255),
     appointment_status INT,
     start_date VARCHAR(255),
     end_date VARCHAR(255),
@@ -517,6 +533,7 @@ BEGIN
     query := '
         SELECT a.hashed_id as hashed_id_appointment,
         a.hashed_id as id,
+        (''Consulta'' || '' - '' || ui_patient.first_name || '' '' || ui_patient.last_name ) as title,
         a.status as appointment_status,
 		a.start_date || T || a.start_time as start,
         a.end_date || T || a.end_time as end,
@@ -714,6 +731,61 @@ BEGIN
 
     query := query || ' ORDER BY a.start_date DESC';
     RETURN QUERY EXECUTE query;
+END;
+$$
+LANGUAGE plpgsql;
+--
+--
+--
+-- Change Health Unit Status
+CREATE OR REPLACE FUNCTION change_appointment_status(
+    id_appointment_in BIGINT DEFAULT NULL,
+    hashed_id_appointment_in VARCHAR(255) DEFAULT NULL,
+    status_in INT DEFAULT 1
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+    appointment_id BIGINT;
+BEGIN
+
+    IF status_in NOT IN (0, 1, 2, 3, 4) THEN
+        RAISE EXCEPTION 'O status deve ser 0 ou 1 ou 2 ou 3 ou 4';
+    END IF;
+
+    IF id_appointment_in IS NOT NULL AND hashed_id_appointment_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Apenas pode ser passado o hashed_id ou o id, não ambos';
+    END IF;
+
+    IF hashed_id_appointment_in IS NOT NULL THEN
+        SELECT id_appointment INTO appointment_id FROM appointment WHERE hashed_id = hashed_id_appointment_in;
+    ELSE
+        appointment_id := id_appointment_in;
+    END IF;
+
+    IF appointment_id IS NULL AND id_appointment_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Não existe nenhuma Consulta com o id passado';
+    ELSIF appointment_id IS NULL AND hashed_id_appointment_in IS NOT NULL THEN
+        RAISE EXCEPTION 'Não existe nenhuma Consulta com o hashed_id passado';
+    END IF;
+
+    IF NOT EXISTS (SELECT appointment.id_appointment FROM appointment WHERE id_appointment = appointment_id AND status = status_in) THEN
+        UPDATE appointment SET status = status_in WHERE id_appointment = appointment_id;
+        RETURN TRUE;
+    ELSE
+        IF status_in = 0 THEN
+            RAISE EXCEPTION 'A Consulta já está com o estado Pendente';
+        ELSIF status_in = 1 THEN
+            RAISE EXCEPTION 'A Consulta já está com o estado Concluída';
+        ELSIF status_in = 2 THEN
+            RAISE EXCEPTION 'A Consulta já está com o estado Não Compareceu';
+        ELSIF status_in = 3 THEN
+            RAISE EXCEPTION 'A Consulta já está com o estado Cancelada';
+        ELSIF status_in = 4 THEN
+            RAISE EXCEPTION 'A Consulta já está com o estado Eliminada';
+        END IF;
+    END IF;
+
+    RETURN FALSE; -- Return FALSE if the status was not changed
 END;
 $$
 LANGUAGE plpgsql;
