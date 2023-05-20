@@ -685,7 +685,6 @@ DECLARE
     expiration_date TIMESTAMP;
     medication_prescription_id BIGINT;
 BEGIN
-
     IF id_prescription_in IS NULL AND (hashed_id_prescription_in IS NULL OR hashed_id_prescription_in = '') THEN
         RAISE EXCEPTION 'É necessário passar o id_prescription ou o hashed_id_prescription';
     ELSEIF id_prescription_in IS NOT NULL AND (hashed_id_prescription_in IS NOT NULL OR hashed_id_prescription_in <> '') THEN
