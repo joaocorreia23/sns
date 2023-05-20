@@ -780,14 +780,18 @@ $page_name = $appointment_info["title"] . ' - ' . (new DateTime($appointment_inf
 
 			var medications_list = [];
 
+			
+
 			$('#medication_repeater').find('[data-kt-repeater="select2"]').each(function() {
 				var medication_hashed_id = $(this).val();
-				var prescribed_amount = $(this).parent().parent().children().eq(3).children().eq(2).val();
+				var use_description = $(this).parent().parent().children().eq(3).children().eq(2).val();
 				var prescribed_amount = parseInt($(this).parent().parent().children().eq(1).children().eq(1).val());
+				var usual_medication = $(this).parent().parent().children().eq(2).children().children().eq(0).is(":checked");
 				var medication = {
 					hashed_id_medication: medication_hashed_id,
 					use_description: use_description,
-					prescribed_amount: prescribed_amount
+					prescribed_amount: prescribed_amount,
+					usual_medication: usual_medication
 				};
 				medications_list.push(medication);
 			});

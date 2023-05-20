@@ -95,6 +95,50 @@ const Activate_Medication = (req, res) => {
     });
 };
 
+const Add_Usual_Medication = (req, res) => {
+    const { hashed_id_medication_prescription } = req.body;
+    pool.query("SELECT * FROM add_to_usual_medication(NULL, $1)", [hashed_id_medication_prescription], (error, results) => {
+        if (error) {
+            res.status(400).json({ "status": false, "error": error.message });
+            return;
+        }
+        res.status(201).json({ "status": true, "data": results.rows[0], "message": "Medicação adicionada com sucesso!" });
+    });
+};
+
+const Remove_Usual_Medication = (req, res) => {
+    const { hashed_id_medication_prescription } = req.body;
+    pool.query("SELECT * FROM remove_from_usual_medication(NULL, $1)", [hashed_id_medication_prescription], (error, results) => {
+        if (error) {
+            res.status(400).json({ "status": false, "error": error.message });
+            return;
+        }
+        res.status(201).json({ "status": true, "data": results.rows[0], "message": "Medicação removida com sucesso!" });
+    });
+};
+
+const Get_Usual_Medication = (req, res) => {
+    const { hashed_id_patient, status} = req.body;
+    pool.query("SELECT * FROM get_usual_medication(NULL, $1, $2)", [hashed_id_patient, status], (error, results) => {
+        if (error) {
+            res.status(400).json({ "status": false, "error": error.message });
+            return;
+        }
+        res.status(201).json({ "status": true, "data": results.rows });
+    });
+};
+
+const Get_Usual_Medication_DataTable = (req, res) => {
+    const { hashed_id_patient, status} = req.body;
+    pool.query("SELECT * FROM get_usual_medication(NULL, $1, $2)", [hashed_id_patient, status], (error, results) => {
+        if (error) {
+            res.status(400).json({ "status": false, "error": error.message });
+            return;
+        }
+        res.status(200).json({ 'recordsFiltered': results.rows.length, 'recordsTotal': results.rows.length, 'data': results.rows });
+    });
+};
+
 
 module.exports = {
     Get_Medication,
@@ -105,5 +149,9 @@ module.exports = {
     Add_Medication,
     Update_Medication,
     Deactivate_Medication,
-    Activate_Medication
+    Activate_Medication,
+    Add_Usual_Medication,
+    Remove_Usual_Medication,
+    Get_Usual_Medication,
+    Get_Usual_Medication_DataTable
 };

@@ -352,16 +352,13 @@ CREATE TABLE medication_prescription (
 
 -- Usual Medication Table
 CREATE TABLE usual_medication (
-    id_patient BIGINT NOT NULL,
-    id_medication BIGINT NOT NULL,
-    id_medication_prescription BIGINT NULL,
+    id_medication_prescription BIGINT NOT NULL,
     status INT NOT NULL DEFAULT 1,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (id_patient) REFERENCES users(id_user),
-    FOREIGN KEY (id_medication) REFERENCES medication(id_medication),
+    updated_at TIMESTAMP NULL,
     FOREIGN KEY (id_medication_prescription) REFERENCES medication_prescription(id_medication_prescription)
 );
+
 
 -- =======================
 -- END: MEDICATION

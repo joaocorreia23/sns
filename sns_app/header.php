@@ -547,6 +547,14 @@
                             </span>
                         </div>
 
+                        <!-- Medicação Habitual -->
+                        <div class="menu-item here show menu-here-bg me-0 me-lg-2">
+                            <span class="menu-link">
+                                <a href="<?php echo $link_home; ?>pages/patient/usual_medication/list"><span class="menu-title">Medicação Habitual</span></a>
+                                <span class="menu-arrow d-lg-none"></span>
+                            </span>
+                        </div>
+
                         <!-- Exames -->
                         <div class="menu-item here show menu-here-bg me-0 me-lg-2">
                             <span class="menu-link">
