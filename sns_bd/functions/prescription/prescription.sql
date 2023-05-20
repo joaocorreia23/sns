@@ -91,14 +91,14 @@ BEGIN
                 NULL,
                 (medication_prescription_list[i]->>'hashed_id_medication')::VARCHAR(255),
                 (medication_prescription_list[i]->>'prescribed_amount')::INT,
-                (medication_prescription_list[i]->>'use_description')::VARCHAR(255)
+                (medication_prescription_list[i]->>'use_description')::VARCHAR(255),
+                (medication_prescription_list[i]->>'usual_medication')::BOOLEAN
             );
         END LOOP;
     ELSE 
         DELETE FROM prescription WHERE id_prescription = prescription_id;
         RAISE EXCEPTION 'É necessário passar pelo menos um medicamento';
     END IF;
-        
     RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql;
@@ -673,7 +673,8 @@ CREATE OR REPLACE FUNCTION create_medication_prescription(
     id_medication_in BIGINT DEFAULT NULL,
     hashed_id_medication_in VARCHAR(255) DEFAULT NULL,
     prescribed_amount_in INT DEFAULT NULL,
-    use_description_in VARCHAR(255) DEFAULT NULL
+    use_description_in VARCHAR(255) DEFAULT NULL,
+    usual_medication_in BOOLEAN DEFAULT FALSE
 ) RETURNS BOOLEAN AS $$
 DECLARE
     prescription_id BIGINT;
@@ -682,6 +683,7 @@ DECLARE
     option_pin INT;
     status INT;
     expiration_date TIMESTAMP;
+    medication_prescription_id BIGINT;
 BEGIN
 
     IF id_prescription_in IS NULL AND (hashed_id_prescription_in IS NULL OR hashed_id_prescription_in = '') THEN
@@ -721,7 +723,11 @@ BEGIN
     status := 1;
     expiration_date := NOW() + INTERVAL '6 months';
 
-    INSERT INTO medication_prescription (id_prescription, id_medication, access_pin, option_pin, prescribed_amount, expiration_date, available_amount, use_description, status) VALUES (prescription_id, medication_id, access_pin, option_pin, prescribed_amount_in, expiration_date, prescribed_amount_in, use_description_in, status);
+    INSERT INTO medication_prescription (id_prescription, id_medication, access_pin, option_pin, prescribed_amount, expiration_date, available_amount, use_description, status) VALUES (prescription_id, medication_id, access_pin, option_pin, prescribed_amount_in, expiration_date, prescribed_amount_in, use_description_in, status) RETURNING id_medication_prescription INTO medication_prescription_id;
+    IF usual_medication_in THEN
+        --call function to set usual medication
+        PERFORM add_to_usual_medication(medication_prescription_id);
+    END IF;
     RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql;

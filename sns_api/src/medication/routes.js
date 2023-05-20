@@ -16,6 +16,11 @@ router.put('/update', controller.Update_Medication);
 router.post('/deactivate', controller.Deactivate_Medication);
 router.post('/activate', controller.Activate_Medication);
 
+router.post('/usual_medication/insert', controller.Add_Usual_Medication);
+router.post('/usual_medication/remove', controller.Remove_Usual_Medication);
+router.post('/usual_medication', controller.Get_Usual_Medication);
+router.post('/usual_medication/table', controller.Get_Usual_Medication_DataTable);
+
 router.get('/:hashed_id', controller.Get_MedicationByHashedId);
 
 module.exports = router;
