@@ -216,6 +216,7 @@ BEGIN
 
     IF EXISTS (SELECT * FROM usual_medication WHERE usual_medication.id_medication_prescription = medication_prescription_id) THEN
         RAISE EXCEPTION 'Prescrição de medicação já está na lista de medicações usuais';
+        RETURN FALSE;
     END IF;
 
     medication_id := (SELECT m.id_medication FROM medication_prescription mp INNER JOIN medication m ON mp.id_medication = m.id_medication WHERE mp.id_medication_prescription = medication_prescription_id);
@@ -231,7 +232,8 @@ BEGIN
     INNER JOIN prescription p ON mp.id_prescription = p.id_prescription
     INNER JOIN appointment a ON p.id_appointment = a.id_appointment AND a.id_user_patient = patient_id
     WHERE mp.id_medication = medication_id AND um.status = 1) THEN
-        RAISE EXCEPTION 'Utente já tem esta medicação na lista de medicações usuais';
+        --RAISE EXCEPTION 'Utente já tem esta medicação na lista de medicações usuais';
+        RETURN TRUE;--Already has this medication in usual medication, so no need to add
     END IF;
 
     INSERT INTO usual_medication (id_medication_prescription) VALUES (medication_prescription_id);
