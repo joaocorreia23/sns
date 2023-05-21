@@ -5,6 +5,13 @@
 $api = new Api();
 $user_info = $api->fetch("users/", null, $id_patient);
 $user_info_data = $user_info["response"];
+
+$user_info_unit_doctor = $api->fetch("health_unit/get_patient_doctor", null, $id_patient);
+if ($user_info_unit_doctor["response"]["status"] === true) {
+    $user_info_unit_doctor_data = $user_info_unit_doctor["response"]["data"][0];
+} else {
+    $user_info_unit_doctor_data = $user_info_unit_doctor["response"];
+}
 ?>
 
 
@@ -30,14 +37,8 @@ $user_info_data = $user_info["response"];
                                                 <h3 class="card-title align-items-start flex-column text-green pt-15">
                                                     <span class="fw-bold fs-2x mb-3 text-green">Olá, <?php echo $user_info_data["first_name"] . ' ' . $user_info_data["last_name"] ?></span>
                                                     <div class="fs-4 text-green">
-                                                        <span class="opacity-75">You have</span>
-                                                        <span class="position-relative d-inline-block">
-                                                            <a class="link-white text-green opacity-75-hover fw-bold d-block mb-1">4 tasks</a>
-                                                            <!--begin::Separator-->
-                                                            <span class="position-absolute opacity-50 bottom-0 start-0 border-2 border-body border-bottom w-100"></span>
-                                                            <!--end::Separator-->
-                                                        </span>
-                                                        <span class="opacity-75">to comlete</span>
+                                                        <span class="fs-5 text-muted">Unidade de Saúde: <span class="fw-bold text-green"><?php echo isset($user_info_unit_doctor_data["health_unit_name"]) ? $user_info_unit_doctor_data["health_unit_name"] : "Sem Unidade de Saúde Associada"; ?></span></span><br>
+                                                        <span class="fs-5 text-muted">Médico(a): <span class="fw-bold text-green"><?php echo isset($user_info_unit_doctor_data["doctor_name"]) ? $user_info_unit_doctor_data["doctor_name"] : "Sem Médico(a) Associado" ?></span></span><br>
                                                     </div>
                                                 </h3>
                                                 <!--end::Title-->
@@ -180,205 +181,73 @@ $user_info_data = $user_info["response"];
 
                                 </div>
 
-                                <div class="row gy-5 g-xl-10">
-                                    <!--begin::Col-->
-                                    <div class="col-sm-6 col-xl-2 mb-xl-10">
-                                        <!--begin::Card widget 2-->
+                                <div class="row">
+
+                                    <div class="col-sm-6 col-xl-3 mb-xl-10">
                                         <div class="card h-lg-100">
-                                            <!--begin::Body-->
                                             <div class="card-body d-flex justify-content-between align-items-start flex-column">
-                                                <!--begin::Icon-->
                                                 <div class="m-0">
-                                                    <i class="ki-outline ki-compass fs-2hx text-gray-600"></i>
+                                                    <i class="ki-outline ki-capsule fs-2hx text-primary"></i>
                                                 </div>
-                                                <!--end::Icon-->
-                                                <!--begin::Section-->
                                                 <div class="d-flex flex-column my-7">
-                                                    <!--begin::Number-->
-                                                    <span class="fw-semibold fs-3x text-gray-800 lh-1 ls-n2">327</span>
-                                                    <!--end::Number-->
-                                                    <!--begin::Follower-->
+                                                    <span class="fw-semibold fs-3x text-gray-800 lh-1 ls-n2"><?php echo $variavel1 = rand(2, 20); ?></span>
                                                     <div class="m-0">
-                                                        <span class="fw-semibold fs-6 text-gray-400">Projects</span>
+                                                        <span class="fw-semibold fs-6 text-gray-400">Medicação Prescrita</span>
                                                     </div>
-                                                    <!--end::Follower-->
                                                 </div>
-                                                <!--end::Section-->
-                                                <!--begin::Badge-->
-                                                <span class="badge badge-light-success fs-base">
-                                                    <i class="ki-outline ki-arrow-up fs-5 text-success ms-n1"></i>2.1%</span>
-                                                <!--end::Badge-->
                                             </div>
-                                            <!--end::Body-->
                                         </div>
-                                        <!--end::Card widget 2-->
                                     </div>
-                                    <!--end::Col-->
-                                    <!--begin::Col-->
-                                    <div class="col-sm-6 col-xl-2 mb-xl-10">
-                                        <!--begin::Card widget 2-->
+
+                                    <div class="col-sm-6 col-xl-3 mb-xl-10">
                                         <div class="card h-lg-100">
-                                            <!--begin::Body-->
                                             <div class="card-body d-flex justify-content-between align-items-start flex-column">
-                                                <!--begin::Icon-->
                                                 <div class="m-0">
-                                                    <i class="ki-outline ki-chart-simple fs-2hx text-gray-600"></i>
+                                                    <i class="ki-outline ki-document fs-2hx text-primary"></i>
                                                 </div>
-                                                <!--end::Icon-->
-                                                <!--begin::Section-->
                                                 <div class="d-flex flex-column my-7">
-                                                    <!--begin::Number-->
-                                                    <span class="fw-semibold fs-3x text-gray-800 lh-1 ls-n2">27,5M</span>
-                                                    <!--end::Number-->
-                                                    <!--begin::Follower-->
+                                                    <span class="fw-semibold fs-3x text-gray-800 lh-1 ls-n2"><?php echo $variavel2 = rand(2, 20); ?></span>
                                                     <div class="m-0">
-                                                        <span class="fw-semibold fs-6 text-gray-400">Stock Qty</span>
+                                                        <span class="fw-semibold fs-6 text-gray-400">Exames Prescritos</span>
                                                     </div>
-                                                    <!--end::Follower-->
                                                 </div>
-                                                <!--end::Section-->
-                                                <!--begin::Badge-->
-                                                <span class="badge badge-light-success fs-base">
-                                                    <i class="ki-outline ki-arrow-up fs-5 text-success ms-n1"></i>2.1%</span>
-                                                <!--end::Badge-->
                                             </div>
-                                            <!--end::Body-->
                                         </div>
-                                        <!--end::Card widget 2-->
                                     </div>
-                                    <!--end::Col-->
-                                    <!--begin::Col-->
-                                    <div class="col-sm-6 col-xl-2 mb-xl-10">
-                                        <!--begin::Card widget 2-->
+
+                                    <div class="col-sm-6 col-xl-3 mb-xl-10">
                                         <div class="card h-lg-100">
-                                            <!--begin::Body-->
                                             <div class="card-body d-flex justify-content-between align-items-start flex-column">
-                                                <!--begin::Icon-->
                                                 <div class="m-0">
-                                                    <i class="ki-outline ki-abstract-39 fs-2hx text-gray-600"></i>
+                                                    <i class="ki-outline ki-syringe  fs-2hx text-primary"></i>
                                                 </div>
-                                                <!--end::Icon-->
-                                                <!--begin::Section-->
                                                 <div class="d-flex flex-column my-7">
-                                                    <!--begin::Number-->
-                                                    <span class="fw-semibold fs-3x text-gray-800 lh-1 ls-n2">149M</span>
-                                                    <!--end::Number-->
-                                                    <!--begin::Follower-->
+                                                    <span class="fw-semibold fs-3x text-gray-800 lh-1 ls-n2"><?php echo $variavel3 = rand(1, 10); ?></span>
                                                     <div class="m-0">
-                                                        <span class="fw-semibold fs-6 text-gray-400">Stock Value</span>
+                                                        <span class="fw-semibold fs-6 text-gray-400">Vacinas Administradas</span>
                                                     </div>
-                                                    <!--end::Follower-->
                                                 </div>
-                                                <!--end::Section-->
-                                                <!--begin::Badge-->
-                                                <span class="badge badge-light-danger fs-base">
-                                                    <i class="ki-outline ki-arrow-down fs-5 text-danger ms-n1"></i>0.47%</span>
-                                                <!--end::Badge-->
                                             </div>
-                                            <!--end::Body-->
                                         </div>
-                                        <!--end::Card widget 2-->
                                     </div>
-                                    <!--end::Col-->
-                                    <!--begin::Col-->
-                                    <div class="col-sm-6 col-xl-2 mb-xl-10">
-                                        <!--begin::Card widget 2-->
+
+                                    <div class="col-sm-6 col-xl-3 mb-xl-10">
                                         <div class="card h-lg-100">
-                                            <!--begin::Body-->
                                             <div class="card-body d-flex justify-content-between align-items-start flex-column">
-                                                <!--begin::Icon-->
                                                 <div class="m-0">
-                                                    <i class="ki-outline ki-map fs-2hx text-gray-600"></i>
+                                                    <i class="ki-outline ki-pill fs-2hx text-primary"></i>
                                                 </div>
-                                                <!--end::Icon-->
-                                                <!--begin::Section-->
                                                 <div class="d-flex flex-column my-7">
-                                                    <!--begin::Number-->
-                                                    <span class="fw-semibold fs-3x text-gray-800 lh-1 ls-n2">89M</span>
-                                                    <!--end::Number-->
-                                                    <!--begin::Follower-->
+                                                    <span class="fw-semibold fs-3x text-gray-800 lh-1 ls-n2"><?php echo $variavel4 = rand(1, 20); ?></span>
                                                     <div class="m-0">
-                                                        <span class="fw-semibold fs-6 text-gray-400">C APEX</span>
+                                                        <span class="fw-semibold fs-6 text-gray-400">Pedidos Medicação</span>
                                                     </div>
-                                                    <!--end::Follower-->
                                                 </div>
-                                                <!--end::Section-->
-                                                <!--begin::Badge-->
-                                                <span class="badge badge-light-success fs-base">
-                                                    <i class="ki-outline ki-arrow-up fs-5 text-success ms-n1"></i>2.1%</span>
-                                                <!--end::Badge-->
                                             </div>
-                                            <!--end::Body-->
                                         </div>
-                                        <!--end::Card widget 2-->
                                     </div>
-                                    <!--end::Col-->
-                                    <!--begin::Col-->
-                                    <div class="col-sm-6 col-xl-2 mb-5 mb-xl-10">
-                                        <!--begin::Card widget 2-->
-                                        <div class="card h-lg-100">
-                                            <!--begin::Body-->
-                                            <div class="card-body d-flex justify-content-between align-items-start flex-column">
-                                                <!--begin::Icon-->
-                                                <div class="m-0">
-                                                    <i class="ki-outline ki-abstract-35 fs-2hx text-gray-600"></i>
-                                                </div>
-                                                <!--end::Icon-->
-                                                <!--begin::Section-->
-                                                <div class="d-flex flex-column my-7">
-                                                    <!--begin::Number-->
-                                                    <span class="fw-semibold fs-3x text-gray-800 lh-1 ls-n2">72.4%</span>
-                                                    <!--end::Number-->
-                                                    <!--begin::Follower-->
-                                                    <div class="m-0">
-                                                        <span class="fw-semibold fs-6 text-gray-400">OPEX</span>
-                                                    </div>
-                                                    <!--end::Follower-->
-                                                </div>
-                                                <!--end::Section-->
-                                                <!--begin::Badge-->
-                                                <span class="badge badge-light-danger fs-base">
-                                                    <i class="ki-outline ki-arrow-down fs-5 text-danger ms-n1"></i>0.647%</span>
-                                                <!--end::Badge-->
-                                            </div>
-                                            <!--end::Body-->
-                                        </div>
-                                        <!--end::Card widget 2-->
-                                    </div>
-                                    <!--end::Col-->
-                                    <!--begin::Col-->
-                                    <div class="col-sm-6 col-xl-2 mb-5 mb-xl-10">
-                                        <!--begin::Card widget 2-->
-                                        <div class="card h-lg-100">
-                                            <!--begin::Body-->
-                                            <div class="card-body d-flex justify-content-between align-items-start flex-column">
-                                                <!--begin::Icon-->
-                                                <div class="m-0">
-                                                    <i class="ki-outline ki-abstract-26 fs-2hx text-gray-600"></i>
-                                                </div>
-                                                <!--end::Icon-->
-                                                <!--begin::Section-->
-                                                <div class="d-flex flex-column my-7">
-                                                    <!--begin::Number-->
-                                                    <span class="fw-semibold fs-3x text-gray-800 lh-1 ls-n2">106M</span>
-                                                    <!--end::Number-->
-                                                    <!--begin::Follower-->
-                                                    <div class="m-0">
-                                                        <span class="fw-semibold fs-6 text-gray-400">Saving</span>
-                                                    </div>
-                                                    <!--end::Follower-->
-                                                </div>
-                                                <!--end::Section-->
-                                                <!--begin::Badge-->
-                                                <span class="badge badge-light-success fs-base">
-                                                    <i class="ki-outline ki-arrow-up fs-5 text-success ms-n1"></i>2.1%</span>
-                                                <!--end::Badge-->
-                                            </div>
-                                            <!--end::Body-->
-                                        </div>
-                                        <!--end::Card widget 2-->
-                                    </div>
-                                    <!--end::Col-->
+                                   
+                                    <span class="text-end text-muted">* dados ilustrativos</span>
                                 </div>
 
                             </div>
