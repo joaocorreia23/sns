@@ -2,13 +2,15 @@
   "ExpandedNodes": [
     "",
     "\\src",
-    "\\src\\appointment",
     "\\src\\auth",
     "\\src\\coutries",
     "\\src\\exam",
     "\\src\\health_unit",
+    "\\src\\medication",
+    "\\src\\prescription",
     "\\src\\users",
     "\\src\\vaccine"
   ],
+  "SelectedNode": "\\src\\health_unit\\routes.js",
   "PreviewInSolutionExplorer": false
 }

@@ -198,7 +198,11 @@ const Get_Patient_Doctor = (req, res) => {
             res.status(400).json({ "status": false, error: error.message, "message": "Não foi possível obter o Médico do Utente!" });
             return;
         }
-        res.status(200).json({ "status": true, "message": "Médico do Utente obtido com Sucesso!", "data": results.rows });
+        if (results.rows.length == 0) {
+            res.status(400).json({ "status": false, "message": "Não foi possível obter o Médico do Utente!" });
+        } else {
+            res.status(200).json({ "status": true, "message": "Médico do Utente obtido com Sucesso!", "data": results.rows });
+        }
     });
 };
 
