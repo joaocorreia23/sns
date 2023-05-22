@@ -1,6 +1,6 @@
 <?php require_once($_SERVER["DOCUMENT_ROOT"] . "/head.php") ?>
-<?php $page_name = "A Minha Agenda de Consultas" ?>
-<?php $id_doctor = $_SESSION["hashed_id"]; ?>
+<?php $page_name = "A Minha Agenda" ?>
+<?php $id_patient = $_SESSION["hashed_id"]; ?>
 <style>
 	.fc-event {
 		cursor: pointer;
@@ -41,56 +41,57 @@
         var calendarEl = document.getElementById("kt_docs_fullcalendar_drag");
 
         const handleCalendarEventClick = (info) => {
-			if (!info.jsEvent.isTrusted) return;
+            if (!info.jsEvent.isTrusted) return;
 
-			const event = info.event;
+            const event = info.event;
 
-			const eventData = event._def;
-			const eventAdditionalData = eventData.extendedProps;
+            const eventData = event._def;
+            const eventAdditionalData = eventData.extendedProps;
 
-			console.log(event);
+            console.log(event);
 
-			Swal.fire({
-				icon: "info",
-				iconHtml: '<i class="ki-outline ki-calendar-add text-info fs-1"></i>',
-				title: eventData.title,
-				text: "Deseja visualizar os detalhes da Consulta?",
-				showCancelButton: true,
-				confirmButtonText: "Sim, Visualizar",
-				cancelButtonText: "Não, Cancelar",
-				reverseButtons: true,
-				allowOutsideClick: false,
-				customClass: {
-					confirmButton: "btn btn-primary",
-					cancelButton: "btn btn-danger",
-				},
-				didOpen: () => {
+            Swal.fire({
+                icon: "info",
+                iconHtml: '<i class="ki-outline ki-calendar-add text-info fs-1"></i>',
+                title: eventData.title,
+                text: "Deseja visualizar os detalhes da Consulta?",
+                showCancelButton: true,
+                confirmButtonText: "Sim, Visualizar",
+                cancelButtonText: "Não, Cancelar",
+                reverseButtons: true,
+                allowOutsideClick: false,
+                customClass: {
+                    confirmButton: "btn btn-primary",
+                    cancelButton: "btn btn-danger",
+                },
+                didOpen: () => {
 
-				},
-			}).then((result) => {
+                },
+            }).then((result) => {
 
-				if (result.isConfirmed) {
-					Swal.fire({
-						icon: "success",
-						title: "Aguarde...",
-						text: "Carregando os detalhes da Consulta!",
-						showConfirmButton: false,
-						allowOutsideClick: false
-					});
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Aguarde...",
+                        text: "Carregando os detalhes da Consulta!",
+                        showConfirmButton: false,
+                        allowOutsideClick: false
+                    });
 
-					setInterval(() => {
-						window.location.href = `./appointments/view?id=${eventAdditionalData.hashed_id_appointment}`;
-					}, 1500);
+                    setInterval(() => {
+                        window.location.href = `../appointments/view?id=${eventAdditionalData.hashed_id_appointment}`;
+                    }, 1500);
 
-				}
+                }
 
-			})
+            })
 
-		};
+        };
 
-		const handleCalendarEventHover = (info) => {
-			const popover = new bootstrap.Tooltip(info.el, {
-				title: `
+        const handleCalendarEventHover = (info) => {
+            console.log(info);
+            const popover = new bootstrap.Tooltip(info.el, {
+                title: `
 						<div class="">
 							<div class="d-flex align-items-center">
 								<div class="d-flex flex-column flex-grow-1 pe-2">
@@ -133,6 +134,10 @@
 									}
 								</div>
 								<div class="d-flex flex-stack mb-2">
+									<span class="text-muted me-2 fs-7 fw-bold">Medico:</span>
+									<span class="text-gray-800 pe-2 fs-7 fw-bold">${info.event._def.extendedProps.doctor_first_name + ' ' + info.event._def.extendedProps.doctor_last_name}</span>
+								</div>
+								<div class="d-flex flex-stack mb-2">
 									<span class="text-muted me-2 fs-7 fw-bold">Estado da Consulta:</span>
 									${
 										info.event._def.extendedProps.appointment_status === 0 ?
@@ -148,43 +153,24 @@
 									}
 								</div>
 							</div>
-							<div class="separator my-5"></div>
-							<div class="mx-2">
-								<div class="d-flex flex-stack mb-2">
-									<span class="text-muted me-2 fs-7 fw-bold">Utente:</span>
-									<span class="text-gray-800 pe-2 fs-7 fw-bold">${info.event._def.extendedProps.patient_first_name + ' ' + info.event._def.extendedProps.patient_last_name}</span>
-								</div>
-								<div class="d-flex flex-stack mb-2">
-									<span class="text-muted me-2 fs-7 fw-bold">Data de Nascimento:</span>
-									<span class="text-gray-800 pe-2 fs-7 fw-bold">${new Date(info.event._def.extendedProps.patient_birth_date).toLocaleDateString()}</span>
-								</div>
-								<div class="d-flex flex-stack mb-2">
-									<span class="text-muted me-2 fs-7 fw-bold">Género:</span>
-									<span class="text-gray-800 pe-2 fs-7 fw-bold">${info.event._def.extendedProps.patient_gender}</span>
-								</div>
-								<div class="d-flex flex-stack mb-2">
-									<span class="text-muted me-2 fs-7 fw-bold">Número de Utente:</span>
-									<span class="text-gray-800 pe-2 fs-7 fw-bold">${info.event._def.extendedProps.patient_number}</span>
-								</div>
-							</div>
 						</div>
 					`,
-				customClass: "w-300px min-h-300px",
-				trigger: "hover",
-				html: true,
-				container: "body",
-			});
-		}
+                customClass: "w-300px min-h-300px",
+                trigger: "hover",
+                html: true,
+                container: "body",
+            });
+        }
 
-		const handleCalendarSelect = (info) => {
-			if (!info.jsEvent.isTrusted) return;
+        const handleCalendarSelect = (info) => {
+            if (!info.jsEvent.isTrusted) return;
 
-			const event = info;
-			console.log(event);
-		};
+            const event = info;
+            console.log(event);
+        };
 
         const requestBody = {
-            hashed_id_doctor: "<?php echo $id_doctor ?>",
+            hashed_id_patient: "<?php echo $id_patient ?>",
         };
 
         const failureCallbackMessage = () => {
@@ -202,7 +188,7 @@
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        hashed_id_doctor: "<?php echo $id_doctor ?>",
+                        hashed_id_patient: "<?php echo $id_patient ?>",
                     }),
                 })
                 .then((response) => response.json())

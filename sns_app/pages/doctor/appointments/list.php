@@ -1,5 +1,10 @@
 <?php require_once($_SERVER["DOCUMENT_ROOT"] . "/head.php") ?>
-<?php $page_name = "Listagem de Consultas" ?>
+<?php require_once($_SERVER["DOCUMENT_ROOT"] . "/api/api.php") ?>
+<?php $page_name = "As Minhas Consultas Marcadas" ?>
+<?php
+$api = new Api();
+$id_doctor = $_SESSION["hashed_id"];
+?>
 
 <body id="kt_app_body" data-kt-app-header-fixed-mobile="true" data-kt-app-toolbar-enabled="true" class="app-default">
     <div class="d-flex flex-column flex-root app-root" id="kt_app_root">
@@ -35,13 +40,10 @@
                                             </div>
 
                                             <div class="d-flex flex-column flex-sm-row align-items-center justify-content-md-end gap-3">
+                                                <!-- Sincronizar Tabela -->
                                                 <button type="button" class="btn btn-icon btn-active-light-primary lh-1" data-datatable-action="sync" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss="click" title="Sincronizar tabela">
                                                     <i class="ki-outline ki-arrows-circle fs-2"></i>
                                                 </button>
-
-                                                <a href="add" class="btn btn-light-primary d-flex align-items-center lh-1">
-                                                    <i class="ki-outline ki-plus fs-2"></i>Adicionar
-                                                </a>
                                             </div>
                                         </div>
 
@@ -51,9 +53,10 @@
                                                     <tr class="fw-bold text-muted bg-light">
                                                         <th class="ps-4 fs-6 min-w-150px rounded-start" data-priority="1">Médico</th>
                                                         <th class="ps-4 fs-6 min-w-150px rounded-start" data-priority="2">Utente</th>
-                                                        <th class="ps-4 fs-6 min-w-100px rounded-start" data-priority="3">Hora</th>
-                                                        <th class="ps-4 fs-6 min-w-80px rounded-start" data-priority="4">Estado</th>
-                                                        <th class="pe-4 fs-6 min-w-50px text-sm-end rounded-end" data-priority="5">Ações</th>
+                                                        <th class="ps-4 fs-6 min-w-150px rounded-start" data-priority="3">Unidade de Saúde</th>
+                                                        <th class="ps-4 fs-6 min-w-100px rounded-start" data-priority="4">Hora</th>
+                                                        <th class="ps-4 fs-6 min-w-80px rounded-start" data-priority="5">Estado</th>
+                                                        <th class="pe-4 fs-6 min-w-50px text-sm-end rounded-end" data-priority="6">Ações</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody></tbody>
@@ -98,7 +101,7 @@
                         data: () => {
                             return JSON.stringify({
                                 'start_date': moment(document.querySelector(`input[data-datatable-action="date"]`).value, "DD/MM/YYYY").format("YYYY-MM-DD"),
-                                'hashed_id_doctor': "<?php echo $_SESSION["hashed_id"] ?>"
+                                'hashed_id_doctor': "<?php echo $id_doctor ?>"
                             });
                         }
                     },
@@ -107,6 +110,9 @@
                         },
                         {
                             data: "patient_first_name"
+                        },
+                        {
+                            data: "health_unit_name"
                         },
                         {
                             data: "start_time"
@@ -151,6 +157,20 @@
                             targets: 2,
                             orderable: true,
                             render: (data, type, row) => {
+                                return `
+									<div class="d-inline-flex align-items-center">                                
+										<div class="d-flex justify-content-center flex-column">
+										<span class="mb-1 fs-6 lh-sm">${row.health_unit_name}</span>
+										</div>
+									</div>
+								`;
+
+                            },
+                        },
+                        {
+                            targets: 3,
+                            orderable: true,
+                            render: (data, type, row) => {
 
                                 const start_tim = moment(row.start_time, 'HH:mm:ss').format('HH:mm');
                                 const end_tim = moment(row.end_time, 'HH:mm:ss').format('HH:mm');
@@ -159,14 +179,14 @@
                                 return `
 									<div class="d-inline-flex align-items-center">                                
 										<div class="d-flex justify-content-center flex-column">
-											<span class="text-dark fw-bold text-hover-primary mb-1 fs-6 lh-sm">${formattedHour}</span>
+											<span class="mb-1 fs-6 lh-sm">${formattedHour}</span>
 										</div>
 									</div>
 								`;
                             },
                         },
                         {
-                            targets: 3,
+                            targets: 4,
                             orderable: true,
                             render: (data, type, row) => {
                                 if (row.appointment_status === 0) {
@@ -213,17 +233,31 @@
                             orderable: false,
                             className: "text-sm-end",
                             render: (data, type, row) => {
-                                return `
+                                const patient_name2 = row.patient_first_name !== null && row.patient_last_name !== null ? row.patient_first_name + " " + row.patient_last_name : 'Perfil sem nome';
+                                if (row.appointment_status === 0) {
+                                    return `
 									<div>
-										<a href="edit?id=${row.hashed_id}" class="btn btn-icon btn-bg-light btn-color-primary btn-active-light-primary rounded w-35px h-35px me-1"><i class="ki-outline ki-notepad-edit fs-2"></i></a>
-										<a href="permissions?id=${row.hashed_id}" class="btn btn-icon btn-bg-light btn-color-info btn-active-light-info rounded w-35px h-35px me-1"><i class="ki-outline ki-lock fs-2"></i></a>
-										<button type="button" data-id="${row.hashed_id}" data-name="${row.email}" data-datatable-action="delete-row" class="btn btn-icon btn-bg-light btn-color-danger btn-active-light-danger rounded w-35px h-35px"><i class="ki-outline ki-trash fs-2"></i></button>
+										<a href="view?id=${row.hashed_id_appointment}" class="btn btn-icon btn-bg-light btn-color-primary btn-active-light-primary rounded w-35px h-35px me-1"><i class="ki-outline ki-google-play fs-2"></i></a>
+                                        <button type="button" data-id="${row.hashed_id_appointment}" data-name="${patient_name2}" data-datatable-action="conclude-row" class="btn btn-icon btn-bg-light btn-color-primary btn-active-light-primary rounded w-35px h-35px"><i class="ki-outline ki-check-circle fs-2"></i></button>
+                                        <button type="button" data-id="${row.hashed_id_appointment}" data-name="${patient_name2}" data-datatable-action="missed-row" class="btn btn-icon btn-bg-light btn-color-warning btn-active-light-warning rounded w-35px h-35px"><i class="ki-outline ki-calendar-remove fs-2"></i></button>
+                                        <button type="button" data-id="${row.hashed_id_appointment}" data-name="${patient_name2}" data-datatable-action="cancel-row" class="btn btn-icon btn-bg-light btn-color-danger btn-active-light-danger rounded w-35px h-35px"><i class="ki-outline ki-information-3 fs-2"></i></button>
+                                    </div>
+								`;
+                                } else if (row.appointment_status === 1){
+                                    return `
+									<div>
+										<a href="view?id=${row.hashed_id_appointment}" class="btn btn-icon btn-bg-light btn-color-primary btn-active-light-primary rounded w-35px h-35px me-1"><i class="ki-outline ki-information-2 fs-2"></i></a>
 									</div>
 								`;
+                                } else {
+                                    return ``;
+                                }
                             },
                         },
                     ],
                 })
+
+
 
                 table = dt.$
 
@@ -249,9 +283,76 @@
             }
 
             var handleDeleteRows = () => {
-                const deleteButtons = document.querySelectorAll(`[data-datatable-action="delete-row"]`)
+                $("#datatable").on("click", "[data-datatable-action='conclude-row']", (e) => {
+                    e.preventDefault()
+                    const button = e.currentTarget
+                    const parent = button.closest("tr")
+                    const name = button.getAttribute("data-name")
 
-                $("#datatable").on("click", "[data-datatable-action='delete-row']", (e) => {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Concluir Consulta",
+                        text: "Tem a certeza que deseja a Consulta do Utente (" + name + ") ?",
+                        showCancelButton: true,
+                        buttonsStyling: false,
+                        cancelButtonText: "Não, cancelar",
+                        confirmButtonText: "Sim, concluir",
+                        reverseButtons: true,
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            const confirmButton = Swal.getConfirmButton();
+                            confirmButton.blur();
+                        },
+                        customClass: {
+                            confirmButton: "btn fw-bold btn-primary",
+                            cancelButton: "btn fw-bold btn-active-light-warning",
+                        },
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const id = button.getAttribute("data-id")
+
+                            const data = {
+                                hashed_id_appointment: id,
+                                status: 1
+                            }
+
+                            const options = {
+                                method: "POST",
+                                body: JSON.stringify(data),
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+                            }
+
+                            fetch("http://localhost:3000/api/appointments/change_status", options)
+                                .then((response) => {
+                                    response.text().then((json) => {
+                                        json = JSON.parse(json)
+
+                                        toastr.options = {
+                                            positionClass: "toastr-top-right",
+                                            preventDuplicates: true,
+                                        }
+
+                                        if (response.status === 201) {
+                                            if (json.status === true) {
+                                                toastr.success(json.message)
+                                                dt.ajax.reload()
+                                            }
+                                        } else if (response.status === 401) {
+                                            toastr.error(json.error)
+                                        } else {
+                                            toastr.error(json.error)
+                                        }
+                                    })
+                                })
+                                .catch((error) => {
+                                    console.error(error)
+                                })
+                        }
+                    })
+                })
+                $("#datatable").on("click", "[data-datatable-action='missed-row']", (e) => {
                     e.preventDefault()
                     const button = e.currentTarget
                     const parent = button.closest("tr")
@@ -259,12 +360,81 @@
 
                     Swal.fire({
                         icon: "warning",
-                        title: "Desativar Utilizador",
-                        text: "Tem a certeza que deseja desativar o Utilizador (" + name + ") ?",
+                        title: "Faltou à Consulta",
+                        text: "Tem a certeza que deseja marcar Falta na Consulta do Utente (" + name + ") ?",
                         showCancelButton: true,
                         buttonsStyling: false,
                         cancelButtonText: "Não, cancelar",
-                        confirmButtonText: "Sim, desativar",
+                        confirmButtonText: "Sim, faltou",
+                        reverseButtons: true,
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            const confirmButton = Swal.getConfirmButton();
+                            confirmButton.blur();
+                        },
+                        customClass: {
+                            confirmButton: "btn fw-bold btn-warning",
+                            cancelButton: "btn fw-bold btn-active-light-warning",
+                        },
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const id = button.getAttribute("data-id")
+
+                            const data = {
+                                hashed_id_appointment: id,
+                                status: 2
+                            }
+
+                            const options = {
+                                method: "POST",
+                                body: JSON.stringify(data),
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+                            }
+
+                            fetch("http://localhost:3000/api/appointments/change_status", options)
+                                .then((response) => {
+                                    response.text().then((json) => {
+                                        json = JSON.parse(json)
+
+                                        toastr.options = {
+                                            positionClass: "toastr-top-right",
+                                            preventDuplicates: true,
+                                        }
+
+                                        if (response.status === 201) {
+                                            if (json.status === true) {
+                                                toastr.success(json.message)
+                                                dt.ajax.reload()
+                                            }
+                                        } else if (response.status === 401) {
+                                            toastr.error(json.error)
+                                        } else {
+                                            toastr.error(json.error)
+                                        }
+                                    })
+                                })
+                                .catch((error) => {
+                                    console.error(error)
+                                })
+                        }
+                    })
+                })
+                $("#datatable").on("click", "[data-datatable-action='cancel-row']", (e) => {
+                    e.preventDefault()
+                    const button = e.currentTarget
+                    const parent = button.closest("tr")
+                    const name = button.getAttribute("data-name")
+
+                    Swal.fire({
+                        icon: "error",
+                        title: "Cancelar Consulta",
+                        text: "Tem a certeza que deseja Cancelar a Consulta do Utente (" + name + ") ?",
+                        showCancelButton: true,
+                        buttonsStyling: false,
+                        cancelButtonText: "Não, voltar",
+                        confirmButtonText: "Sim, cancelar",
                         reverseButtons: true,
                         allowOutsideClick: false,
                         didOpen: () => {
@@ -280,7 +450,8 @@
                             const id = button.getAttribute("data-id")
 
                             const data = {
-                                hashed_id: id,
+                                hashed_id_appointment: id,
+                                status: 3
                             }
 
                             const options = {
@@ -291,7 +462,7 @@
                                 },
                             }
 
-                            fetch("http://localhost:3000/api/users/remove", options)
+                            fetch("http://localhost:3000/api/appointments/change_status", options)
                                 .then((response) => {
                                     response.text().then((json) => {
                                         json = JSON.parse(json)
@@ -351,6 +522,14 @@
                 });
             };
 
+            var handleFilterDatatable = () => {
+                const filterButton = document.querySelector(`[data-datatable-action="filter"]`);
+
+                filterButton.addEventListener("click", () => {
+                    dt.ajax.reload()
+                });
+            };
+
             return {
                 init: () => {
                     initDatatable()
@@ -358,6 +537,7 @@
                     handleSearchDatatable()
                     handleDeleteRows()
                     handleDateFilter()
+                    handleFilterDatatable()
                 },
             }
         })()

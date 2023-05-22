@@ -10,9 +10,23 @@
                 <ul class="breadcrumb breadcrumb-separatorless fw-semibold">
                     <!--begin::Item-->
                     <li class="breadcrumb-item text-white fw-bold lh-1">
-                        <a href="<?php echo $link_home ?>index" class="text-white">
-                            <i class="ki-outline ki-home text-white fs-3"></i>
-                        </a>
+
+                        <?php if ($_SESSION["active_role"] === "Admin") { ?>
+                            <a href="<?php echo $link_home ?>pages/admin/index" class="text-white">
+                                <i class="ki-outline ki-home text-white fs-3"></i>
+                            </a>
+                        <?php } ?>
+                        <?php if ($_SESSION["active_role"] === "Doctor") { ?>
+                            <a href="<?php echo $link_home ?>pages/doctor/index" class="text-white">
+                                <i class="ki-outline ki-home text-white fs-3"></i>
+                            </a>
+                        <?php } ?>
+                        <?php if ($_SESSION["active_role"] === "Patient") { ?>
+                            <a href="<?php echo $link_home ?>pages/patient/index" class="text-white">
+                                <i class="ki-outline ki-home text-white fs-3"></i>
+                            </a>
+                        <?php } ?>
+
                     </li>
                     <!--end::Item-->
                     <!--begin::Item-->
@@ -21,7 +35,7 @@
                     </li>
                     <!--end::Item-->
                     <!--begin::Item-->
-                    <li class="breadcrumb-item text-white fw-bold lh-1">Dashboards</li>
+                    <li class="breadcrumb-item text-white fw-bold lh-1">Início</li>
                     <!--end::Item-->
                 </ul>
                 <!--end::Breadcrumb-->
@@ -31,7 +45,7 @@
             <div class="d-flex flex-stack flex-wrap flex-lg-nowrap gap-4 gap-lg-10 pt-6 pb-18 py-lg-13">
                 <!--begin::Page title-->
                 <div class="page-title d-flex align-items-center me-3">
-                    <img alt="Logo" src="<?php echo $link_home?>assets/media/svg/misc/layer.svg" class="h-60px me-5" />
+                    <img alt="Logo" src="<?php echo $link_home ?>assets/media/svg/misc/layer.svg" class="h-60px me-5" />
                     <!--begin::Title-->
                     <h1 class="page-heading d-flex text-white fw-bolder fs-2 flex-column justify-content-center my-0"><?php echo isset($page_name) ? $page_name : "SNS 24" ?>
                         <!--begin::Description-->

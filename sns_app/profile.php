@@ -224,6 +224,22 @@ $user_info_data = $user_info["response"];
                                                     </div>
                                                 </div>
 
+                                                <?php if($_SESSION['active_role'] === "Patient") { ?>
+                                                    <div class="row mb-7">
+                                                        <label class="col-lg-4 fw-semibold text-muted">Número de Utente</label>
+                                                        <div class="col-lg-8">
+                                                            <span class="fw-bold fs-6 text-gray-800"><?php echo $user_info_data["patient_number"] ?></span>
+                                                        </div>
+                                                    </div>
+                                                <?php }else if($_SESSION['active_role'] === "Doctor") { ?>
+                                                    <div class="row mb-7">
+                                                        <label class="col-lg-4 fw-semibold text-muted">Número de Cédula Profissional</label>
+                                                        <div class="col-lg-8">
+                                                            <span class="fw-bold fs-6 text-gray-800"><?php echo $user_info_data["doctor_number"] ?></span>
+                                                        </div>
+                                                    </div>
+                                                <?php } ?>
+
                                                 <div class="row mb-7">
                                                     <label class="col-lg-4 fw-semibold text-muted">Utilizador criado em:</label>
                                                     <div class="col-lg-8">

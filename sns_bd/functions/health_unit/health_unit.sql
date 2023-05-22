@@ -611,6 +611,10 @@ BEGIN
         RAISE EXCEPTION 'O utente já está associado à unidade de saúde';
     END IF;
 
+    IF EXISTS(SELECT * FROM health_unit_patient WHERE health_unit_patient.id_patient = id_patient_out) THEN
+        RAISE EXCEPTION 'O utente já está associado ao Centro de Saude: %', (SELECT health_unit.name FROM health_unit WHERE health_unit.id_health_unit = (SELECT health_unit_patient.id_health_unit FROM health_unit_patient WHERE health_unit_patient.id_patient = id_patient_out));
+    END IF;
+
     -- Check if health unit is a "Centro de Saúde"
     IF (SELECT type FROM health_unit WHERE health_unit.id_health_unit = id_health_unit_out) != 'Centro de Saúde' THEN
         RAISE EXCEPTION 'A unidade de saúde não é um Centro de Saúde, logo não pode ter utentes associados';
@@ -734,6 +738,298 @@ BEGIN
 
 END;
 $$ LANGUAGE plpgsql;
+--
+--
+--
+-- Add Patient Doctor
+CREATE OR REPLACE FUNCTION add_patient_doctor(
+    id_health_unit INTEGER,
+    hashed_id_health_unit VARCHAR(255),
+    id_doctor INTEGER,
+    hashed_id_doctor VARCHAR(255),
+    id_patient INTEGER,
+    hashed_id_patient VARCHAR(255)
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+    id_health_unit_out BIGINT;
+    id_doctor_out BIGINT;
+    id_patient_out BIGINT;
+
+    id_health_unit_doctor_out BIGINT;
+    id_health_unit_patient_out BIGINT;
+BEGIN
+    IF id_health_unit IS NOT NULL AND hashed_id_health_unit IS NOT NULL THEN
+        RAISE EXCEPTION 'O id da unidade de saúde e o hash_id não podem ser informados ao mesmo tempo';
+    END IF;
+
+    IF id_doctor IS NOT NULL AND hashed_id_doctor IS NOT NULL THEN
+        RAISE EXCEPTION 'O id do médico e o hash_id não podem ser informados ao mesmo tempo';
+    END IF;
+    
+    IF id_patient IS NOT NULL AND hashed_id_patient IS NOT NULL THEN
+        RAISE EXCEPTION 'O id do paciente e o hash_id não podem ser informados ao mesmo tempo';
+    END IF;
+
+    IF id_health_unit IS NULL AND hashed_id_health_unit IS NULL THEN
+        RAISE EXCEPTION 'O id da unidade de saúde ou o hash_id devem ser informados';
+    END IF;
+
+    IF id_doctor IS NULL AND hashed_id_doctor IS NULL THEN
+        RAISE EXCEPTION 'O id do médico ou o hash_id devem ser informados';
+    END IF;
+
+    IF id_patient IS NULL AND hashed_id_patient IS NULL THEN
+        RAISE EXCEPTION 'O id do paciente ou o hash_id devem ser informados';
+    END IF;
+
+
+    IF id_health_unit IS NOT NULL THEN
+        id_health_unit_out = id_health_unit;
+    ELSE
+        id_health_unit_out = (SELECT health_unit.id_health_unit FROM health_unit WHERE hashed_id = hashed_id_health_unit);
+    END IF;
+
+    -- Check if health unit exists
+    IF NOT EXISTS(SELECT * FROM health_unit WHERE health_unit.id_health_unit = id_health_unit_out) THEN
+        RAISE EXCEPTION 'A unidade de saúde não existe';
+    END IF;
+
+    IF id_doctor IS NOT NULL THEN
+        id_doctor_out = id_doctor;
+    ELSE
+        id_doctor_out = (SELECT u.id_user FROM users u WHERE u.hashed_id = hashed_id_doctor);
+    END IF;
+
+    -- Check if patient exists
+    IF NOT EXISTS(SELECT * FROM users WHERE users.id_user = id_doctor_out) THEN
+        RAISE EXCEPTION 'O médico não existe';
+    END IF;
+
+	--Check if users is a Patient
+    IF check_user_role(id_doctor_out, NULL, 'Doctor') = FALSE THEN
+        RAISE EXCEPTION 'O utilizador não é um Médico';
+    END IF;
+
+
+    IF id_patient IS NOT NULL THEN
+        id_patient_out = id_patient;
+    ELSE
+        id_patient_out = (SELECT u.id_user FROM users u WHERE u.hashed_id = hashed_id_patient);
+    END IF;
+
+    -- Check if patient exists
+    IF NOT EXISTS(SELECT * FROM users WHERE users.id_user = id_patient_out) THEN
+        RAISE EXCEPTION 'O utente não existe';
+    END IF;
+
+	--Check if users is a Patient
+    IF check_user_role(id_patient_out, NULL, 'Patient') = FALSE THEN
+        RAISE EXCEPTION 'O utilizador não é um Utente';
+    END IF;
+
+    -- Get id_health_unit_doctor
+    id_health_unit_doctor_out = (SELECT health_unit_doctor.id_health_unit_doctor FROM health_unit_doctor WHERE health_unit_doctor.id_health_unit = id_health_unit_out AND health_unit_doctor.id_doctor = id_doctor_out);
+    IF id_health_unit_doctor_out IS NULL THEN
+        RAISE EXCEPTION 'O médico não está associado à unidade de saúde';
+    END IF;
+
+    -- Get id_health_unit_patient
+    id_health_unit_patient_out = (SELECT health_unit_patient.id_health_unit_patient FROM health_unit_patient WHERE health_unit_patient.id_health_unit = id_health_unit_out AND health_unit_patient.id_patient = id_patient_out);
+    IF id_health_unit_patient_out IS NULL THEN
+        RAISE EXCEPTION 'O utente não está associado à unidade de saúde';
+    END IF;
+
+    -- Check if patient is already associated to doctor
+    IF EXISTS(SELECT * FROM patient_doctor WHERE patient_doctor.id_health_unit_doctor = id_health_unit_doctor_out AND patient_doctor.id_health_unit_patient = id_health_unit_patient_out AND status=1) THEN
+        RAISE EXCEPTION 'O utente já está associado ao médico';
+    END IF;
+
+    -- Check if patient is already associated to another doctor
+    IF EXISTS(SELECT * FROM patient_doctor WHERE patient_doctor.id_health_unit_patient = id_health_unit_patient_out AND status=1) THEN
+        RAISE EXCEPTION 'O utente já está associado a outro médico';
+    END IF;
+
+    INSERT INTO patient_doctor (id_health_unit_doctor, id_health_unit_patient, status, start_date) VALUES (id_health_unit_doctor_out, id_health_unit_patient_out, 1, NOW());
+    RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql;
+--
+--
+--
+-- Remove Patient Doctor
+CREATE OR REPLACE FUNCTION remove_patient_doctor(
+    id_health_unit INTEGER,
+    hashed_id_health_unit VARCHAR(255),
+    id_doctor INTEGER,
+    hashed_id_doctor VARCHAR(255),
+    id_patient INTEGER,
+    hashed_id_patient VARCHAR(255)
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+    id_health_unit_out BIGINT;
+    id_doctor_out BIGINT;
+    id_patient_out BIGINT;
+
+    id_health_unit_doctor_out BIGINT;
+    id_health_unit_patient_out BIGINT;
+BEGIN
+    IF id_health_unit IS NOT NULL AND hashed_id_health_unit IS NOT NULL THEN
+        RAISE EXCEPTION 'O id da unidade de saúde e o hash_id não podem ser informados ao mesmo tempo';
+    END IF;
+
+    IF id_doctor IS NOT NULL AND hashed_id_doctor IS NOT NULL THEN
+        RAISE EXCEPTION 'O id do médico e o hash_id não podem ser informados ao mesmo tempo';
+    END IF;
+    
+    IF id_patient IS NOT NULL AND hashed_id_patient IS NOT NULL THEN
+        RAISE EXCEPTION 'O id do paciente e o hash_id não podem ser informados ao mesmo tempo';
+    END IF;
+
+    IF id_health_unit IS NULL AND hashed_id_health_unit IS NULL THEN
+        RAISE EXCEPTION 'O id da unidade de saúde ou o hash_id devem ser informados';
+    END IF;
+
+    IF id_doctor IS NULL AND hashed_id_doctor IS NULL THEN
+        RAISE EXCEPTION 'O id do médico ou o hash_id devem ser informados';
+    END IF;
+
+    IF id_patient IS NULL AND hashed_id_patient IS NULL THEN
+        RAISE EXCEPTION 'O id do paciente ou o hash_id devem ser informados';
+    END IF;
+
+    IF id_health_unit IS NOT NULL THEN
+        id_health_unit_out = id_health_unit;
+    ELSE
+        id_health_unit_out = (SELECT health_unit.id_health_unit FROM health_unit WHERE hashed_id = hashed_id_health_unit);
+    END IF;
+
+    -- Check if health unit exists
+    IF NOT EXISTS(SELECT * FROM health_unit WHERE health_unit.id_health_unit = id_health_unit_out) THEN
+        RAISE EXCEPTION 'A unidade de saúde não existe';
+    END IF;
+
+    IF id_doctor IS NOT NULL THEN
+        id_doctor_out = id_doctor;
+    ELSE
+        id_doctor_out = (SELECT u.id_user FROM users u WHERE u.hashed_id = hashed_id_doctor);
+    END IF;
+
+    -- Check if patient exists
+    IF NOT EXISTS(SELECT * FROM users WHERE users.id_user = id_doctor_out) THEN
+        RAISE EXCEPTION 'O médico não existe';
+    END IF;
+
+	--Check if users is a Patient
+    IF check_user_role(id_doctor_out, NULL, 'Doctor') = FALSE THEN
+        RAISE EXCEPTION 'O utilizador não é um Médico';
+    END IF;
+
+
+    IF id_patient IS NOT NULL THEN
+        id_patient_out = id_patient;
+    ELSE
+        id_patient_out = (SELECT u.id_user FROM users u WHERE u.hashed_id = hashed_id_patient);
+    END IF;
+
+    -- Check if patient exists
+    IF NOT EXISTS(SELECT * FROM users WHERE users.id_user = id_patient_out) THEN
+        RAISE EXCEPTION 'O utente não existe';
+    END IF;
+
+	--Check if users is a Patient
+    IF check_user_role(id_patient_out, NULL, 'Patient') = FALSE THEN
+        RAISE EXCEPTION 'O utilizador não é um Utente';
+    END IF;
+
+    -- Get id_health_unit_doctor_out
+    id_health_unit_doctor_out = (SELECT health_unit_doctor.id_health_unit_doctor FROM health_unit_doctor WHERE health_unit_doctor.id_health_unit = id_health_unit_out AND health_unit_doctor.id_doctor = id_doctor_out);
+    IF id_health_unit_doctor_out IS NULL THEN
+        RAISE EXCEPTION 'O médico não está associado à unidade de saúde';
+    END IF;
+
+    -- Get id_health_unit_patient_out
+    id_health_unit_patient_out = (SELECT health_unit_patient.id_health_unit_patient FROM health_unit_patient WHERE health_unit_patient.id_health_unit = id_health_unit_out AND health_unit_patient.id_patient = id_patient_out);
+    IF id_health_unit_patient_out IS NULL THEN
+        RAISE EXCEPTION 'O utente não está associado à unidade de saúde';
+    END IF;
+
+    UPDATE patient_doctor SET status = 0, end_date=now() WHERE id_health_unit_doctor = id_health_unit_doctor_out AND id_health_unit_patient = id_health_unit_patient_out AND status=1;
+    RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql;
+--
+--
+--
+-- Get Patient Current Health Unit Doctor
+CREATE OR REPLACE FUNCTION get_patient_current_health_unit_doctor(
+    id_patient BIGINT,
+    hashed_id_patient_in VARCHAR(255)
+)
+RETURNS TABLE(
+    hashed_id_doctor VARCHAR(255),
+    hashed_id_patient VARCHAR(255),
+    hashed_id_health_unit VARCHAR(255),
+    status INTEGER,
+    start_date TIMESTAMP,
+    health_unit_name VARCHAR(255),
+    doctor_name VARCHAR(255),
+    patient_name VARCHAR(255)
+) AS $$
+DECLARE
+    id_patient_out BIGINT;
+BEGIN
+    IF id_patient IS NOT NULL AND hashed_id_patient_in IS NOT NULL THEN
+        RAISE EXCEPTION 'O id do paciente e o hash_id não podem ser informados ao mesmo tempo';
+    END IF;
+
+    IF id_patient IS NULL AND hashed_id_patient_in IS NULL THEN
+        RAISE EXCEPTION 'O id do paciente ou o hash_id devem ser informados';
+    END IF;
+
+    IF id_patient IS NOT NULL THEN
+        id_patient_out = id_patient;
+    ELSE
+        id_patient_out = (SELECT u.id_user FROM users u WHERE u.hashed_id = hashed_id_patient_in);
+    END IF;
+
+    -- Check if patient exists
+    IF NOT EXISTS(SELECT * FROM users WHERE users.id_user = id_patient_out) THEN
+        RAISE EXCEPTION 'O utente não existe';
+    END IF;
+
+    --Check if users is a Patient
+    IF check_user_role(id_patient_out, NULL, 'Patient') = FALSE THEN
+        RAISE EXCEPTION 'O utilizador não é um Utente';
+    END IF;
+
+    RETURN QUERY
+    SELECT
+        u_doc.hashed_id as hashed_id_doctor,
+        u_pat.hashed_id as hashed_id_patient,
+        hu.hashed_id,
+        pd.status,
+        pd.start_date,
+        hu.name,
+        (ui_doc.first_name || ' ' || ui_doc.last_name) as doctor_name,
+		(ui_pat.first_name || ' ' || ui_pat.last_name) as patient_name
+    FROM patient_doctor pd
+    INNER JOIN health_unit_doctor hud ON hud.id_health_unit_doctor = pd.id_health_unit_doctor
+    INNER JOIN health_unit_patient hup ON hup.id_health_unit_patient = pd.id_health_unit_patient
+    INNER JOIN users u_doc ON u_doc.id_user = hud.id_doctor
+    INNER JOIN users u_pat ON u_pat.id_user = hup.id_patient
+    INNER JOIN health_unit hu ON hu.id_health_unit = hud.id_health_unit
+    INNER JOIN user_info ui_pat ON ui_pat.id_user = u_pat.id_user
+    INNER JOIN user_info ui_doc ON ui_doc.id_user = u_doc.id_user
+    WHERE pd.status = 1 AND hup.id_patient=id_patient_out;
+
+END;
+$$ LANGUAGE plpgsql;
+    
+
+
+
 
 
 

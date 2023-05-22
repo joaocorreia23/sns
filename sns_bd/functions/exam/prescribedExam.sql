@@ -8,7 +8,7 @@ CREATE OR REPLACE FUNCTION create_prescribed_exam(
     hashed_id_appointment_in VARCHAR(255) DEFAULT NULL,
     id_exam_in BIGINT DEFAULT NULL,
     hashed_id_exam_in VARCHAR(255) DEFAULT NULL,
-    requisition_date_in DATE DEFAULT NULL,
+    requisition_date_in TIMESTAMP DEFAULT NULL,
 	status INT DEFAULT 0,
     scheduled_date_in DATE DEFAULT NULL
 ) RETURNS BOOLEAN AS $$
@@ -527,7 +527,7 @@ BEGIN
         END IF;
     END IF;
 
-    UPDATE prescribed_exam SET scheduled_date = scheduled_date_in WHERE id_prescribed_exam = prescribed_exam_id;
+    UPDATE prescribed_exam SET scheduled_date = scheduled_date_in, status=1 WHERE id_prescribed_exam = prescribed_exam_id;
 	RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql;

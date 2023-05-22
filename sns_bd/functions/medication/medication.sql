@@ -184,3 +184,177 @@ BEGIN
     END IF;
 END;
 $$ LANGUAGE plpgsql;
+--
+--
+--
+-- Add To Usual Medication
+CREATE OR REPLACE FUNCTION add_to_usual_medication(
+    IN id_medication_prescription BIGINT DEFAULT NULL,
+    IN hashed_id_medication_prescription VARCHAR(255) DEFAULT NULL
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+    medication_id BIGINT;
+    medication_prescription_id BIGINT;
+    patient_id BIGINT;
+BEGIN
+    IF id_medication_prescription IS NULL AND hashed_id_medication_prescription IS NULL THEN
+        RAISE EXCEPTION 'É necessário passar o id_medication_prescription ou o hashed_id_medication_prescription';
+    ELSEIF id_medication_prescription IS NOT NULL AND hashed_id_medication_prescription IS NOT NULL THEN
+        RAISE EXCEPTION 'Não é possível passar o id_medication_prescription e o hashed_id_medication_prescription';
+    ELSEIF id_medication_prescription IS NULL THEN
+        SELECT medication_prescription.id_medication_prescription INTO medication_prescription_id FROM medication_prescription WHERE hashed_id = hashed_id_medication_prescription;
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Prescrição de medicação com o hashed_id "%" não existe', hashed_id_medication_prescription; --medication_prescription NOT FOUND
+        END IF;
+    ELSEIF hashed_id_medication_prescription IS NULL THEN
+        SELECT medication_prescription.id_medication_prescription INTO medication_prescription_id FROM medication_prescription WHERE medication_prescription.id_medication_prescription = add_to_usual_medication.id_medication_prescription;
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Prescrição de medicação com o id "%" não existe', id_medication_prescription; --medication_prescription NOT FOUND
+        END IF;
+    END IF;
+
+    IF EXISTS (SELECT * FROM usual_medication WHERE usual_medication.id_medication_prescription = medication_prescription_id) THEN
+        RAISE EXCEPTION 'Prescrição de medicação já está na lista de medicações usuais';
+        RETURN FALSE;
+    END IF;
+
+    medication_id := (SELECT m.id_medication FROM medication_prescription mp INNER JOIN medication m ON mp.id_medication = m.id_medication WHERE mp.id_medication_prescription = medication_prescription_id);
+    IF NOT EXISTS (SELECT * FROM medication WHERE id_medication = medication_id AND status = 1) THEN
+        RAISE EXCEPTION 'Medicação não está ativa';
+    END IF;
+
+    patient_id := (SELECT a.id_user_patient FROM medication_prescription mp INNER JOIN prescription p ON mp.id_prescription = p.id_prescription INNER JOIN appointment a ON p.id_appointment = a.id_appointment WHERE mp.id_medication_prescription = medication_prescription_id);
+
+    -- Check if patient already has this medication in usual medication
+    IF EXISTS (SELECT * FROM usual_medication um 
+    INNER JOIN medication_prescription mp ON um.id_medication_prescription = mp.id_medication_prescription 
+    INNER JOIN prescription p ON mp.id_prescription = p.id_prescription
+    INNER JOIN appointment a ON p.id_appointment = a.id_appointment AND a.id_user_patient = patient_id
+    WHERE mp.id_medication = medication_id AND um.status = 1) THEN
+        --RAISE EXCEPTION 'Utente já tem esta medicação na lista de medicações usuais';
+        RETURN TRUE;--Already has this medication in usual medication, so no need to add
+    END IF;
+
+    INSERT INTO usual_medication (id_medication_prescription) VALUES (medication_prescription_id);
+    RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql;
+--
+--
+--
+-- Remove From Usual Medication
+CREATE OR REPLACE FUNCTION remove_from_usual_medication(
+    IN id_medication_prescription BIGINT DEFAULT NULL,
+    IN hashed_id_medication_prescription VARCHAR(255) DEFAULT NULL
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+    medication_prescription_id BIGINT;
+BEGIN
+    IF id_medication_prescription IS NULL AND hashed_id_medication_prescription IS NULL THEN
+        RAISE EXCEPTION 'É necessário passar o id_medication_prescription ou o hashed_id_medication_prescription';
+    ELSEIF id_medication_prescription IS NOT NULL AND hashed_id_medication_prescription IS NOT NULL THEN
+        RAISE EXCEPTION 'Não é possível passar o id_medication_prescription e o hashed_id_medication_prescription';
+    ELSEIF id_medication_prescription IS NULL THEN
+        SELECT medication_prescription.id_medication_prescription INTO medication_prescription_id FROM medication_prescription WHERE hashed_id = hashed_id_medication_prescription;
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Prescrição de medicação com o hashed_id "%" não existe', hashed_id_medication_prescription; --medication_prescription NOT FOUND
+        END IF;
+    ELSEIF hashed_id_medication_prescription IS NULL THEN
+        SELECT medication_prescription.id_medication_prescription INTO medication_prescription_id FROM medication_prescription WHERE medication_prescription.id_medication_prescription = remove_from_usual_medication.id_medication_prescription;
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Prescrição de medicação com o id "%" não existe', id_medication_prescription; --medication_prescription NOT FOUND
+        END IF;
+    END IF;
+
+    IF NOT EXISTS (SELECT * FROM usual_medication WHERE usual_medication.id_medication_prescription = medication_prescription_id) THEN
+        RAISE EXCEPTION 'Prescrição de medicação não está na lista de medicações usuais';
+    END IF;
+
+    IF EXISTS(SELECT * FROM usual_medication WHERE usual_medication.id_medication_prescription = medication_prescription_id AND usual_medication.status = 0) THEN
+        RAISE EXCEPTION 'Prescrição de medicação já está desativada';
+    END IF;
+
+    UPDATE usual_medication SET status = 0, updated_at=NOW WHERE usual_medication.id_medication_prescription = medication_prescription_id;
+    RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql;
+--
+--
+--
+-- Get Usual Medication
+CREATE OR REPLACE FUNCTION get_usual_medication(
+    IN id_user_patient BIGINT DEFAULT NULL,
+    IN hashed_id_user_patient VARCHAR(255) DEFAULT NULL,
+    status INTEGER DEFAULT NULL
+)
+RETURNS TABLE (
+    id_medication_prescription BIGINT,
+    usual_medication_status INTEGER,
+    usual_medication_created_at TIMESTAMP,
+    usual_medication_updated_at TIMESTAMP,
+    id_medication BIGINT,
+    medication_name VARCHAR(255),
+    medication_status INTEGER
+) AS $$
+DECLARE
+    patient_id BIGINT;
+BEGIN
+    IF id_user_patient IS NULL AND hashed_id_user_patient IS NULL THEN
+        RAISE EXCEPTION 'É necessário passar o id_user_patient ou o hashed_id_user_patient';
+    ELSEIF id_user_patient IS NOT NULL AND hashed_id_user_patient IS NOT NULL THEN
+        RAISE EXCEPTION 'Não é possível passar o id_user_patient e o hashed_id_user_patient';
+    ELSEIF id_user_patient IS NULL THEN
+        SELECT users.id_user INTO patient_id FROM users WHERE hashed_id = hashed_id_user_patient;
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Utente com o hashed_id "%" não existe', hashed_id_user_patient; --user_patient NOT FOUND
+        END IF;
+    ELSEIF hashed_id_user_patient IS NULL THEN
+        SELECT users.id_user INTO patient_id FROM users WHERE users.id_user = get_usual_medication.id_user_patient;
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'Utente com o id "%" não existe', id_user_patient; --user_patient NOT FOUND
+        END IF;
+    END IF;
+
+    IF get_usual_medication.status IS NULL THEN
+        RETURN QUERY
+        SELECT 
+            um.id_medication_prescription, 
+            um.status AS usual_medication_status, 
+            um.created_at AS usual_medication_created_at, 
+            um.updated_at AS usual_medication_updated_at, 
+            m.id_medication, 
+            m.medication_name AS medication_name, 
+            m.status AS medication_status 
+        FROM usual_medication um
+        INNER JOIN medication_prescription mp ON um.id_medication_prescription = mp.id_medication_prescription
+        INNER JOIN medication m ON mp.id_medication = m.id_medication
+        INNER JOIN prescription p ON mp.id_prescription = p.id_prescription
+        INNER JOIN appointment a ON p.id_appointment = a.id_appointment AND a.id_user_patient = patient_id;
+    ELSEIF get_usual_medication.status IN (0, 1) THEN
+        RETURN QUERY
+        SELECT 
+            um.id_medication_prescription, 
+            um.status AS usual_medication_status, 
+            um.created_at AS usual_medication_created_at, 
+            um.updated_at AS usual_medication_updated_at, 
+            m.id_medication, 
+            m.medication_name AS medication_name, 
+            m.status AS medication_status 
+        FROM usual_medication um
+        INNER JOIN medication_prescription mp ON um.id_medication_prescription = mp.id_medication_prescription
+        INNER JOIN medication m ON mp.id_medication = m.id_medication
+        INNER JOIN prescription p ON mp.id_prescription = p.id_prescription
+        INNER JOIN appointment a ON p.id_appointment = a.id_appointment AND a.id_user_patient = patient_id
+        WHERE um.status = get_usual_medication.status;
+    ELSE
+        RAISE EXCEPTION 'Estado inválido';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+
+       

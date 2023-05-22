@@ -153,7 +153,7 @@ CREATE TABLE admin (
 CREATE TABLE doctor (
 	id_doctor BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('doctor_sequence'::regclass),
 	id_user BIGINT NOT NULL,
-	doctor_number INT UNIQUE NOT NULL,
+	doctor_number VARCHAR(255) UNIQUE NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	FOREIGN KEY (id_user) REFERENCES users(id_user)
 );
@@ -162,10 +162,11 @@ CREATE TABLE doctor (
 CREATE TABLE patient (
 	id_patient BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('patient_sequence'::regclass),
 	id_user BIGINT NOT NULL,
-	patient_number INT UNIQUE NOT NULL,
+	patient_number VARCHAR(255) UNIQUE NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	FOREIGN KEY (id_user) REFERENCES users(id_user)
 );
+
 
 -- =======================
 -- END: USER
@@ -244,12 +245,14 @@ CREATE TABLE patient_doctor (
 	id_patient_doctor BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('patient_doctor_sequence'::regclass),
 	id_health_unit_doctor BIGINT NOT NULL,
 	id_health_unit_patient BIGINT NOT NULL,
-	start_date DATE NOT NULL,
-	end_date DATE NULL,
-	status INT NOT NULL DEFAULT 0,
+	start_date TIMESTAMP NOT NULL DEFAULT NOW(),
+	end_date TIMESTAMP NULL,
+	status INT NOT NULL DEFAULT 1,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+
+--start date from date to timestam
 
 -- =======================
 -- END: HEALTH UNIT
@@ -349,16 +352,13 @@ CREATE TABLE medication_prescription (
 
 -- Usual Medication Table
 CREATE TABLE usual_medication (
-    id_patient BIGINT NOT NULL,
-    id_medication BIGINT NOT NULL,
-    id_medication_prescription BIGINT NULL,
+    id_medication_prescription BIGINT NOT NULL,
     status INT NOT NULL DEFAULT 1,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (id_patient) REFERENCES users(id_user),
-    FOREIGN KEY (id_medication) REFERENCES medication(id_medication),
+    updated_at TIMESTAMP NULL,
     FOREIGN KEY (id_medication_prescription) REFERENCES medication_prescription(id_medication_prescription)
 );
+
 
 -- =======================
 -- END: MEDICATION

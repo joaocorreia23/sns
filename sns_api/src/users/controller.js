@@ -75,10 +75,10 @@ const Update_User = (req, res) => {
 };
 
 const Update_User_Info = (req, res) => {
-    const { hashed_id, first_name, last_name, birth_date, gender, tax_number, phone_number, contact_email, nationality, door_number, floor, address, zip_code, county, district, id_country, avatar_path } = req.body;
+    const { hashed_id, first_name, last_name, birth_date, gender, tax_number, phone_number, contact_email, nationality, door_number, floor, address, zip_code, county, district, id_country, avatar_path, doctor_number, patient_number } = req.body;
     pool.query(
-        "SELECT * FROM update_user_info(NULL, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17)",
-        [hashed_id, first_name, last_name, birth_date, gender, tax_number, phone_number, contact_email, nationality, door_number, floor, address, zip_code, county, district, id_country, avatar_path],
+        "SELECT * FROM update_user_info(NULL, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11,$12,$13,$14,$15,$16,$17, $18, $19)",
+        [hashed_id, first_name, last_name, birth_date, gender, tax_number, phone_number, contact_email, nationality, door_number, floor, address, zip_code, county, district, id_country, avatar_path, doctor_number, patient_number],
         (error, results) => {
             if (error) {
                 res.status(400).json({ error: error.message });

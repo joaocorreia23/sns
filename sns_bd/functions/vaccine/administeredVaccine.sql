@@ -5,13 +5,10 @@
 
 --Insert Administered Vaccine
 CREATE OR REPLACE FUNCTION create_administered_vaccine(
-
     id_vaccine_in BIGINT DEFAULT NULL,
     hashed_id_vaccine_in VARCHAR(255) DEFAULT NULL,
-
 	id_appointment_in BIGINT DEFAULT NULL,
     hashed_id_appointment_in VARCHAR(255) DEFAULT NULL,
-
     administered_date_in TIMESTAMP DEFAULT NULL,
     dosage_in FLOAT DEFAULT NULL,
 	status INT DEFAULT 0,
@@ -81,7 +78,11 @@ BEGIN
     END IF;
 
     IF due_date_in IS NULL THEN
-        RAISE EXCEPTION 'É necessário passar a Data de nova Vacinação.';
+        due_date_in := NOW()::DATE + INTERVAL '6 months';
+    END IF;
+
+    IF administered_date_in IS NOT NULL THEN
+        status := 1;
     END IF;
 
     INSERT INTO administered_vaccine (id_vaccine, id_appointment, administered_date, dosage, status, due_date) VALUES (vaccine_id, appointment_id, administered_date_in, dosage_in, status, due_date_in);

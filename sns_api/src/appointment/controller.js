@@ -78,13 +78,22 @@ const Add_Appoitment = (req, res) => {
     });
 };
 
-
-
+const Update_Appointment_Status = (req, res) => {
+    const { hashed_id_appointment, status } = req.body;
+    pool.query("SELECT * FROM change_appointment_status(NULL, $1, $2)", [hashed_id_appointment, status], (error, results) => {
+        if (error) {
+            res.status(400).json({ "status": false, "error": error.message });
+            return;
+        }
+        res.status(201).json({ "status": true, "data": results.rows[0], "message": "Estado atualizado com sucesso!" });
+    });
+};
 
 module.exports = {
     Get_Appointments,
     Get_Appointments_Calendar,
     Get_Appointments_DataTable,
     Get_AppointmentByHashedId,
-    Add_Appoitment
+    Add_Appoitment,
+    Update_Appointment_Status
 };

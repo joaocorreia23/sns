@@ -27,11 +27,6 @@ $medication_list = $medication["response"];
 
 $page_name = $appointment_info["title"] . ' - ' . (new DateTime($appointment_info["start"]))->format("d/m/Y");;
 ?>
-<style>
-	textarea {
-		resize: none;
-	}
-</style>
 
 <body id="kt_app_body" data-kt-app-header-fixed-mobile="true" data-kt-app-toolbar-enabled="true" class="app-default">
 	<div class="d-flex flex-column flex-root app-root" id="kt_app_root">
@@ -493,7 +488,7 @@ $page_name = $appointment_info["title"] . ' - ' . (new DateTime($appointment_inf
 																							<label class="form-label required">Medicação</label>
 																							<select name="hashed_id_medication" class="form-select mb-2" data-kt-repeater="select2" data-control="select2" data-placeholder="Selecione uma Medicação" data-hide-search="false" data-allow-clear="true" required>
 																								<option></option>
-																								<?php foreach($medication_list as $key=>$medication){ ?>
+																								<?php foreach ($medication_list as $key => $medication) { ?>
 																									<option value="<?php echo $medication["hashed_id"]; ?>"><?php echo $medication["medication_name"]; ?></option>
 																								<?php } ?>
 																							</select>
@@ -583,7 +578,6 @@ $page_name = $appointment_info["title"] . ' - ' . (new DateTime($appointment_inf
 	</div>
 
 	<?php require_once($_SERVER["DOCUMENT_ROOT"] . "/foo.php") ?>
-	<script src="<?php echo $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['SERVER_NAME'] . '/'; ?>/assets/plugins/custom/formrepeater/formrepeater.bundle.js"></script>
 
 	<script>
 		const form = document.getElementById("modal-vaccines-form");
@@ -678,132 +672,6 @@ $page_name = $appointment_info["title"] . ' - ' . (new DateTime($appointment_inf
 						"Content-Type": "application/json",
 					},
 					body: JSON.stringify(formData),
-				})
-				.then((response) => response.json())
-				.then((data) => {
-					if (data.status) {
-						Swal.fire({
-							icon: "success",
-							title: "Sucesso!",
-							text: data.message,
-							buttonsStyling: false,
-							allowOutsideClick: false,
-							didOpen: () => {
-								const confirmButton = Swal.getConfirmButton();
-								confirmButton.blur();
-							},
-							customClass: {
-								confirmButton: "btn fw-bold btn-primary",
-							},
-						}).then((result) => {
-							if (result.isConfirmed) {
-								location.reload();
-							}
-						});
-					} else {
-						Swal.fire({
-							icon: "error",
-							title: "Ocorreu um Erro!",
-							text: data.error,
-							confirmButtonText: "Voltar a Edição",
-							buttonsStyling: false,
-							customClass: {
-								confirmButton: "btn btn-danger",
-							},
-						});
-					}
-				})
-				.catch((error) => {
-					console.error("Error:", error);
-				});
-		}
-	</script>
-
-	<script>
-		$('#medication_repeater').repeater({
-			initEmpty: false,
-			defaultValues: {
-				'text-input': 'foo'
-			},
-			show: function() {
-				$(this).slideDown();
-				// Re-init select2
-				$('[data-kt-repeater="select2"]').select2({
-					placeholder: "Selecione uma Medicação",
-					allowClear: false
-				});
-
-			},
-
-			hide: function(deleteElement) {
-				if($('#medication_repeater').find('[data-kt-repeater="select2"]').length > 1){
-					$(this).slideUp(deleteElement);
-				}else{
-					toastr.error('É necessário pelo menos uma Medicação', 'Erro!');
-				}
-			}
-		});
-
-		//PREVENT USER FROM SELECTING SAME SPECIALTY TWICE
-		$('#medication_repeater').on('change', '[data-kt-repeater="select2"]', function() {
-			// Get the current select2 instance
-			var $this = $(this);
-			// Get all select2 instances
-			var selects = $('#medication_repeater').find('[data-kt-repeater="select2"]');
-			// Get all selected values
-			var selected = selects.filter(function() {
-				return $(this).val() == $this.val();
-			});
-			// If there are more than one selected value, reset the current select2
-			if (selected.length > 1 && $this.val() != '') {
-				$this.val('').trigger('change');
-				//ADD ERROR MESSAGE
-				toastr.error('Não é possivel selecionar a mesma Medicação duas vezes', 'Erro!');
-			}
-		});
-
-		const form3 = document.getElementById("modal-prescriptions-form");
-		form3.addEventListener("submit", addPrescription);
-
-		const api_url3 = "http://localhost:3000/api/";
-		const path3 = "prescriptions/insert_new";
-
-		function addPrescription() {
-			event.preventDefault();
-	
-
-			var form = document.getElementById("modal-prescriptions-form");
-
-			const formData = {
-				hashed_id_appointment: "<?php echo $id_appointment ?>",
-			};
-
-			var medications_list = [];
-
-			
-
-			$('#medication_repeater').find('[data-kt-repeater="select2"]').each(function() {
-				var medication_hashed_id = $(this).val();
-				var use_description = $(this).parent().parent().children().eq(3).children().eq(2).val();
-				var prescribed_amount = parseInt($(this).parent().parent().children().eq(1).children().eq(1).val());
-				var usual_medication = $(this).parent().parent().children().eq(2).children().children().eq(0).is(":checked");
-				var medication = {
-					hashed_id_medication: medication_hashed_id,
-					use_description: use_description,
-					prescribed_amount: prescribed_amount,
-					usual_medication: usual_medication
-				};
-				medications_list.push(medication);
-			});
-
-			console.table(medications_list);
-
-			fetch(api_url3 + path3, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({hashed_id_appointment: "<?php echo $id_appointment; ?>", prescription_medications: medications_list}),
 				})
 				.then((response) => response.json())
 				.then((data) => {

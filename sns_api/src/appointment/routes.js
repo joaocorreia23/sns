@@ -11,6 +11,9 @@ router.post('/table', controller.Get_Appointments_DataTable);
 
 router.post('/calendar', controller.Get_Appointments_Calendar);
 
+router.post('/change_status', controller.Update_Appointment_Status);
+
 router.get('/:hashed_id', controller.Get_AppointmentByHashedId);
+
 
 module.exports = router;
