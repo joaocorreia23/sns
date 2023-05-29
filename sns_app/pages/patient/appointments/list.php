@@ -393,6 +393,7 @@ $id_patient = $_SESSION["hashed_id"];
             datatableServerSide.init()
         })
     </script>
+
 </body>
 
 </html>
