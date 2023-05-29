@@ -11,20 +11,34 @@
                 <div class="app-container container-xxl">
                     <div class="app-main flex-column flex-row-fluid" id="kt_app_main">
                         <div class="d-flex flex-column flex-column-fluid">
-                            <div id="kt_app_content" class="app-content">
 
+                            <div id="kt_app_content" class="app-content">
 
                                 <!-- Content Here -->
                                 <div class="card">
                                     <div class="card-body">
+                                        <div class="d-flex flex-column flex-md-row align-items-center justify-content-md-between flex-wrap mb-5 gap-4">
+                                            <div class="d-flex align-items-center position-relative my-1 mb-2 mb-md-0">
+                                                <span class="svg-icon svg-icon-1 position-absolute ms-5">
+                                                    <i class="ki-outline ki-magnifier fs-2"></i>
+                                                </span>
+                                                <input type="text" data-datatable-action="search" class="form-control form-control-solid w-250px ps-15" placeholder="Pesquisar...">
+                                            </div>
+                                            <div class="d-flex flex-column flex-sm-row align-items-center justify-content-md-end gap-3">
+                                                <!-- Botão Adicionar Nova -->
+                                                <a href="request" class="btn btn-light-primary d-flex align-items-center lh-1">
+                                                    <i class="ki-outline ki-plus fs-2"></i>Pedir
+                                                </a>
+                                            </div>
+                                        </div>
                                         <div class="table-responsive">
                                             <table id="datatable" class="table align-middle gs-0 gy-4">
                                                 <thead class="border-bottom border-gray-200 fs-7 fw-bold">
                                                     <tr class="text-start text-muted text-uppercase gs-0">
                                                         <th class="min-w-300px sorting">Nome da Medicação</th>
                                                         <th class="min-w-150px sorting">Estado</th>
-                                                        <th class="min-w-150px sorting">Desde</th>
-                                                        <th class="min-w-100px sorting">Até</th>
+                                                        <th class="min-w-150px sorting">Data Pedido</th>
+                                                        <th class="min-w-100px sorting">Data Prescrição</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody></tbody>
@@ -70,7 +84,7 @@
                         contentType: "application/json",
                         data: () => {
                             return JSON.stringify({
-                                'hashed_id_patient': "<?php echo $id_patient ?>"
+                                'hashed_id_patient': "<?php echo $id_patient ?>",
                             });
                         }
                     },
@@ -78,13 +92,13 @@
                             data: "medication_name"
                         },
                         {
-                            data: "usual_medication_status"
+                            data: "status"
                         },
                         {
-                            data: "usual_medication_created_at"
+                            data: "request_date"
                         },
                         {
-                            data: "usual_medication_updated_at"
+                            data: "response_date"
                         }
                     ],
                     columnDefs: [{
@@ -104,19 +118,27 @@
                             targets: 1,
                             orderable: true,
                             render: (data, type, row) => {
-                                if(row.usual_medication_status == 0){
+                                if (row.status == 0) {
                                     return `
                                     <div class="d-inline-flex align-items-center">                                
                                         <div class="d-flex justify-content-center flex-column">
-                                            <span class="badge badge-warning px-2 py-2">Finalizada</span>
+                                            <span class="badge badge-warning px-2 py-2">Em Curso</span>
                                         </div>
                                     </div>
                                     `
-                                }else if(row.usual_medication_status == 1){
+                                } else if (row.status == 1) {
                                     return `
                                     <div class="d-inline-flex align-items-center">                                
                                         <div class="d-flex justify-content-center flex-column">
-                                            <span class="badge badge-success px-2 py-2">Em Curso</span>
+                                            <span class="badge badge-success px-2 py-2">Prescrito</span>
+                                        </div>
+                                    </div>
+                                    `
+                                } else if (row.status == 2) {
+                                    return `
+                                    <div class="d-inline-flex align-items-center">                                
+                                        <div class="d-flex justify-content-center flex-column">
+                                            <span class="badge badge-danger px-2 py-2">Recusado</span>
                                         </div>
                                     </div>
                                     `
@@ -127,7 +149,7 @@
                             targets: 2,
                             orderable: true,
                             render: (data, type, row) => {
-                                var date = new Date(row.usual_medication_created_at);
+                                var date = new Date(row.request_date);
                                 var day = date.getDate();
                                 var month = date.getMonth() + 1;
                                 var year = date.getFullYear();
@@ -145,8 +167,8 @@
                             targets: 3,
                             orderable: true,
                             render: (data, type, row) => {
-                                if(row.usual_medication_updated_at !== null){
-                                    var date = new Date(row.usual_medication_updated_at);
+                                if (row.response_date !== null) {
+                                    var date = new Date(row.response_date);
                                     var day = date.getDate();
                                     var month = date.getMonth() + 1;
                                     var year = date.getFullYear();
@@ -158,7 +180,7 @@
                                             </div>
                                         </div>
                                     `;
-                                }else{
+                                } else {
                                     return `
                                         <div class="d-inline-flex align-items-center">                                
                                             <div class="d-flex justify-content-center flex-column">
