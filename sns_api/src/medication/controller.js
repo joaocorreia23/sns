@@ -150,17 +150,17 @@ const Request_Usual_Medication = (req, res) => {
     });
 };
 
-const Get_Usual_Medication_Requests = (req, res) => {
+const Get_Usual_Medication_Requests_DataTable = (req, res) => {
     const hashed_id_health_unit = req.body.hashed_id_health_unit !== undefined && req.body.hashed_id_health_unit !== '' ? req.body.hashed_id_health_unit : null;
     const hashed_id_doctor = req.body.hashed_id_doctor !== undefined && req.body.hashed_id_doctor !== '' ? req.body.hashed_id_doctor : null;
     const hashed_id_patient = req.body.hashed_id_patient !== undefined && req.body.hashed_id_patient !== '' ? req.body.hashed_id_patient : null;
     const status = req.body.status !== undefined && req.body.status !== '' ? req.body.status : null;
     pool.query("SELECT * FROM get_usual_medication_requests(NULL, $1, NULL, $2, NULL, $3, $4)", [hashed_id_health_unit, hashed_id_doctor, hashed_id_patient, status], (error, results) => {
         if (error) {
-            res.status(400).json({ "status": false, "message": error.message });
+            res.status(400).json({ "status": false, "error": error.message });
             return;
         }
-        res.status(200).json({ "status": true, "data": results.rows });
+        res.status(200).json({ 'recordsFiltered': results.rows.length, 'recordsTotal': results.rows.length, 'data': results.rows });
     });
 };
 
@@ -180,5 +180,5 @@ module.exports = {
     Get_Usual_Medication,
     Get_Usual_Medication_DataTable,
     Request_Usual_Medication,
-    Get_Usual_Medication_Requests
+    Get_Usual_Medication_Requests_DataTable
 };

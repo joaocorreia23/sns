@@ -169,7 +169,7 @@ if ($user_info_unit_doctor["response"]["status"] === true) {
                                                 <!--begin::Links-->
                                                 <div class="text-center">
                                                     <!--begin::Link-->
-                                                    <a class="btn btn-sm bg-white btn-color-gray-800 me-2">Pedir Agora!</a>
+                                                    <a href="<?php echo $link_home ?>pages/patient/usual_medication_request/list" class="btn btn-sm bg-white btn-color-gray-800 me-2">Pedir Agora!</a>
                                                     <!--end::Link-->
                                                 </div>
                                                 <!--end::Links-->
