@@ -227,6 +227,10 @@ BEGIN
         a.hashed_id as hashed_id_appointment, 
         a.id_appointment as id,
         (''Consulta - '' || ui_patient.first_name || '' '' || ui_patient.last_name)::varchar as title,
+        (CASE WHEN a.type = 0 THEN ''Consulta - '' || ui_patient.first_name || ' ' || ui_patient.last_name
+            WHEN a.type = 1 THEN ''Ato de Prescrição - '' || ui_patient.first_name || ' ' || ui_patient.last_name
+            ELSE ''Tipo de consulta desconhecido''
+        END)::varchar as title
         (a.start_date || ''T'' || a.start_time)::timestamp as start,
         (a.start_date || ''T'' || a.end_time)::timestamp as "end",
         a.status as appointment_status,
@@ -406,7 +410,7 @@ BEGIN
         ELSE
             query := query || ' AND ';
         END IF;
-        query := query || 'a.id_user_patient = ' || quote_literal(patient_id);
+        query := query || 'a.type = 0 AND a.id_user_patient = ' || quote_literal(patient_id);
     END IF;
 
     IF start_date_in IS NOT NULL THEN
