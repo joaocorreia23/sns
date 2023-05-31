@@ -24,10 +24,6 @@
                                                 <input type="text" data-datatable-action="search" class="form-control form-control-solid w-250px ps-15" placeholder="Pesquisar...">
                                             </div>
                                             <div class="d-flex flex-column flex-sm-row align-items-center justify-content-md-end gap-3">
-                                                <!-- Botão Adicionar Nova -->
-                                                <a href="request" class="btn btn-light-primary d-flex align-items-center lh-1">
-                                                    <i class="ki-outline ki-plus fs-2"></i>Pedir
-                                                </a>
                                             </div>
                                         </div>
                                         <div class="table-responsive">
