@@ -21,6 +21,9 @@ router.post('/usual_medication/remove', controller.Remove_Usual_Medication);
 router.post('/usual_medication', controller.Get_Usual_Medication);
 router.post('/usual_medication/table', controller.Get_Usual_Medication_DataTable);
 
+router.post('/usual_medication/request', controller.Request_Usual_Medication);
+router.post('/usual_medication/requests/table', controller.Get_Usual_Medication_Requests_DataTable);
+
 router.get('/:hashed_id', controller.Get_MedicationByHashedId);
 
 module.exports = router;

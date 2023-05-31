@@ -308,6 +308,11 @@ CREATE SEQUENCE medication_prescription_sequence
 INCREMENT 1
 START 1;
 
+-- Usual Medication Request Sequence
+CREATE SEQUENCE usual_medication_request_sequence
+INCREMENT 1
+START 1;
+
 -- Medication Table
 CREATE TABLE medication (
 	id_medication BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('medication_sequence'::regclass),
@@ -357,6 +362,21 @@ CREATE TABLE usual_medication (
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NULL,
     FOREIGN KEY (id_medication_prescription) REFERENCES medication_prescription(id_medication_prescription)
+);
+
+-- Usual Medication Request Table
+CREATE TABLE usual_medication_request (
+	id_usual_medication_request BIGINT PRIMARY KEY NOT NULL DEFAULT NEXTVAL('usual_medication_request_sequence'::regclass),
+	hashed_id VARCHAR(255) NULL,
+	id_medication BIGINT NOT NULL,
+	id_doctor BIGINT NOT NULL,
+	id_patient BIGINT NOT NULL,
+	status INT NOT NULL DEFAULT 0,
+	request_date TIMESTAMP NOT NULL DEFAULT NOW(),
+	response_date TIMESTAMP NULL,
+	FOREIGN KEY (id_medication) REFERENCES medication(id_medication),
+	FOREIGN KEY (id_doctor) REFERENCES health_unit_doctor(id_health_unit_doctor),
+	FOREIGN KEY (id_patient) REFERENCES health_unit_patient(id_health_unit_patient)
 );
 
 

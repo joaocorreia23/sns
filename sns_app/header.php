@@ -540,19 +540,60 @@
                         </div>
 
                         <!-- Medicação -->
-                        <div class="menu-item here show menu-here-bg me-0 me-lg-2">
+                        <div data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="bottom-start" data-kt-menu-offset="-50,0" class="menu-item here show menu-here-bg menu-lg-down-accordion me-0 me-lg-2">
                             <span class="menu-link">
-                                <a href="<?php echo $link_home; ?>pages/patient/medications/list"><span class="menu-title">Medicação</span></a>
+                                <span class="menu-title">Medicação</span>
                                 <span class="menu-arrow d-lg-none"></span>
                             </span>
-                        </div>
-
-                        <!-- Medicação Habitual -->
-                        <div class="menu-item here show menu-here-bg me-0 me-lg-2">
-                            <span class="menu-link">
-                                <a href="<?php echo $link_home; ?>pages/patient/usual_medication/list"><span class="menu-title">Medicação Habitual</span></a>
-                                <span class="menu-arrow d-lg-none"></span>
-                            </span>
+                            <div class="menu-sub menu-sub-lg-down-accordion menu-sub-lg-dropdown p-0 w-100 w-lg-700px">
+                                <div class="menu-state-bg menu-extended overflow-hidden overflow-lg-visible" data-kt-menu-dismiss="true">
+                                    <div class="row">
+                                        <div class="col-lg-12 mb-3 mb-lg-0 py-3 px-3 py-lg-6 px-lg-6">
+                                            <div class="row">
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/patient/medications/list" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-capsule text-primary fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Medicação Prescrita</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Medicação Precrita em Consulta</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/patient/usual_medication/list" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-capsule text-info fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Medicação Habitual</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Registo Medicação Habitual</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 mb-3">
+                                                    <div class="menu-item p-0 m-0">
+                                                        <a href="<?php echo $link_home; ?>pages/patient/usual_medication_request/list" class="menu-link">
+                                                            <span class="menu-custom-icon d-flex flex-center flex-shrink-0 rounded w-40px h-40px me-3">
+                                                                <i class="ki-outline ki-plus-square text-warning fs-1"></i>
+                                                            </span>
+                                                            <span class="d-flex flex-column">
+                                                                <span class="fs-6 fw-bold text-gray-800">Pedido Medicação</span>
+                                                                <span class="fs-7 fw-semibold text-muted">Pedir Medicação Habitual</span>
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Exames -->
@@ -630,7 +671,7 @@
                         <!--begin::Menu separator-->
                         <div class="separator my-2"></div>
                         <!--end::Menu separator-->
-                        
+
                         <!--begin::Menu item-->
                         <div class="menu-item px-5">
                             <a href="<?php echo $link_home ?>profile" class="menu-link px-5">Meu Perfil</a>
@@ -641,7 +682,7 @@
                         <div class="separator my-2"></div>
                         <!--end::Menu separator-->
 
-                        <?php if(count($_SESSION['roles']) > 1){ ?>
+                        <?php if (count($_SESSION['roles']) > 1) { ?>
                             <!--begin::Menu item-->
                             <div class="menu-item px-5">
                                 <a href="<?php echo $link_home ?>" class="menu-link px-5">Trocar de Conta</a>
@@ -651,8 +692,8 @@
                             <div class="separator my-2"></div>
                             <!--end::Menu separator-->
                         <?php } ?>
-                        
-                        
+
+
                         <!--begin::Menu item-->
                         <div class="menu-item px-5">
                             <a href="<?php echo $link_home ?>pages/auth/logout" class="menu-link px-5">Terminar Sessão</a>
