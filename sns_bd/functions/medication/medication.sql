@@ -846,8 +846,10 @@ BEGIN
             medication_prescription_list_out
         );
         RETURN TRUE;
+    ELSE
+        RETURN FALSE;
     END IF;
-    RAISE EXCEPTION 'OCORREU UM ERRO';
+    
 END;
 $$ LANGUAGE plpgsql;
 
