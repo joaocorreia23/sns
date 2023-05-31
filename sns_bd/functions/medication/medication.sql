@@ -290,11 +290,12 @@ CREATE OR REPLACE FUNCTION get_usual_medication(
     status INTEGER DEFAULT NULL
 )
 RETURNS TABLE (
-    id_medication_prescription BIGINT,
+    hashed_medication_prescription BIGINT,
     usual_medication_status INTEGER,
     usual_medication_created_at TIMESTAMP,
     usual_medication_updated_at TIMESTAMP,
     id_medication BIGINT,
+	hashed_id_medication VARCHAR(255),
     medication_name VARCHAR(255),
     medication_status INTEGER
 ) AS $$
@@ -325,6 +326,7 @@ BEGIN
             um.created_at AS usual_medication_created_at, 
             um.updated_at AS usual_medication_updated_at, 
             m.id_medication, 
+			m.hashed_id AS hashed_id_medication,
             m.medication_name AS medication_name, 
             m.status AS medication_status 
         FROM usual_medication um
@@ -340,6 +342,7 @@ BEGIN
             um.created_at AS usual_medication_created_at, 
             um.updated_at AS usual_medication_updated_at, 
             m.id_medication, 
+			m.hashed_id AS hashed_id_medication,
             m.medication_name AS medication_name, 
             m.status AS medication_status 
         FROM usual_medication um
@@ -482,6 +485,7 @@ CREATE OR REPLACE FUNCTION get_usual_medication_requests(
 ) RETURNS TABLE (
     hashed_id_medication VARCHAR(255),
     medication_name VARCHAR(255),
+    hashed_id_usual_medication_request VARCHAR(255),
     request_date TIMESTAMP,
     response_date TIMESTAMP,
     status INT,
@@ -561,6 +565,7 @@ BEGIN
     query := 'SELECT
         umr.hashed_id as hashed_id_medication,
         m.medication_name as medication_name,
+        umr.hashed_id as hashed_id_usual_medication_request,
         umr.request_date as request_date,
         umr.response_date as response_date,
         umr.status as status,
@@ -732,6 +737,121 @@ BEGIN
 END;
 $$
 LANGUAGE plpgsql;
+--
+--
+--
+-- Change status of a request
+CREATE OR REPLACE FUNCTION change_request_status(
+    id_usual_medication_request_in BIGINT DEFAULT NULL,
+    hashed_id_usual_medication_request_in VARCHAR(255) DEFAULT NULL,
+    status_in INTEGER DEFAULT NULL
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+    usual_medication_request_id INTEGER;
+    actual_status INTEGER;
+
+    id_user_patient BIGINT;
+    id_user_doctor BIGINT;
+    id_health_unit_out BIGINT;
+
+    id_appointment_out BIGINT;
+    hashed_id_appointment_out VARCHAR(255) DEFAULT NULL;
+    start_date_out DATE;
+    start_time_out TIME;
+    end_time_out TIME;
+    hashed_id_medication_out VARCHAR(255);
+    medication_prescription_list_out json[];
+BEGIN
+    IF id_usual_medication_request_in IS NOT NULL THEN
+        usual_medication_request_id := id_usual_medication_request_in;
+        SELECT id_usual_medication_request INTO usual_medication_request_id FROM usual_medication_request WHERE id_usual_medication_request = id_usual_medication_request_in;
+        IF NOT FOUND
+        THEN
+            RAISE EXCEPTION 'Não existe pedido de medicação usual com o id passado.';
+        END IF;
+    ELSIF hashed_id_usual_medication_request_in IS NOT NULL AND hashed_id_usual_medication_request_in != '' THEN
+        SELECT id_usual_medication_request INTO usual_medication_request_id FROM usual_medication_request WHERE hashed_id = hashed_id_usual_medication_request_in;
+        IF NOT FOUND
+        THEN
+            RAISE EXCEPTION 'Não existe pedido de medicação usual com o hashed_id passado.';
+        END IF;
+    END IF;
+
+    IF status_in IS NULL OR (status_in != 0 AND status_in != 1 AND status_in != 2) THEN
+        RAISE EXCEPTION 'O status passado é inválido.';
+    END IF;
+
+    SELECT status INTO actual_status FROM usual_medication_request WHERE id_usual_medication_request = usual_medication_request_id;
+
+    IF status_in = actual_status THEN
+        RAISE EXCEPTION 'O pedido já se encontra com o status passado.';
+    END IF;
+
+    IF actual_status = 0 THEN
+        UPDATE usual_medication_request SET status = status_in, response_date = NOW() WHERE id_usual_medication_request = usual_medication_request_id;
+    ELSE 
+        RAISE EXCEPTION 'O pedido já se encontra respondido.';
+    END IF;
+
+    IF status_in = 1 THEN
+
+        SELECT 
+            u.id_user INTO id_user_patient
+        FROM usual_medication_request umr
+        INNER JOIN health_unit_patient hup ON hup.id_health_unit_patient = umr.id_patient
+        INNER JOIN users u ON u.id_user = hup.id_patient
+        WHERE umr.id_usual_medication_request = usual_medication_request_id;
+
+        SELECT 
+            u.id_user INTO id_user_doctor
+        FROM usual_medication_request umr
+        INNER JOIN health_unit_doctor hud ON hud.id_health_unit_doctor = umr.id_doctor
+        INNER JOIN users u ON u.id_user = hud.id_doctor
+        WHERE umr.id_usual_medication_request = usual_medication_request_id;
+
+        SELECT 
+            hu.id_health_unit INTO id_health_unit_out
+        FROM usual_medication_request umr
+        INNER JOIN health_unit_patient hup ON hup.id_health_unit_patient = umr.id_patient
+        INNER JOIN health_unit hu ON hu.id_health_unit = hup.id_health_unit
+        WHERE umr.id_usual_medication_request = usual_medication_request_id;
+
+        SELECT 
+            m.hashed_id INTO hashed_id_medication_out
+        FROM usual_medication_request umr
+        INNER JOIN medication m ON m.id_medication = umr.id_medication
+        WHERE umr.id_usual_medication_request = usual_medication_request_id;
+
+
+        start_date_out := NOW()::DATE;
+        start_time_out := NOW()::TIME;
+        end_time_out := NOW()::TIME + '00:05:00'::INTERVAL;
+        INSERT INTO appointment (id_health_unit, id_user_doctor, id_user_patient, status, start_date, start_time, end_time, type) VALUES (id_health_unit_out, id_user_doctor, id_user_patient, 1, start_date_out, start_time_out, end_time_out, 1) RETURNING id_appointment INTO id_appointment_out;
+
+        medication_prescription_list_out = ARRAY(
+            SELECT json_build_object(
+                'hashed_id_medication', hashed_id_medication_out,
+                'prescribed_amount', 1
+            )
+        );
+
+
+
+        PERFORM create_prescription_with_medication(
+            id_appointment_out,
+            hashed_id_appointment_out,
+            NOW()::TIMESTAMP without time zone,
+            1,
+            medication_prescription_list_out
+        );
+        RETURN TRUE;
+    END IF;
+    RAISE EXCEPTION 'OCORREU UM ERRO';
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT * FROM change_request_status(NULL, '7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451', 1)
 
 
        

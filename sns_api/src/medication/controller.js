@@ -150,6 +150,17 @@ const Request_Usual_Medication = (req, res) => {
     });
 };
 
+const Respond_Usual_Medication_Request = (req, res) => {
+    const { hashed_id_usual_medication_request, status } = req.body;
+    pool.query("SELECT * FROM change_request_status(NULL, $1, $2)", [hashed_id_usual_medication_request, status], (error, results) => {
+        if (error) {
+            res.status(400).json({ "status": false, "message": error.message });
+            return;
+        }
+        res.status(201).json({ "status": true, "data": results.rows[0], "message": "Resposta enviada com sucesso!" });
+    });
+};
+
 const Get_Usual_Medication_Requests_DataTable = (req, res) => {
     const hashed_id_health_unit = req.body.hashed_id_health_unit !== undefined && req.body.hashed_id_health_unit !== '' ? req.body.hashed_id_health_unit : null;
     const hashed_id_doctor = req.body.hashed_id_doctor !== undefined && req.body.hashed_id_doctor !== '' ? req.body.hashed_id_doctor : null;
@@ -180,5 +191,6 @@ module.exports = {
     Get_Usual_Medication,
     Get_Usual_Medication_DataTable,
     Request_Usual_Medication,
+    Respond_Usual_Medication_Request,
     Get_Usual_Medication_Requests_DataTable
 };
