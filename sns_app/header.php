@@ -512,6 +512,14 @@
                             </span>
                         </div>
 
+                        <!-- Medicação -->
+                        <div class="menu-item here show menu-here-bg me-0 me-lg-2">
+                            <span class="menu-link">
+                                <a href="<?php echo $link_home; ?>pages/doctor/usual_medication_request/list"><span class="menu-title">Pedidos Medicação</span></a>
+                                <span class="menu-arrow d-lg-none"></span>
+                            </span>
+                        </div>
+
                     </div>
 
                 </div>
