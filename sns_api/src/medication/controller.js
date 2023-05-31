@@ -158,6 +158,7 @@ const Respond_Usual_Medication_Request = (req, res) => {
             return;
         }
         res.status(201).json({ "status": true, "data": results.rows[0], "message": "Resposta enviada com sucesso!" });
+        
     });
 };
 
