@@ -275,6 +275,7 @@ CREATE TABLE appointment (
 	id_user_doctor BIGINT NOT NULL,
 	id_user_patient BIGINT NOT NULL,
 	status INT NOT NULL DEFAULT 0,
+	type INT NOT NULL DEFAULT 0,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	FOREIGN KEY (id_health_unit) REFERENCES health_unit(id_health_unit),
 	FOREIGN KEY (id_user_doctor) REFERENCES users(id_user),
@@ -284,6 +285,8 @@ CREATE TABLE appointment (
 ALTER TABLE appointment ADD COLUMN start_date DATE NOT NULL;
 ALTER TABLE appointment ADD COLUMN start_time TIME NOT NULL;
 ALTER TABLE appointment ADD COLUMN end_time TIME NOT NULL;
+
+ALTER TABLE appointment ADD COLUMN type INT NOT NULL DEFAULT 0;
 
 -- =======================
 -- END: APPOINTMENT
